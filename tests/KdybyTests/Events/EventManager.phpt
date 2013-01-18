@@ -95,6 +95,8 @@ class EventManagerTest extends Tester\TestCase
 
 	public function testDispatching()
 	{
+		Assert::fail("not implemented");
+
 		$this->manager->addEventSubscriber($this->listener);
 		Assert::true($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));

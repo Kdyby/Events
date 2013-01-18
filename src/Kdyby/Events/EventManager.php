@@ -94,7 +94,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 * Adds an event listener that listens on the specified events.
 	 *
 	 * @param string|array $events The event(s) to listen on.
-	 * @param Subscriber $listener The listener object.
+	 * @param Doctrine\Common\EventSubscriber $listener The listener object.
 	 *
 	 * @throws InvalidListenerException
 	 */
@@ -116,7 +116,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 * Removes an event listener from the specified events.
 	 *
 	 * @param string|array $events
-	 * @param Subscriber $listener
+	 * @param Doctrine\Common\EventSubscriber $listener
 	 */
 	public function removeEventListener($events, $listener = NULL)
 	{
