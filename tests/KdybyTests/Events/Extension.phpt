@@ -71,7 +71,11 @@ class ExtensionTest extends Tester\TestCase
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.invalid');
-		}, "Nette\\Utils\\AssertionException", 'Event listener KdybyTests\Events\InvalidListenerMock::onFoo() is not implemented.');
+		}, "Nette\\Utils\\AssertionException", 'Event listener KdybyTests\Events\FirstInvalidListenerMock::onFoo() is not implemented.');
+
+		Assert::exception(function () use ($me) {
+			$me->createContainer('validate.invalid2');
+		}, "Nette\\Utils\\AssertionException", 'Event listener KdybyTests\Events\SecondInvalidListenerMock::onBar() is not implemented.');
 	}
 
 

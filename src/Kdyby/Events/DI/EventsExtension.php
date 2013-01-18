@@ -135,8 +135,9 @@ class EventsExtension extends Nette\Config\CompilerExtension
 			$listenerInst = Nette\PhpGenerator\Helpers::createObject($def->class, array());
 			/** @var EventSubscriber $listenerInst */
 			foreach ($listenerInst->getSubscribedEvents() as $eventName) {
-				if (!method_exists($listenerInst, $eventName)) {
-					throw new Nette\Utils\AssertionException("Event listener " . $def->class . "::{$eventName}() is not implemented.");
+				list($namespace, $method) = Kdyby\Events\Event::parseName($eventName);
+				if (!method_exists($listenerInst, $method)) {
+					throw new Nette\Utils\AssertionException("Event listener " . $def->class . "::{$method}() is not implemented.");
 				}
 			}
 		}

@@ -3,4 +3,4 @@ events:
 	validate: yes
 	autowire: no
 	subscribers:
-		- KdybyTests\Events\FirstInvalidListenerMock
+		- KdybyTests\Events\SecondInvalidListenerMock

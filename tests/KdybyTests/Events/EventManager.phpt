@@ -95,22 +95,16 @@ class EventManagerTest extends Tester\TestCase
 
 	public function testDispatching()
 	{
-		Assert::fail("not implemented");
-
 		$this->manager->addEventSubscriber($this->listener);
 		Assert::true($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
 
 		$eventArgs = new EventArgsMock();
-
-		$this->listener->expects($this->once())
-			->method('onFoo')
-			->with($this->equalTo($eventArgs));
-
-		$this->listener->expects($this->never())
-			->method('onBar');
-
 		$this->manager->dispatchEvent('onFoo', $eventArgs);
+
+		Assert::same(array(
+			array('KdybyTests\Events\EventListenerMock::onFoo', array($eventArgs))
+		), $this->listener->calls);
 	}
 
 

@@ -138,6 +138,12 @@ class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
 	/**
+	 * @var array
+	 */
+	public $calls = array();
+
+
+	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
@@ -155,7 +161,7 @@ class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function onFoo(Kdyby\Events\EventArgs $args)
 	{
-
+		$this->calls[] = array(__METHOD__, func_get_args());
 	}
 
 
@@ -165,7 +171,7 @@ class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function onBar(Kdyby\Events\EventArgs $args)
 	{
-
+		$this->calls[] = array(__METHOD__, func_get_args());
 	}
 
 }
@@ -175,7 +181,7 @@ class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class InvalidListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
+class FirstInvalidListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
 	/**
@@ -184,8 +190,27 @@ class InvalidListenerMock extends Nette\Object implements Kdyby\Events\Subscribe
 	public function getSubscribedEvents()
 	{
 		return array(
-			'onFoo',
-			'onBar'
+			'onFoo'
+		);
+	}
+
+}
+
+
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
+class SecondInvalidListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
+{
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+			'Application::onBar'
 		);
 	}
 
