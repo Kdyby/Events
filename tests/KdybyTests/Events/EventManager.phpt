@@ -29,36 +29,34 @@ class EventManagerTest extends Tester\TestCase
 	/** @var EventManager */
 	private $manager;
 
-	/** @var EventListenerMock */
-	private $listener;
-
 
 
 	public function setUp()
 	{
 		$this->manager = new EventManager();
-		$this->listener = new EventListenerMock();
 	}
 
 
 
 	public function testListenerHasRequiredMethod()
 	{
-		$this->manager->addEventListener('onFoo', $this->listener);
+		$listener = new EventListenerMock();
+		$this->manager->addEventListener('onFoo', $listener);
 		Assert::true($this->manager->hasListeners('onFoo'));
-		Assert::same(array($this->listener), $this->manager->getListeners());
+		Assert::same(array($listener), $this->manager->getListeners());
 	}
 
 
 
 	public function testRemovingListenerFromSpecificEvent()
 	{
-		$this->manager->addEventListener('onFoo', $this->listener);
-		$this->manager->addEventListener('onBar', $this->listener);
+		$listener = new EventListenerMock();
+		$this->manager->addEventListener('onFoo', $listener);
+		$this->manager->addEventListener('onBar', $listener);
 		Assert::true($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
 
-		$this->manager->removeEventListener('onFoo', $this->listener);
+		$this->manager->removeEventListener('onFoo', $listener);
 		Assert::false($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
 	}
@@ -67,12 +65,13 @@ class EventManagerTest extends Tester\TestCase
 
 	public function testRemovingListenerCompletely()
 	{
-		$this->manager->addEventListener('onFoo', $this->listener);
-		$this->manager->addEventListener('onBar', $this->listener);
+		$listener = new EventListenerMock();
+		$this->manager->addEventListener('onFoo', $listener);
+		$this->manager->addEventListener('onBar', $listener);
 		Assert::true($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
 
-		$this->manager->removeEventListener($this->listener);
+		$this->manager->removeEventListener($listener);
 		Assert::false($this->manager->hasListeners('onFoo'));
 		Assert::false($this->manager->hasListeners('onBar'));
 		Assert::same(array(), $this->manager->getListeners());
@@ -83,7 +82,7 @@ class EventManagerTest extends Tester\TestCase
 	public function testListenerDontHaveRequiredMethodException()
 	{
 		$evm = $this->manager;
-		$listener = $this->listener;
+		$listener = new EventListenerMock();
 
 		Assert::exception(function () use ($evm, $listener) {
 			$evm->addEventListener('onNonexisting', $listener);
@@ -95,7 +94,8 @@ class EventManagerTest extends Tester\TestCase
 
 	public function testDispatching()
 	{
-		$this->manager->addEventSubscriber($this->listener);
+		$listener = new EventListenerMock();
+		$this->manager->addEventSubscriber($listener);
 		Assert::true($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
 
@@ -104,7 +104,7 @@ class EventManagerTest extends Tester\TestCase
 
 		Assert::same(array(
 			array('KdybyTests\Events\EventListenerMock::onFoo', array($eventArgs))
-		), $this->listener->calls);
+		), $listener->calls);
 	}
 
 
@@ -115,9 +115,9 @@ class EventManagerTest extends Tester\TestCase
 	public function dataEventsDispatching_Namespaces()
 	{
 		return array(
-			array('App::event', array('App::event')),
-			array('event', array('App::event', 'event')),
-			array('Other::event', array()),
+			array('App::onFoo', array('App::onFoo')),
+			array('onFoo', array('App::onFoo', 'onFoo')),
+			array('Other::onFoo', array()),
 		);
 	}
 
@@ -127,11 +127,24 @@ class EventManagerTest extends Tester\TestCase
 	 * @dataProvider dataEventsDispatching_Namespaces
 	 *
 	 * @param string $trigger
-	 * @param array $expected
+	 * @param array $called
 	 */
-	public function testEventsDispatching_Namespaces($trigger, array $expected)
+	public function testEventsDispatching_Namespaces($trigger, array $called)
 	{
-		Assert::fail("not implemented");
+		$this->manager->addEventListener('onFoo', $plain = new EventListenerMock());
+		$this->manager->addEventListener('App::onFoo', $ns = new NamespacedEventListenerMock());
+
+		$this->manager->dispatchEvent($trigger, $args = new EventArgsMock());
+
+		$expected = array();
+		if (in_array('App::onFoo', $called)) {
+			$expected[] = array(__NAMESPACE__ . '\\NamespacedEventListenerMock::onFoo', array($args));
+		}
+		if (in_array('onFoo', $called)) {
+			$expected[] = array(__NAMESPACE__ . '\\EventListenerMock::onFoo', array($args));
+		}
+
+		Assert::same($expected, array_merge($ns->calls, $plain->calls));
 	}
 
 }

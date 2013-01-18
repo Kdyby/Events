@@ -181,6 +181,43 @@ class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
+class NamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
+{
+
+	/**
+	 * @var array
+	 */
+	public $calls = array();
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+			'App::onFoo'
+		);
+	}
+
+
+
+	/**
+	 * @param \Kdyby\Events\EventArgs $args
+	 */
+	public function onFoo(Kdyby\Events\EventArgs $args)
+	{
+		$this->calls[] = array(__METHOD__, func_get_args());
+	}
+
+}
+
+
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
 class FirstInvalidListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 

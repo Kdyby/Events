@@ -24,7 +24,7 @@ class EventManager extends Doctrine\Common\EventManager
 {
 
 	/**
-	 * @var array|object[]
+	 * @var array|array[]|object[]
 	 */
 	private $listeners = array();
 
@@ -38,12 +38,9 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function dispatchEvent($eventName, Doctrine\Common\EventArgs $eventArgs = NULL)
 	{
-		if (!isset($this->listeners[$eventName])) {
-			return;
-		}
-
-		foreach ($this->listeners[$eventName] as $listener) {
-			$cb = callback($listener, $eventName);
+		list(, $event) = Kdyby\Events\Event::parseName($eventName);
+		foreach ($this->getListeners($eventName) as $listener) {
+			$cb = callback($listener, $event);
 			if ($eventArgs instanceof EventArgsList) {
 				/** @var EventArgsList $eventArgs */
 				$cb->invokeArgs($eventArgs->getArgs());
@@ -59,20 +56,30 @@ class EventManager extends Doctrine\Common\EventManager
 	/**
 	 * Gets the listeners of a specific event or all listeners.
 	 *
-	 * @param string $eventName The name of the event.
-	 * @return array The event listeners for the specified event, or all event listeners.
+	 * @param string $eventName
+	 * @return Doctrine\Common\EventSubscriber[]
 	 */
 	public function getListeners($eventName = NULL)
 	{
-		if ($eventName !== NULL) {
-			if (!isset($this->listeners[$eventName])) {
+		if ($eventName === NULL) {
+			return self::unique($this->listeners);
+		}
+
+		list($namespace, $event) = Kdyby\Events\Event::parseName($eventName);
+
+		if ($namespace === NULL) {
+			if (!isset($this->listeners[$event])) {
 				return array();
 			}
 
-			return $this->listeners[$eventName];
+			return self::unique($this->listeners[$event]);
 		}
 
-		return array_unique(Arrays::flatten($this->listeners), SORT_REGULAR);
+		if (!isset($this->listeners[$event][$namespace])) {
+			return array();
+		}
+
+		return $this->listeners[$event][$namespace];
 	}
 
 
@@ -85,7 +92,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function hasListeners($eventName)
 	{
-		return isset($this->listeners[$eventName]) && $this->listeners[$eventName];
+		return (bool) $this->getListeners($eventName);
 	}
 
 
@@ -101,12 +108,16 @@ class EventManager extends Doctrine\Common\EventManager
 	public function addEventListener($events, $listener)
 	{
 		$hash = spl_object_hash($listener);
-		foreach ((array)$events as $eventName) {
-			if (!method_exists($listener, $eventName)) {
-				throw new InvalidListenerException("Event listener '" . get_class($listener) . "' has no method '" . $eventName . "'");
+		foreach ((array) $events as $eventName) {
+			list($namespace, $event) = Kdyby\Events\Event::parseName($eventName);
+			if (!method_exists($listener, $event)) {
+				throw new InvalidListenerException("Event listener '" . get_class($listener) . "' has no method '" . $event . "'");
 			}
 
-			$this->listeners[$eventName][$hash] = $listener;
+			$this->listeners[$event][][$hash] = $listener;
+			if ($namespace !== NULL) {
+				$this->listeners[$event][$namespace][$hash] = $listener;
+			}
 		}
 	}
 
@@ -115,22 +126,54 @@ class EventManager extends Doctrine\Common\EventManager
 	/**
 	 * Removes an event listener from the specified events.
 	 *
-	 * @param string|array $events
+	 * @param string|array $unsubscribe
 	 * @param Doctrine\Common\EventSubscriber $listener
 	 */
-	public function removeEventListener($events, $listener = NULL)
+	public function removeEventListener($unsubscribe, $listener = NULL)
 	{
-		if (is_object($events)) {
-			$listener = $events;
-			$events = array();
+		if (is_object($unsubscribe)) {
+			$listener = $unsubscribe;
+			$unsubscribe = array();
+		}
+
+		$events = array();
+		foreach ((array) $unsubscribe as $eventName) {
+			list($namespace, $event) = Kdyby\Events\Event::parseName($eventName);
+			$events[$event][] = $namespace;
+		}
+
+		if (!$events) {
+			$events = array_fill_keys(array_keys($this->listeners), array());
 		}
 
 		$hash = spl_object_hash($listener);
-		foreach ((array)$events ?: array_keys($this->listeners) as $event) {
-			if (isset($this->listeners[$event][$hash])) {
-				unset($this->listeners[$event][$hash]);
+		foreach ((array) $events as $event => $namespaces) {
+			foreach ($this->listeners[$event] as $namespace => &$listeners) {
+				if ($namespaces && !in_array($namespace, $namespaces)) {
+					continue;
+				}
+
+				unset($listeners[$hash]);
 			}
 		}
+	}
+
+
+
+	/**
+	 * @param array $array
+	 * @return array
+	 */
+	private function unique(array $array)
+	{
+		$res = array();
+		array_walk_recursive($array, function ($a) use (& $res) {
+			if (!in_array($a, $res, TRUE)) {
+				$res[] = $a;
+			}
+		});
+
+		return $res;
 	}
 
 
