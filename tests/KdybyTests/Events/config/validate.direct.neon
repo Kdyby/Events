@@ -1,0 +1,9 @@
+events:
+	optimize: no
+	validate: yes
+	autowire: no
+
+services:
+	events.manager:
+		setup:
+			- addEventSubscriber(DoesntMatterHadSex())

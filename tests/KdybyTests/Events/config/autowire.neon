@@ -1,0 +1,5 @@
+events:
+	optimize: no
+	validate: no
+	autowire: yes
+

@@ -1,0 +1,6 @@
+events:
+	optimize: no
+	validate: yes
+	autowire: no
+	subscribers:
+		- NonExistingClass_4242432432

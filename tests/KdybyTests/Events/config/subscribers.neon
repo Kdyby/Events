@@ -1,0 +1,7 @@
+events:
+	optimize: no
+	validate: no
+	autowire: no
+	subscribers:
+		- KdybyTests\Events\EventListenerMock
+
