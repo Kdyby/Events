@@ -161,6 +161,21 @@ class EventManager extends Doctrine\Common\EventManager
 
 
 	/**
+	 * @param string $name
+	 * @param array $defaults
+	 * @param string $argsClass
+	 * @return Event
+	 */
+	public function createEvent($name, $defaults = array(), $argsClass = NULL)
+	{
+		$event = new Event($name, $defaults, $argsClass);
+		$event->injectEventManager($this);
+		return $event;
+	}
+
+
+
+	/**
 	 * @param array $array
 	 * @return array
 	 */

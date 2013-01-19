@@ -51,6 +51,9 @@ class FooMock extends Nette\Object
 class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
+	public $calls = array();
+
+
 	/**
 	 * Returns an array of events this subscriber wants to listen to.
 	 *
@@ -72,7 +75,7 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function onMagic(FooMock $foo, $int)
 	{
-		echo $int * 2;
+		$this->calls[] = array(__METHOD__, func_get_args());
 	}
 
 
@@ -82,7 +85,7 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function onStartup(StartupEventArgs $args)
 	{
-		echo $args->int * 10;
+		$this->calls[] = array(__METHOD__, func_get_args());
 	}
 
 }

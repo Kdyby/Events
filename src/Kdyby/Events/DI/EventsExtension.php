@@ -35,22 +35,29 @@ class EventsExtension extends Nette\Config\CompilerExtension
 		'optimize' => TRUE,
 	);
 
+	/**
+	 * @var array
+	 */
+	private $listeners = array();
+
+	/**
+	 * @var array
+	 */
+	private $allowedManagerSetup = array();
+
 
 
 	public function loadConfiguration()
 	{
+		$this->listeners = array();
+		$this->allowedManagerSetup = array();
+
 		$builder = $this->getContainerBuilder();
 		$config = $this->getConfig($this->defaults);
 
 		$builder->addDefinition($this->prefix('manager'))
-			->setClass('Kdyby\Events\EventManager');
-
-		$builder->addDefinition($this->prefix('eventFactory'))
-			->setClass('Kdyby\Events\Event', array('%name%', '%defaults%'))
-			->addSetup('injectEventManager', array($this->prefix('@manager')))
-			->setInject(FALSE)
-			->setParameters(array('name', 'defaults' => array()))
-			->setShared(FALSE);
+			->setClass('Kdyby\Events\EventManager')
+			->setInject(FALSE);
 
 		Nette\Utils\Validators::assert($config, 'array');
 		foreach ($config['subscribers'] as $subscriber) {
@@ -93,7 +100,11 @@ class EventsExtension extends Nette\Config\CompilerExtension
 
 		Nette\Utils\Validators::assertField($config, 'optimize', 'bool');
 		if ($config['optimize']) {
-			throw new Nette\NotImplementedException;
+			if (!$config['validate']) {
+				throw new Kdyby\Events\InvalidStateException("Cannot optimize without validation.");
+			}
+
+			$this->optimizeListeners($builder);
 		}
 	}
 
@@ -108,6 +119,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 	{
 		foreach ($manager->setup as $stt) {
 			if ($stt->entity !== 'addEventSubscriber') {
+				$this->allowedManagerSetup[] = $stt;
 				continue;
 			}
 
@@ -134,12 +146,14 @@ class EventsExtension extends Nette\Config\CompilerExtension
 
 			$listenerInst = Nette\PhpGenerator\Helpers::createObject($def->class, array());
 			/** @var EventSubscriber $listenerInst */
-			foreach ($listenerInst->getSubscribedEvents() as $eventName) {
-				list($namespace, $method) = Kdyby\Events\Event::parseName($eventName);
+			foreach ($eventNames = $listenerInst->getSubscribedEvents() as $eventName) {
+				list(, $method) = Kdyby\Events\Event::parseName($eventName);
 				if (!method_exists($listenerInst, $method)) {
 					throw new Nette\Utils\AssertionException("Event listener " . $def->class . "::{$method}() is not implemented.");
 				}
 			}
+
+			$this->listeners[$serviceName] = $eventNames;
 		}
 	}
 
@@ -163,13 +177,37 @@ class EventsExtension extends Nette\Config\CompilerExtension
 				}
 
 				$def->addSetup('$' . $name, array(
-					new Nette\DI\Statement($this->prefix('@eventFactory'), array(
+					new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
 						$property->getDeclaringClass()->getName() . '::' . $name,
 						new PhpLiteral('$service->' . $name)
 					))
 				));
 			}
 		}
+	}
+
+
+
+	/**
+	 * @param \Nette\DI\ContainerBuilder $builder
+	 */
+	private function optimizeListeners(Nette\DI\ContainerBuilder $builder)
+	{
+		$listeners = array();
+		foreach ($this->listeners as $serviceName => $eventNames) {
+			foreach ($eventNames as $eventName) {
+				list($namespace, $event) = Kdyby\Events\Event::parseName($eventName);
+				$listeners[$eventName][] = $serviceName;
+				if ($namespace !== NULL) {
+					$listeners[$event][] = $serviceName;
+				}
+			}
+		}
+
+		$builder->getDefinition($this->prefix('manager'))
+			->setClass('Kdyby\Events\LazyEventManager')
+			->setArguments(array($listeners))
+			->setup = $this->allowedManagerSetup;
 	}
 
 

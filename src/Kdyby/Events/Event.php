@@ -95,8 +95,12 @@ class Event extends Nette\Object implements \ArrayAccess, \IteratorAggregate, \C
 	 *
 	 * @param array $args
 	 */
-	public function dispatch(array $args = array())
+	public function dispatch($args = array())
 	{
+		if (!is_array($args)) {
+			$args = func_get_args();
+		}
+
 		foreach ($this->getListeners() as $handler) {
 			if ($handler->invokeArgs(array_values($args)) === FALSE) {
 				return;

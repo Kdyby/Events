@@ -23,72 +23,46 @@ class LazyEventManager extends EventManager
 {
 
 	/**
-	 * @var \Kdyby\Config\TaggedServices
+	 * @var array
 	 */
-	private $subscribers;
+	private $listenerIds;
+
+	/**
+	 * @var \Nette\DI\Container
+	 */
+	private $container;
 
 
 
 	/**
-	 * @internal
-	 * @param \Kdyby\Config\TaggedServices $subscribers
+	 * @param array $listenerIds
+	 * @param \Nette\DI\Container $container
 	 */
-	public function addSubscribers(Kdyby\Config\TaggedServices $subscribers)
+	public function __construct(array $listenerIds, Nette\DI\Container $container)
 	{
-		$this->subscribers = $subscribers;
-	}
-
-
-
-	/**
-	 * Registers all found subscribers when needed
-	 */
-	private function registerSubscribers()
-	{
-		if ($this->subscribers) {
-			$subscribers = $this->subscribers;
-			$this->subscribers = NULL;
-
-			foreach ($subscribers as $subscriber) {
-				$this->addEventSubscriber($subscriber);
-			}
-		}
+		$this->listenerIds = $listenerIds;
+		$this->container = $container;
 	}
 
 
 
 	/**
 	 * @param string $eventName
-	 * @param \Doctrine\Common\EventArgs|NULL $eventArgs
+	 * @return \Doctrine\Common\EventSubscriber[]
 	 */
-	public function dispatchEvent($eventName, Doctrine\Common\EventArgs $eventArgs = NULL)
+	public function getListeners($eventName = NULL)
 	{
-		$this->registerSubscribers();
-		parent::dispatchEvent($eventName, $eventArgs);
-	}
+		if (!empty($this->listenerIds[$eventName])) {
+			foreach ($this->listenerIds[$eventName] as $serviceName) {
+				$subscriber = $this->container->getService($serviceName);
+				/** @var Doctrine\Common\EventSubscriber $subscriber */
+				$this->addEventListener($eventName, $subscriber);
+			}
 
+			unset($this->listenerIds[$eventName]);
+		}
 
-
-	/**
-	 * @param null $event
-	 * @return array
-	 */
-	public function getListeners($event = null)
-	{
-		$this->registerSubscribers();
-		return parent::getListeners($event);
-	}
-
-
-
-	/**
-	 * @param string $event
-	 * @return bool
-	 */
-	public function hasListeners($event)
-	{
-		$this->registerSubscribers();
-		return parent::hasListeners($event);
+		return parent::getListeners($eventName);
 	}
 
 }

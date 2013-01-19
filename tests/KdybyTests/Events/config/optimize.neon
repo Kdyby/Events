@@ -1,0 +1,17 @@
+events:
+	optimize: yes
+	validate: yes
+	autowire: no
+
+services:
+	foo:
+		class: KdybyTests\Events\LoremListener
+		tags: [kdyby.subscriber]
+
+	bar:
+		class: KdybyTests\Events\EventListenerMock
+		tags: [kdyby.subscriber]
+
+	baz:
+		class: KdybyTests\Events\NamespacedEventListenerMock
+		tags: [kdyby.subscriber]

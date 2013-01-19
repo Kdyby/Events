@@ -114,6 +114,94 @@ class ExtensionTest extends Tester\TestCase
 		Assert::same('Nette\Security\User::onLoggedOut', $user->onLoggedOut->getName());
 	}
 
+
+
+	public function testOptimize()
+	{
+		$container = $this->createContainer('optimize');
+		$manager = $container->getService('events.manager');
+		/** @var Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof Kdyby\Events\EventManager);
+
+		Assert::false($container->isCreated('foo'));
+		Assert::false($container->isCreated('bar'));
+		Assert::false($container->isCreated('baz'));
+		$manager->dispatchEvent('onFoo', $bazArgs = new EventArgsMock());
+		Assert::false($container->isCreated('foo'));
+		Assert::true($container->isCreated('bar'));
+		Assert::true($container->isCreated('baz'));
+		Assert::same(2, count($manager->getListeners('onFoo')));
+
+		$manager->dispatchEvent('App::onFoo', $bazArgsSecond = new EventArgsMock());
+		Assert::same(1, count($manager->getListeners('App::onFoo')));
+
+		$baz = $container->getService('baz');
+		/** @var NamespacedEventListenerMock $baz */
+		$bar = $container->getService('bar');
+		/** @var EventListenerMock $bar */
+
+		Assert::same(array(
+			array('KdybyTests\Events\EventListenerMock::onFoo', array($bazArgs))
+		), $bar->calls);
+
+		Assert::same(array(
+			array('KdybyTests\Events\NamespacedEventListenerMock::onFoo', array($bazArgs)),
+			array('KdybyTests\Events\NamespacedEventListenerMock::onFoo', array($bazArgsSecond)),
+		), $baz->calls);
+	}
+
+
+
+	public function testOptimize_dispatchNamespaceFirst()
+	{
+		$container = $this->createContainer('optimize');
+		$manager = $container->getService('events.manager');
+		/** @var Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof Kdyby\Events\EventManager);
+
+		Assert::false($container->isCreated('foo'));
+		Assert::false($container->isCreated('bar'));
+		Assert::false($container->isCreated('baz'));
+		$manager->dispatchEvent('App::onFoo', $bazArgs = new EventArgsMock());
+		Assert::false($container->isCreated('foo'));
+		Assert::false($container->isCreated('bar'));
+		Assert::true($container->isCreated('baz'));
+		Assert::same(1, count($manager->getListeners('App::onFoo')));
+
+		$baz = $container->getService('baz');
+		/** @var NamespacedEventListenerMock $baz */
+
+		Assert::same(array(
+			array('KdybyTests\Events\NamespacedEventListenerMock::onFoo', array($bazArgs))
+		), $baz->calls);
+	}
+
+
+
+	public function testOptimize_standalone()
+	{
+		$container = $this->createContainer('optimize');
+		$manager = $container->getService('events.manager');
+		/** @var Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof Kdyby\Events\EventManager);
+
+		Assert::false($container->isCreated('foo'));
+		Assert::false($container->isCreated('bar'));
+		Assert::false($container->isCreated('baz'));
+		$manager->dispatchEvent('onStartup', $bazArgs = new StartupEventArgs($foo = new FooMock(), $num = 123));
+		Assert::true($container->isCreated('foo'));
+		Assert::false($container->isCreated('bar'));
+		Assert::false($container->isCreated('baz'));
+		Assert::same(1, count($manager->getListeners('onStartup')));
+
+		$baz = $container->getService('foo');
+		/** @var NamespacedEventListenerMock $baz */
+
+		Assert::same(array(
+			array('KdybyTests\Events\LoremListener::onStartup', array($bazArgs))
+		), $baz->calls);
+	}
+
 }
 
 \run(new ExtensionTest());

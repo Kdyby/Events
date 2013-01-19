@@ -35,6 +35,16 @@ class InvalidListenerException extends \RuntimeException implements Exception
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
+class InvalidStateException extends \RuntimeException implements Exception
+{
+
+}
+
+
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
 class OutOfRangeException extends \OutOfRangeException
 {
 
