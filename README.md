@@ -5,7 +5,7 @@ Kdyby/Events [![Build Status](https://secure.travis-ci.org/Kdyby/Events.png?bran
 Requirements
 ------------
 
-Kdyby/Events requires PHP 5.3.2 or higher with cUrl extension enabled.
+Kdyby/Events requires PHP 5.3.2 or higher.
 
 - [Nette Framework 2.0.x](https://github.com/nette/nette)
 - [Doctrine Common 2.0.x](https://github.com/doctrine/common)
