@@ -8,7 +8,9 @@ Requirements
 Kdyby/Events requires PHP 5.3.2 or higher.
 
 - [Nette Framework 2.0.x](https://github.com/nette/nette)
-- [Doctrine Common 2.0.x](https://github.com/doctrine/common)
+
+
+Kdyby/Events are also compatible with events dispatcher in [doctrine/common](https://github.com/doctrine/common), so you can use them with Doctrine.
 
 
 Installation
