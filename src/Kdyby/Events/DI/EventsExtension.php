@@ -59,7 +59,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 			->setClass('Kdyby\Events\EventManager')
 			->setInject(FALSE);
 
-		Nette\Utils\Validators::assert($config, 'array');
+		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
 		foreach ($config['subscribers'] as $subscriber) {
 			$def = $builder->addDefinition($this->prefix('subscriber.' . md5(Nette\Utils\Json::encode($subscriber))));
 			list($def->factory) = Nette\Config\Compiler::filterArguments(array(
