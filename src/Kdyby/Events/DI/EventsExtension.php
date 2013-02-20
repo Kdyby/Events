@@ -169,7 +169,9 @@ class EventsExtension extends Nette\Config\CompilerExtension
 		foreach ($builder->getDefinitions() as $def) {
 			/** @var Nette\DI\ServiceDefinition $def */
 			if (!class_exists($class = $builder->expand($def->class))) {
-				continue;
+				if (!$def->factory || !class_exists($class = $builder->expand($def->factory->entity))) {
+					continue;
+				}
 			}
 
 			$properties = Nette\Reflection\ClassType::from($class)->getProperties(Nette\Reflection\Property::IS_PUBLIC);
