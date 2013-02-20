@@ -200,7 +200,7 @@ class NamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\S
 	public function getSubscribedEvents()
 	{
 		return array(
-			'App::onFoo'
+			'\App::onFoo'
 		);
 	}
 

@@ -144,10 +144,12 @@ class EventsExtension extends Nette\Config\CompilerExtension
 				throw new Nette\Utils\AssertionException("Subscriber '$serviceName' doesn't implement Kdyby\\Events\\Subscriber.");
 			}
 
+			$eventNames = array();
 			$listenerInst = Nette\PhpGenerator\Helpers::createObject($def->class, array());
 			/** @var EventSubscriber $listenerInst */
-			foreach ($eventNames = $listenerInst->getSubscribedEvents() as $eventName) {
+			foreach ($listenerInst->getSubscribedEvents() as $eventName) {
 				list(, $method) = Kdyby\Events\Event::parseName($eventName);
+				$eventNames[] = ltrim($eventName, '\\');
 				if (!method_exists($listenerInst, $method)) {
 					throw new Nette\Utils\AssertionException("Event listener " . $def->class . "::{$method}() is not implemented.");
 				}

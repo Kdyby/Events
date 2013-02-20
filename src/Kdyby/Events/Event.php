@@ -167,6 +167,7 @@ class Event extends Nette\Object implements \ArrayAccess, \IteratorAggregate, \C
 	 */
 	public static function parseName($name)
 	{
+		$name = ltrim($name, '\\');
 		if (strpos($name, '::') === FALSE) {
 			return array(NULL, $name);
 		}
