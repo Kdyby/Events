@@ -36,7 +36,7 @@ class ExtensionTest extends Tester\TestCase
 		$config->setTempDirectory(TEMP_DIR);
 		$config->addParameters(array('container' => array('class' => 'SystemContainer_' . md5($configFile))));
 		Kdyby\Events\DI\EventsExtension::register($config);
-		$config->addConfig(__DIR__ . '/config/' . $configFile . '.neon');
+		$config->addConfig(__DIR__ . '/config/' . $configFile . '.neon', FALSE);
 		return $config->createContainer();
 	}
 
