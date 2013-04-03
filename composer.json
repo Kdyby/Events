@@ -29,7 +29,8 @@
 			"src/Kdyby/Events/exceptions.php"
 		],
 		"files": [
-			"src/Doctrine/compatibility.php"
+			"src/Doctrine/compatibility.php",
+			"src/Nette/compatibility.php"
 		]
 	}
 }
