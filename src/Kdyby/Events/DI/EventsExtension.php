@@ -13,7 +13,7 @@ namespace Kdyby\Events\DI;
 use Doctrine\Common\EventSubscriber;
 use Kdyby;
 use Nette;
-use Nette\Utils\PhpGenerator as Code;
+use Nette\PhpGenerator as Code;
 
 
 
@@ -183,7 +183,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 				$def->addSetup('$' . $name, array(
 					new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
 						$property->getDeclaringClass()->getName() . '::' . $name,
-						new PhpLiteral('$service->' . $name)
+						new Code\PhpLiteral('$service->' . $name)
 					))
 				));
 			}
