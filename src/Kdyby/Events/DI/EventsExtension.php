@@ -56,8 +56,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 		$config = $this->getConfig($this->defaults);
 
 		$builder->addDefinition($this->prefix('manager'))
-			->setClass('Kdyby\Events\EventManager')
-			->setInject(FALSE);
+			->setClass('Kdyby\Events\EventManager');
 
 		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
 		foreach ($config['subscribers'] as $subscriber) {
