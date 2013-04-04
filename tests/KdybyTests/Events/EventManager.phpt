@@ -31,7 +31,7 @@ class EventManagerTest extends Tester\TestCase
 
 
 
-	public function setUp()
+	protected function setUp()
 	{
 		$this->manager = new EventManager();
 	}
