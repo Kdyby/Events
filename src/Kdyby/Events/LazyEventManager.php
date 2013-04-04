@@ -53,16 +53,28 @@ class LazyEventManager extends EventManager
 	public function getListeners($eventName = NULL)
 	{
 		if (!empty($this->listenerIds[$eventName])) {
-			foreach ($this->listenerIds[$eventName] as $serviceName) {
-				$subscriber = $this->container->getService($serviceName);
-				/** @var Doctrine\Common\EventSubscriber $subscriber */
-				$this->addEventListener($eventName, $subscriber);
-			}
+			$this->initializeListener($eventName);
+		}
 
-			unset($this->listenerIds[$eventName]);
+		if ($eventName === NULL) {
+			foreach (array_keys($this->listenerIds) as $type) {
+				$this->initializeListener($type);
+			}
 		}
 
 		return parent::getListeners($eventName);
+	}
+
+
+
+	private function initializeListener($eventName)
+	{
+		foreach ($this->listenerIds[$eventName] as $serviceName) {
+			$subscriber = $this->container->getService($serviceName);
+			/** @var Doctrine\Common\EventSubscriber $subscriber */
+			$this->addEventListener($eventName, $subscriber);
+		}
+		unset($this->listenerIds[$eventName]);
 	}
 
 }
