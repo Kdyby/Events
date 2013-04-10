@@ -65,10 +65,11 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::false($sl->isCreated('second'));
 
 		$fooListener = $lazy->getListeners('onFoo');
-		Assert::same(array($sl->getService('second')), $fooListener);
 
 		Assert::false($sl->isCreated('first'));
 		Assert::true($sl->isCreated('second'));
+
+		Assert::same(array($sl->getService('second')), $fooListener);
 	}
 
 
@@ -83,13 +84,13 @@ class LazyEventManagerTest extends Tester\TestCase
 
 		$all = $lazy->getListeners();
 
+		Assert::true($sl->isCreated('first'));
+		Assert::true($sl->isCreated('second'));
+
 		Assert::same(array(
 			$sl->getService('first'),
 			$sl->getService('second'),
 		), $all);
-
-		Assert::true($sl->isCreated('first'));
-		Assert::true($sl->isCreated('second'));
 	}
 
 }
