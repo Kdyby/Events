@@ -63,7 +63,7 @@ class ExtensionTest extends Tester\TestCase
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.missing');
-		}, "Nette\\Utils\\AssertionException", 'Please, specify existing class for service \'events.subscriber.%a%\' explicitly.');
+		}, "Nette\\Utils\\AssertionException", 'Please, specify existing class for service \'events.subscriber.%a%\' explicitly, and make sure, that the class exists and can be autoloaded.');
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.fake');

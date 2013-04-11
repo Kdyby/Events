@@ -10,10 +10,10 @@
 
 namespace Kdyby\Events\DI;
 
-use Doctrine\Common\EventSubscriber;
 use Kdyby;
 use Nette;
 use Nette\Utils\PhpGenerator as Code;
+use Nette\Utils\AssertionException;
 
 
 
@@ -112,7 +112,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 	/**
 	 * @param \Nette\DI\ContainerBuilder $builder
 	 * @param \Nette\DI\ServiceDefinition $manager
-	 * @throws \Nette\Utils\AssertionException
+	 * @throws AssertionException
 	 */
 	private function validateSubscribers(Nette\DI\ContainerBuilder $builder, Nette\DI\ServiceDefinition $manager)
 	{
@@ -127,30 +127,39 @@ class EventsExtension extends Nette\Config\CompilerExtension
 				$def = $builder->getDefinition($serviceName);
 
 			} catch (\Exception $e) {
-				throw new Nette\Utils\AssertionException(
+				throw new AssertionException(
 					"Please, do not register listeners directly to service '" . $this->prefix('manager') . "'. " .
 					"Use section '" . $this->name . ": subscribers: ', or tag the service as '" . self::SUBSCRIBER_TAG . "'.",
 					0, $e
 				);
 			}
 
-			if (!$def->class || !class_exists($def->class)) {
-				throw new Nette\Utils\AssertionException("Please, specify existing class for service '$serviceName' explicitly.");
+			if (!$def->class) {
+				throw new AssertionException(
+					"Please, specify existing class for " . (is_numeric($serviceName) ? 'anonymous ' : '') . "service '$serviceName' explicitly, " .
+					"and make sure, that the class exists and can be autoloaded."
+				);
+
+			} elseif (!class_exists($def->class)) {
+				throw new AssertionException(
+					"Class '{$def->class}' of " . (is_numeric($serviceName) ? 'anonymous ' : '') . "service '$serviceName' cannot be found. " .
+					"Please make sure, that the class exists and can be autoloaded."
+				);
 			}
 
 			if (!in_array('Doctrine\Common\EventSubscriber' , class_implements($def->class))) {
 				// the minimum is Doctrine EventSubscriber, but recommend is Kdyby Subscriber
-				throw new Nette\Utils\AssertionException("Subscriber '$serviceName' doesn't implement Kdyby\\Events\\Subscriber.");
+				throw new AssertionException("Subscriber '$serviceName' doesn't implement Kdyby\\Events\\Subscriber.");
 			}
 
 			$eventNames = array();
 			$listenerInst = Code\Helpers::createObject($def->class, array());
-			/** @var EventSubscriber $listenerInst */
+			/** @var \Doctrine\Common\EventSubscriber $listenerInst */
 			foreach ($listenerInst->getSubscribedEvents() as $eventName) {
 				list(, $method) = Kdyby\Events\Event::parseName($eventName);
 				$eventNames[] = ltrim($eventName, '\\');
 				if (!method_exists($listenerInst, $method)) {
-					throw new Nette\Utils\AssertionException("Event listener " . $def->class . "::{$method}() is not implemented.");
+					throw new AssertionException("Event listener " . $def->class . "::{$method}() is not implemented.");
 				}
 			}
 
