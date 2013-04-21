@@ -255,3 +255,26 @@ class SecondInvalidListenerMock extends Nette\Object implements Kdyby\Events\Sub
 	}
 
 }
+
+
+class RouterFactory extends Nette\Object
+{
+
+	/**
+	 * @return \KdybyTests\Events\SampleRouter
+	 */
+	public function createRouter()
+	{
+		return new SampleRouter('nemam');
+	}
+
+}
+
+class SampleRouter extends Nette\Application\Routers\Route
+{
+
+	public $onMatch = array();
+
+	public $onConstruct = array();
+
+}
