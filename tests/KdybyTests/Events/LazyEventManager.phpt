@@ -31,13 +31,7 @@ class LazyEventManagerTest extends Tester\TestCase
 
 	public function dateGetListeners()
 	{
-		$sl = new Container();
-		$sl->addService('first', function () {
-			return new NamespacedEventListenerMock();
-		});
-		$sl->addService('second', function () {
-			return new EventListenerMock();
-		});
+		$sl = new ListenersContainer();
 
 		$lazy = new LazyEventManager(array(
 			'App::onFoo' => array(
@@ -94,5 +88,26 @@ class LazyEventManagerTest extends Tester\TestCase
 	}
 
 }
+
+
+
+class ListenersContainer extends Container
+{
+
+	protected function createServiceFirst()
+	{
+		return new NamespacedEventListenerMock();
+	}
+
+
+
+	protected function createServiceSecond()
+	{
+		return new EventListenerMock();
+	}
+
+}
+
+
 
 \run(new LazyEventManagerTest());
