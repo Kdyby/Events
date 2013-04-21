@@ -17,6 +17,8 @@ use Nette;
 
 
 /**
+ * Is aware of DI Container and accepts map of listener service ids which then loads when needed.
+ *
  * @author Filip Procházka <filip@prochazka.su>
  */
 class LazyEventManager extends EventManager
@@ -48,9 +50,10 @@ class LazyEventManager extends EventManager
 
 	/**
 	 * @param string $eventName
+	 * @param bool $asCallbacks
 	 * @return \Doctrine\Common\EventSubscriber[]
 	 */
-	public function getListeners($eventName = NULL)
+	public function getListeners($eventName = NULL, $asCallbacks = FALSE)
 	{
 		if (!empty($this->listenerIds[$eventName])) {
 			$this->initializeListener($eventName);
@@ -62,7 +65,18 @@ class LazyEventManager extends EventManager
 			}
 		}
 
-		return parent::getListeners($eventName);
+		return parent::getListeners($eventName, $asCallbacks);
+	}
+
+
+
+	public function removeEventListener($unsubscribe, $subscriber = NULL)
+	{
+		foreach ((array) $unsubscribe as $eventName) {
+			$this->initializeListener($eventName);
+		}
+
+		parent::removeEventListener($unsubscribe, $subscriber);
 	}
 
 
@@ -72,8 +86,10 @@ class LazyEventManager extends EventManager
 		foreach ($this->listenerIds[$eventName] as $serviceName) {
 			$subscriber = $this->container->getService($serviceName);
 			/** @var Doctrine\Common\EventSubscriber $subscriber */
-			$this->addEventListener($eventName, $subscriber);
+
+			$this->addEventSubscriber($subscriber);
 		}
+
 		unset($this->listenerIds[$eventName]);
 	}
 
