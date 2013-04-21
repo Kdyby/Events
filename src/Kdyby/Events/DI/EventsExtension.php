@@ -155,15 +155,38 @@ class EventsExtension extends Nette\Config\CompilerExtension
 			$eventNames = array();
 			$listenerInst = Code\Helpers::createObject($def->class, array());
 			/** @var \Doctrine\Common\EventSubscriber $listenerInst */
-			foreach ($listenerInst->getSubscribedEvents() as $eventName) {
-				list(, $method) = Kdyby\Events\Event::parseName($eventName);
-				$eventNames[] = ltrim($eventName, '\\');
-				if (!method_exists($listenerInst, $method)) {
-					throw new AssertionException("Event listener " . $def->class . "::{$method}() is not implemented.");
+			foreach ($listenerInst->getSubscribedEvents() as $eventName => $params) {
+				if (is_numeric($eventName) && is_string($params)) { // [EventName, ...]
+					list(, $method) = Kdyby\Events\Event::parseName($params);
+					$eventNames[] = ltrim($params, '\\');
+					if (!method_exists($listenerInst, $method)) {
+						throw new AssertionException("Event listener " . $def->class . "::{$method}() is not implemented.");
+					}
+
+				} elseif (is_string($eventName)) { // [EventName => ???, ...]
+					$eventNames[] = ltrim($eventName, '\\');
+
+					if (is_string($params)) { // [EventName => method, ...]
+						if (!method_exists($listenerInst, $params)) {
+							throw new AssertionException("Event listener " . $def->class . "::{$params}() is not implemented.");
+						}
+
+					} elseif (is_string($params[0])) { // [EventName => [method, priority], ...]
+						if (!method_exists($listenerInst, $params[0])) {
+							throw new AssertionException("Event listener " . $def->class . "::{$params[0]}() is not implemented.");
+						}
+
+					} else {
+						foreach ($params as $listener) { // [EventName => [[method, priority], ...], ...]
+							if (!method_exists($listenerInst, $listener[0])) {
+								throw new AssertionException("Event listener " . $def->class . "::{$listener[0]}() is not implemented.");
+							}
+						}
+					}
 				}
 			}
 
-			$this->listeners[$serviceName] = $eventNames;
+			$this->listeners[$serviceName] = array_unique($eventNames);
 		}
 	}
 

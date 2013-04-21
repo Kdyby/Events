@@ -162,6 +162,48 @@ class EventManagerTest extends Tester\TestCase
 		), $listener->calls);
 	}
 
+
+
+	public function testEventsDispatching_CustomMethodAlias()
+	{
+		$this->manager->addEventSubscriber($listener = new MethodAliasListenerMock());
+
+		$this->manager->dispatchEvent('onDiscard', $args = new EventArgsMock());
+
+		Assert::same(array(
+			array(__NAMESPACE__ . '\\MethodAliasListenerMock::customMethod', array($args)),
+		), $listener->calls);
+	}
+
+
+
+	public function testEventsDispatching_Priority()
+	{
+		$this->manager->addEventSubscriber($lower = new PriorityMethodAliasListenerMock());
+		$this->manager->addEventSubscriber($higher = new HigherPriorityMethodAliasListenerMock());
+
+		$this->manager->dispatchEvent('onDiscard', $args = new EventArgsMock());
+
+		Assert::same(array(
+			array(__NAMESPACE__ . '\\HigherPriorityMethodAliasListenerMock::customMethod', array($args)),
+			array(__NAMESPACE__ . '\\PriorityMethodAliasListenerMock::customMethod', array($args)),
+		), $args->calls);
+	}
+
+
+
+	public function testEventsDispatching_MultipleEventMethods()
+	{
+		$this->manager->addEventSubscriber($listener = new MultipleEventMethodsListenerMock());
+
+		$this->manager->dispatchEvent('onDiscard', $args = new EventArgsMock());
+
+		Assert::same(array(
+			array(__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::firstMethod', array($args)),
+			array(__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::secondMethod', array($args)),
+		), $listener->calls);
+	}
+
 }
 
 \run(new EventManagerTest());
