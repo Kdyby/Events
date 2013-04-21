@@ -168,11 +168,12 @@ class Event extends Nette\Object implements \ArrayAccess, \IteratorAggregate, \C
 	public static function parseName($name)
 	{
 		$name = ltrim($name, '\\');
-		if (strpos($name, '::') === FALSE) {
-			return array(NULL, $name);
+
+		if ($m = Nette\Utils\Strings::match($name, '~^(?P<namespace>.*\w+)[^\w]+(?P<name>[a-z]\w+)$~i')) {
+			return array($m['namespace'], $m['name']);
 		}
 
-		return explode('::', $name);
+		return array(NULL, $name);
 	}
 
 
