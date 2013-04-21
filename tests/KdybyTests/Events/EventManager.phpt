@@ -147,6 +147,21 @@ class EventManagerTest extends Tester\TestCase
 		Assert::same($expected, array_merge($ns->calls, $plain->calls));
 	}
 
+
+
+	public function testEventsDispatching_CustomNamespaces()
+	{
+		$this->manager->addEventSubscriber($listener = new CustomNamespacedEventListenerMock());
+
+		$this->manager->dispatchEvent('updated', $first = new EventArgsMock());
+		$this->manager->dispatchEvent('domain.users.updated', $second = new EventArgsMock());
+
+		Assert::same(array(
+			array(__NAMESPACE__ . '\\CustomNamespacedEventListenerMock::updated', array($first)),
+			array(__NAMESPACE__ . '\\CustomNamespacedEventListenerMock::updated', array($second)),
+		), $listener->calls);
+	}
+
 }
 
 \run(new EventManagerTest());

@@ -221,6 +221,43 @@ class NamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\S
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
+class CustomNamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
+{
+
+	/**
+	 * @var array
+	 */
+	public $calls = array();
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+			'domain.users.updated'
+		);
+	}
+
+
+
+	/**
+	 * @param \Kdyby\Events\EventArgs $args
+	 */
+	public function updated(Kdyby\Events\EventArgs $args)
+	{
+		$this->calls[] = array(__METHOD__, func_get_args());
+	}
+
+}
+
+
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
 class FirstInvalidListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
