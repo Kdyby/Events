@@ -20,7 +20,7 @@ use Nette\Utils\AssertionException;
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class EventsExtension extends Nette\Config\CompilerExtension
+class EventsExtension extends Nette\DI\CompilerExtension
 {
 	const EVENT_TAG = 'kdyby.event';
 	const SUBSCRIBER_TAG = 'kdyby.subscriber';
