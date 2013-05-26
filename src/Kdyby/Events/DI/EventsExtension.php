@@ -17,10 +17,17 @@ use Nette\Utils\AssertionException;
 
 
 
+if (!class_exists('Nette\DI\CompilerExtension')) {
+	class_alias('Nette\Config\CompilerExtension', 'Nette\DI\CompilerExtension');
+	class_alias('Nette\Config\Configurator', 'Nette\Configurator');
+	class_alias('Nette\Config\Compiler', 'Nette\DI\Compiler');
+	class_alias('Nette\Config\Helpers', 'Nette\DI\Helpers');
+}
+
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class EventsExtension extends Nette\Config\CompilerExtension
+class EventsExtension extends Nette\DI\CompilerExtension
 {
 	const EVENT_TAG = 'kdyby.event';
 	const SUBSCRIBER_TAG = 'kdyby.subscriber';
@@ -62,7 +69,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
 		foreach ($config['subscribers'] as $subscriber) {
 			$def = $builder->addDefinition($this->prefix('subscriber.' . md5(Nette\Utils\Json::encode($subscriber))));
-			list($def->factory) = Nette\Config\Compiler::filterArguments(array(
+			list($def->factory) = Nette\DI\Compiler::filterArguments(array(
 				is_string($subscriber) ? new Nette\DI\Statement($subscriber) : $subscriber
 			));
 
@@ -255,11 +262,11 @@ class EventsExtension extends Nette\Config\CompilerExtension
 
 
 	/**
-	 * @param \Nette\Config\Configurator $configurator
+	 * @param \Nette\Configurator $configurator
 	 */
-	public static function register(Nette\Config\Configurator $configurator)
+	public static function register(Nette\Configurator $configurator)
 	{
-		$configurator->onCompile[] = function ($config, Nette\Config\Compiler $compiler) {
+		$configurator->onCompile[] = function ($config, Nette\DI\Compiler $compiler) {
 			$compiler->addExtension('events', new EventsExtension());
 		};
 	}
