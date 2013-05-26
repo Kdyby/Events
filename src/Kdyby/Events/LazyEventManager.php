@@ -70,6 +70,10 @@ class LazyEventManager extends EventManager
 
 
 
+	/**
+	 * @param array|string $unsubscribe
+	 * @param Doctrine\Common\EventSubscriber|array $subscriber
+	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		foreach ((array) $unsubscribe as $eventName) {
@@ -81,6 +85,9 @@ class LazyEventManager extends EventManager
 
 
 
+	/**
+	 * @param string $eventName
+	 */
 	private function initializeListener($eventName)
 	{
 		foreach ($this->listenerIds[$eventName] as $serviceName) {
