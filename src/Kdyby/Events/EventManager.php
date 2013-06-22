@@ -222,7 +222,7 @@ class EventManager extends Doctrine\Common\EventManager
 
 
 	/**
-	 * @param string $name
+	 * @param string|array $name
 	 * @param array $defaults
 	 * @param string $argsClass
 	 * @return Event
