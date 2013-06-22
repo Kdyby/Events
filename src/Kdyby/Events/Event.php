@@ -19,7 +19,7 @@ use Nette;
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class Event extends Nette\Object implements \ArrayAccess, \IteratorAggregate, \Countable
+class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
 	/**
@@ -260,6 +260,34 @@ class Event extends Nette\Object implements \ArrayAccess, \IteratorAggregate, \C
 	public function offsetUnset($index)
 	{
 		unset($this->listeners[$index]);
+	}
+
+
+
+	/********************* Simpler Nette\Object *********************/
+
+
+
+	/**
+	 * @param $name
+	 * @return mixed|void
+	 * @throws MemberAccessException
+	 */
+	public function &__get($name)
+	{
+		throw new MemberAccessException("There is no property $name in " . get_class($this));
+	}
+
+
+
+	/**
+	 * @param $name
+	 * @param $value
+	 * @throws MemberAccessException
+	 */
+	public function __set($name, $value)
+	{
+		throw new MemberAccessException("There is no property $name in " . get_class($this));
 	}
 
 }

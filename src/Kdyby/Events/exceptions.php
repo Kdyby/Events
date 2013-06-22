@@ -45,7 +45,19 @@ class InvalidStateException extends \RuntimeException implements Exception
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class OutOfRangeException extends \OutOfRangeException
+class OutOfRangeException extends \OutOfRangeException implements Exception
+{
+
+}
+
+
+
+/**
+ * The exception that is thrown when accessing a class member (property or method) fails.
+ *
+ * @author Filip Procházka <filip@prochazka.su>
+ */
+class MemberAccessException extends \LogicException implements Exception
 {
 
 }
