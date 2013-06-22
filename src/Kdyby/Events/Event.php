@@ -50,7 +50,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 
 	/**
-	 * @param string $name
+	 * @param string|array $name
 	 * @param array $defaults
 	 * @param string $argsClass
 	 */
@@ -167,10 +167,15 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public static function parseName($name)
 	{
-		$name = ltrim($name, '\\');
+		if (is_array($name)) {
+			return $name;
+		}
 
-		if ($m = Nette\Utils\Strings::match($name, '~^(?P<namespace>.*\w+)[^\w]+(?P<name>[a-z]\w+)$~i')) {
-			return array($m['namespace'], $m['name']);
+		if (preg_match('~^([^\w]?(?P<namespace>.*\w+)[^\w]{1,2})?(?P<name>[a-z]\w+)$~i', $name, $m)) {
+			return array($m['namespace'] ?: NULL, $m['name']);
+
+		} else {
+			$name = ltrim($name, '\\');
 		}
 
 		return array(NULL, $name);

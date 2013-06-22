@@ -27,6 +27,27 @@ require_once __DIR__ . '/mocks.php';
 class EventTest extends Tester\TestCase
 {
 
+	public function dataParseName()
+	{
+		return array(
+			array(array('App', 'onFoo'), 'App::onFoo'),
+			array(array('App', 'onFoo'), '\\App::onFoo'),
+			array(array('app.blog', 'foo'), 'app.blog.foo'),
+		);
+	}
+
+
+
+	/**
+	 * @dataProvider dataParseName
+	 */
+	public function testParseName($expected, $name)
+	{
+		Assert::same($expected, Event::parseName($name));
+	}
+
+
+
 	/**
 	 * @param array $calls
 	 * @return FooMock
