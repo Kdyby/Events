@@ -124,7 +124,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 				$init->addBody(Code\Helpers::format(
 					'$this->getService(?)->createEvent(?)->dispatch($this);',
 					$this->prefix('manager'),
-					'Nette\\DI\\Container::onInitialize'
+					array('Nette\\DI\\Container', 'onInitialize')
 				));
 
 				$foundNetteInitEnd = TRUE;
@@ -252,7 +252,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 
 				$def->addSetup('$' . $name, array(
 					new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
-						$property->getDeclaringClass()->getName() . '::' . $name,
+						array($property->getDeclaringClass()->getName(), $name),
 						new Code\PhpLiteral('$service->' . $name)
 					))
 				));
