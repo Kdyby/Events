@@ -60,7 +60,7 @@ By passing callbacks to the event, you're making them listeners
 ```php
 $process = new OrderProcess($orders);
 $process->onSuccess[] = function ($process, $order) {
-    echo "You've spend ", $order->sum, ",-";
+    echo "You've spent ", $order->sum, ",-";
 };
 ```
 
