@@ -139,10 +139,10 @@ services:
 ```
 
 When you tag the service with `kdyby.subscriber`, it's automatically registered to the EventManager.
-Your listener is also automatically analysed, if it really contains the methods it should, because after all, there is interface only for the `getSubscribedEvents` method.
+Your listener is also automatically analysed whether it really contains the methods it should, because after all, there is interface only for the `getSubscribedEvents` method.
 
-Also, all the services your register, are automatically analysed, if they extend `Nette\Object`, because if they're, they could be containing some Nette events.
-If your service contains public property, that looks like Nette event, it gets replaced by instance of `Kdyby\Events\Event`.
+Also, all the services your register, are automatically analysed whether they extend `Nette\Object`, because if they do, they could be containing some Nette events.
+If your service contains public property that looks like Nette event, it gets replaced by instance of `Kdyby\Events\Event`.
 
 The `Kdyby\Events\Event` acts like it's an regular array, so the `Nette\Object` doesn't even know it's invoking a global event.
 That's right, the `Kdyby\Events\Event` automatically propagates the event dispatch to EventManager, which calls all the listeners.
@@ -152,8 +152,8 @@ And just like that, we have global events. But don't worry, everything you know 
 Optimisation
 ------------
 
-But wouldn't it be slow, when there was hundreds of listeners with their dependencies registered to the `EventManager`? No it wouldn't! It's all completely lazy.
-All the listeners are analyzed on compile-time, than a map of services and events is created, which gets passed to EventManager
+But wouldn't it be slow, when there were hundreds of listeners with their dependencies registered to the `EventManager`? No it wouldn't! It's all completely lazy.
+All the listeners are analyzed on compile-time, then a map of services and events is created, which gets passed to EventManager
 and they all are created just at the right time, only when they are needed.
 
 
