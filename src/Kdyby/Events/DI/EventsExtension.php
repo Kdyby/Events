@@ -186,8 +186,7 @@ class EventsExtension extends Nette\Config\CompilerExtension
 			}
 
 			$eventNames = array();
-			$listenerInst = Nette\Reflection\ClassType::from($def->class)->newInstanceWithoutConstructor();
-			/** @var \Doctrine\Common\EventSubscriber $listenerInst */
+			$listenerInst = self::createInstanceWithoutConstructor($def->class);
 			foreach ($listenerInst->getSubscribedEvents() as $eventName => $params) {
 				if (is_numeric($eventName) && is_string($params)) { // [EventName, ...]
 					list(, $method) = Kdyby\Events\Event::parseName($params);
@@ -294,6 +293,24 @@ class EventsExtension extends Nette\Config\CompilerExtension
 		$configurator->onCompile[] = function ($config, Nette\Config\Compiler $compiler) {
 			$compiler->addExtension('events', new EventsExtension());
 		};
+	}
+
+
+
+	/**
+	 * @param string $class
+	 * @return \Doctrine\Common\EventSubscriber
+	 */
+	private static function createInstanceWithoutConstructor($class)
+	{
+		if (method_exists('ReflectionClass', 'newInstanceWithoutConstructor')) {
+			$listenerInst = Nette\Reflection\ClassType::from($class)->newInstanceWithoutConstructor();
+
+		} else {
+			$listenerInst = unserialize(sprintf('O:%d:"%s":0:{}', strlen($class), $class));
+		}
+
+		return $listenerInst;
 	}
 
 }
