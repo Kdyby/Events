@@ -198,7 +198,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			}
 
 			$eventNames = array();
-			$listenerInst = Code\Helpers::createObject($def->class, array());
+			$listenerInst = Nette\Reflection\ClassType::from($def->class)->newInstanceWithoutConstructor();
 			/** @var \Doctrine\Common\EventSubscriber $listenerInst */
 			foreach ($listenerInst->getSubscribedEvents() as $eventName => $params) {
 				if (is_numeric($eventName) && is_string($params)) { // [EventName, ...]
