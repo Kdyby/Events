@@ -47,6 +47,11 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	private $argsClass;
 
+	/**
+	 * @var Diagnostics\Panel
+	 */
+	private $panel;
+
 
 
 	/**
@@ -64,6 +69,17 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 				$this->add($listener);
 			}
 		}
+	}
+
+
+
+	/**
+	 * @internal
+	 * @param Diagnostics\Panel $panel
+	 */
+	public function setPanel(Diagnostics\Panel $panel)
+	{
+		$this->panel = $panel;
 	}
 
 
@@ -128,7 +144,11 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	public function getListeners()
 	{
 		$listeners = $this->listeners;
-		if (!$this->eventManager || !$this->eventManager->hasListeners($this->getName())) {
+
+		if ($this->panel) {
+			$this->panel->inlineCallbacks($this->getName(), $listeners);
+
+		} elseif (!$this->eventManager || !$this->eventManager->hasListeners($this->getName())) {
 			return $listeners;
 		}
 
