@@ -48,6 +48,14 @@ class LazyEventManager extends EventManager
 
 
 
+	public function setPanel(Diagnostics\Panel $panel)
+	{
+		parent::setPanel($panel);
+		$panel->setServiceIds($this->listenerIds);
+	}
+
+
+
 	/**
 	 * @param string $eventName
 	 * @param bool $asCallbacks

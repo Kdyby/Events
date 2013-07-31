@@ -44,6 +44,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		'validate' => TRUE,
 		'autowire' => TRUE,
 		'optimize' => TRUE,
+		'debugger' => '%debugMode%',
 	);
 
 	/**
@@ -66,9 +67,13 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		$builder = $this->getContainerBuilder();
 		$config = $this->getConfig($this->defaults);
 
-		$builder->addDefinition($this->prefix('manager'))
+		$evm = $builder->addDefinition($this->prefix('manager'))
 			->setClass('Kdyby\Events\EventManager')
 			->setInject(FALSE);
+
+		if ($config['debugger']) {
+			$evm->addSetup('Kdyby\Events\Diagnostics\Panel::register', array('@self'));
+		}
 
 		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
 		foreach ($config['subscribers'] as $subscriber) {

@@ -47,6 +47,22 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	private $subscribers = array();
 
+	/**
+	 * @var Diagnostics\Panel
+	 */
+	private $panel;
+
+
+
+	/**
+	 * @internal
+	 * @param Diagnostics\Panel $panel
+	 */
+	public function setPanel(Diagnostics\Panel $panel)
+	{
+		$this->panel = $panel;
+	}
+
 
 
 	/**
@@ -57,6 +73,10 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function dispatchEvent($eventName, Doctrine\Common\EventArgs $eventArgs = NULL)
 	{
+		if ($this->panel) {
+			$this->panel->eventDispatch($eventName, $eventArgs);
+		}
+
 		foreach ($this->getListeners($eventName, TRUE) as $listener) {
 			if ($eventArgs instanceof EventArgsList) {
 				/** @var EventArgsList $eventArgs */
@@ -231,6 +251,11 @@ class EventManager extends Doctrine\Common\EventManager
 	{
 		$event = new Event($name, $defaults, $argsClass);
 		$event->injectEventManager($this);
+
+		if ($this->panel) {
+			$this->panel->registerEvent($event);
+		}
+
 		return $event;
 	}
 
