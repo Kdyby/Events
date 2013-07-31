@@ -59,6 +59,11 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 	 */
 	private $inlineCallbacks = array();
 
+	/**
+	 * @var array
+	 */
+	private $registeredClasses;
+
 
 
 	public function __construct(Nette\DI\Container $sl)
@@ -237,6 +242,8 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			$addIcon = '<img width="18" height="18" src="data:image/png;base64,' . base64_encode(file_get_contents(__DIR__ . '/add.png')) . '" title="Listener" />';
 		}
 
+		$registeredClasses = $this->getClassMap();
+
 		$h = 'htmlspecialchars';
 		$s = '';
 		foreach ($ids as $id) {
@@ -248,7 +255,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 				continue;
 			}
 
-			if (!$this->sl->isCreated($id) && ($class = array_search($id, $this->sl->classes, TRUE))) {
+			if (!$this->sl->isCreated($id) && ($class = array_search($id, $registeredClasses, TRUE))) {
 				$s .= '<tr><td width=18>' . $addIcon . '</td><td><pre class="nette-dump"><span class="nette-dump-object">' .
 					$h(Nette\Reflection\ClassType::from($class)->getName()) .
 					'</span></span></th></tr>';
@@ -259,6 +266,35 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		}
 
 		return $s;
+	}
+
+
+
+	private function getClassMap()
+	{
+		if ($this->registeredClasses !== NULL) {
+			return $this->registeredClasses;
+		}
+
+		if (property_exists('Nette\DI\Container', 'classes')) {
+			return $this->registeredClasses = $this->sl->classes;
+		}
+
+		$refl = new Nette\Reflection\Property('Nette\DI\Container', 'meta');
+		$refl->setAccessible(TRUE);
+		$meta = $refl->getValue($this->sl);
+
+		$this->registeredClasses = array();
+		foreach ($meta['types'] as $type => $serviceIds) {
+			if (isset($this->registeredClasses[$type])) {
+				$this->registeredClasses[$type] = FALSE;
+				continue;
+			}
+
+			$this->registeredClasses[$type] = $serviceIds;
+		}
+
+		return $this->registeredClasses;
 	}
 
 
