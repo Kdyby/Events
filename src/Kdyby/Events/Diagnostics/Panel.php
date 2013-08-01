@@ -98,7 +98,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 
 
-	public function eventDispatch($eventName, EventArgs $args)
+	public function eventDispatch($eventName, EventArgs $args = NULL)
 	{
 		$this->dispatchLog[$eventName][] = $args;
 	}
@@ -317,8 +317,8 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		}
 
 		$s = '';
-		foreach ($calls as $call) {
-			$s .= '<tr><td width=18>' . $runIcon . '</td><td>' . self::dumpToHtml($call) . '</th></tr>';
+		foreach ($calls as $args) {
+			$s .= '<tr><td width=18>' . $runIcon . '</td><td>' . ($args ? self::dumpToHtml($args) : 'dispatched without arguments') . '</th></tr>';
 		}
 
 		return $s;
