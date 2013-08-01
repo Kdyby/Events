@@ -86,6 +86,10 @@ class EventManager extends Doctrine\Common\EventManager
 				$listener->invoke($eventArgs);
 			}
 		}
+
+		if ($this->panel) {
+			$this->panel->eventDispatched($eventName, $eventArgs);
+		}
 	}
 
 
