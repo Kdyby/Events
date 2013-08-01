@@ -237,7 +237,9 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		}
 
 		$s .= '<tr class="blank"><td colspan=2>&nbsp;</td></tr>';
-		$s .= '<tr><th colspan=2>Summary event call graph</th></tr>';
+		$s .= '<tr><th colspan=2>Summary event call graph <span class="kdyby-events-cf">Show: ';
+		$s .= '<span class="kdyby-events-cf-all kdyby-events-cf-active">all</span>';
+		$s .= ' / <span class="kdyby-events-cf-nested">nested only</span></th></tr>';
 		$treeItemRenderer = function ($item) use (&$treeItemRenderer, &$s, $h) {
 			$s .= '<ul><li>';
 			$s .= '<a href="#' . $this->formatEventId($item[1]) . '">' . $h($item[1]) . '</a>';
@@ -252,7 +254,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			$s .= '</li></ul>';
 		};
 		foreach ($this->dispatchTree as $item) {
-			$s .= '<tr><td colspan=2>';
+			$s .= '<tr class="kdyby-events-cf-item' . (!$item[3] ? ' kdyby-events-cf-item-empty' : '') . '"><td colspan=2>';
 			$treeItemRenderer($item);
 			$s .= '</td></tr>';
 		}
@@ -262,7 +264,8 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 		return '<style>' . $this->renderStyles() . '</style>'.
 			'<h1>' . $h($totalEvents) . ' registered events, ' . $h($totalListeners) . ' registered listeners</h1>' .
-			'<div class="nette-inner nette-KdybyEventsPanel"><table>' . $s . '</table></div>';
+			'<div class="nette-inner nette-KdybyEventsPanel"><table>' . $s . '</table></div>' .
+			'<script>' . $this->renderScripts() . '</script>';
 	}
 
 
@@ -409,7 +412,46 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td:first-child { padding-bottom: 0; }
 			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr.blank td { background: white; height:25px; border-left:0; border-right:0; }
 			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td ul { background: url(data:image/gif;base64,R0lGODlhCQAJAIABAIODg////yH5BAEAAAEALAAAAAAJAAkAAAIPjI8GebDsHopSOVgb26EAADs=) 0 5px no-repeat; padding-left: 12px; list-style-type: none; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr th .kdyby-events-cf { font-size: 11px; float: right; margin-top: 3px; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr th .kdyby-events-cf span { cursor: pointer; font-weight: normal; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr th .kdyby-events-cf span.kdyby-events-cf-active { font-weight: bold; }
 CSS;
+	}
+
+
+
+	protected function renderScripts()
+	{
+		return <<<SCRIPTS
+			var $ = (Nette.Q || Nette.Query).factory;
+			var allEl = $('.kdyby-events-cf-all');
+			var nestedEl = $('.kdyby-events-cf-nested');
+
+			var kdybyEventsCfDisplay = function (all) {
+				$('.kdyby-events-cf-item-empty').each(function () {
+					if (all) {
+						$(this).show();
+					} else {
+						$(this).hide();
+					}
+				});
+
+				if (all) {
+					nestedEl.removeClass('kdyby-events-cf-active');
+					allEl.addClass('kdyby-events-cf-active');
+				} else {
+					allEl.removeClass('kdyby-events-cf-active');
+					nestedEl.addClass('kdyby-events-cf-active');
+				}
+			};
+
+			allEl.bind('click', function () {
+				kdybyEventsCfDisplay(true);
+			});
+			nestedEl.bind('click', function () {
+				kdybyEventsCfDisplay(false);
+			});
+SCRIPTS;
 	}
 
 
