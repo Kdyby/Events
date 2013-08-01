@@ -17,7 +17,6 @@ use Kdyby\Events\EventManager;
 use Nette;
 use Nette\Diagnostics\Bar;
 use Nette\Diagnostics\Debugger;
-use Nette\Diagnostics\Dumper;
 use Nette\Iterators\CachingIterator;
 use Nette\Utils\Arrays;
 
@@ -261,11 +260,22 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 					'</span></span></th></tr>';
 
 			} else {
-				$s .= '<tr><td width=18>' . $addIcon . '</td><td>' . Dumper::toHtml($this->sl->getService($id), array(Dumper::COLLAPSE => TRUE)) . '</th></tr>';
+				$s .= '<tr><td width=18>' . $addIcon . '</td><td>' . self::dumpToHtml($this->sl->getService($id)) . '</th></tr>';
 			}
 		}
 
 		return $s;
+	}
+
+
+
+	private static function dumpToHtml($structure)
+	{
+		if (class_exists('Nette\Diagnostics\Dumper')) {
+			return Nette\Diagnostics\Dumper::toHtml($structure, array(Nette\Diagnostics\Dumper::COLLAPSE => TRUE));
+		}
+
+		return Nette\Diagnostics\Debugger::dump($structure, TRUE);
 	}
 
 
@@ -308,7 +318,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 		$s = '';
 		foreach ($calls as $call) {
-			$s .= '<tr><td width=18>' . $runIcon . '</td><td>' . Dumper::toHtml($call, array(Dumper::COLLAPSE => TRUE)) . '</th></tr>';
+			$s .= '<tr><td width=18>' . $runIcon . '</td><td>' . self::dumpToHtml($call) . '</th></tr>';
 		}
 
 		return $s;
