@@ -51,6 +51,16 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 	/**
 	 * @var array
 	 */
+	private $dispatchTree = array();
+
+	/**
+	 * @var array|NULL
+	 */
+	private $dispatchTreePointer = NULL;
+
+	/**
+	 * @var array
+	 */
 	private $listenerIds = array();
 
 	/**
@@ -101,6 +111,22 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 	public function eventDispatch($eventName, EventArgs $args = NULL)
 	{
 		$this->dispatchLog[$eventName][] = $args;
+
+		// [parent-ref, name, args, children]
+		$meta = array(&$this->dispatchTreePointer, $eventName, $args, array());
+		if ($this->dispatchTreePointer == NULL) {
+			$this->dispatchTree[] = &$meta;
+		} else {
+			$this->dispatchTreePointer[3][] = &$meta;
+		}
+		$this->dispatchTreePointer = &$meta;
+	}
+
+
+
+	public function eventDispatched($eventName, EventArgs $args = NULL)
+	{
+		$this->dispatchTreePointer = &$this->dispatchTreePointer[0];
 	}
 
 
@@ -208,6 +234,26 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			}
 
 			$s .= $this->renderCalls($calls);
+		}
+
+		$s .= '<tr class="blank"><td colspan=2>&nbsp;</td></tr>';
+		$s .= '<tr><th colspan=2>Summary event call graph</th></tr>';
+		$treeItemRenderer = function ($item) use (&$treeItemRenderer, &$s, $h) {
+			$s .= '<ul><li>';
+			$s .= $h($item[1]);
+
+			if ($item[3]) {
+				foreach ($item[3] as $child) {
+					$treeItemRenderer($child);
+				}
+			}
+
+			$s .= '</li></ul>';
+		};
+		foreach ($this->dispatchTree as $item) {
+			$s .= '<tr><td colspan=2>';
+			$treeItemRenderer($item);
+			$s .= '</td></tr>';
 		}
 
 		$totalEvents = count($this->listenerIds);
@@ -337,6 +383,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			#nette-debug .nette-panel .nette-KdybyEventsPanel table th { font-size: 16px; }
 			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td:first-child { padding-bottom: 0; }
 			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr.blank td { background: white; height:25px; border-left:0; border-right:0; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td ul { background: url(data:image/gif;base64,R0lGODlhCQAJAIABAIODg////yH5BAEAAAEALAAAAAAJAAkAAAIPjI8GebDsHopSOVgb26EAADs=) 0 5px no-repeat; padding-left: 12px; list-style-type: none; }
 CSS;
 	}
 
