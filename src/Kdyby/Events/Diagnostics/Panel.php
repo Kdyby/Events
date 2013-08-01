@@ -275,7 +275,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			return Nette\Diagnostics\Dumper::toHtml($structure, array(Nette\Diagnostics\Dumper::COLLAPSE => TRUE));
 		}
 
-		return Nette\Diagnostics\Debugger::dump($structure, TRUE);
+		return Nette\Diagnostics\Helpers::clickableDump($structure, TRUE);
 	}
 
 
