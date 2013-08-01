@@ -177,7 +177,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			if (!$it->isFirst()) {
 				$s .= '<tr class="blank"><td colspan=2>&nbsp;</td></tr>';
 			}
-			$s .= '<tr><th colspan=2>' . count($calls) . 'x ' . $h($eventName) . '</th></tr>';
+			$s .= '<tr><th colspan=2 id="' . $this->formatEventId($eventName) . '">' . count($calls) . 'x ' . $h($eventName) . '</th></tr>';
 			$visited[] = $eventName;
 
 			$s .= $this->renderListeners($this->getInlineCallbacks($eventName));
@@ -240,7 +240,8 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		$s .= '<tr><th colspan=2>Summary event call graph</th></tr>';
 		$treeItemRenderer = function ($item) use (&$treeItemRenderer, &$s, $h) {
 			$s .= '<ul><li>';
-			$s .= $h($item[1]);
+			$s .= '<a href="#' . $this->formatEventId($item[1]) . '">' . $h($item[1]) . '</a>';
+			if ($item[2]) $s .= ' (<a href="#' . $this->formatArgsId($item[2]) . '">' . get_class($item[2]) . '</a>)';
 
 			if ($item[3]) {
 				foreach ($item[3] as $child) {
@@ -364,10 +365,34 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 		$s = '';
 		foreach ($calls as $args) {
-			$s .= '<tr><td width=18>' . $runIcon . '</td><td>' . ($args ? self::dumpToHtml($args) : 'dispatched without arguments') . '</th></tr>';
+			$s .= '<tr><td width=18>' . $runIcon . '</td>';
+			$s .='<td' . ($args ? ' id="' . $this->formatArgsId($args) . '">' . self::dumpToHtml($args) : '>dispatched without arguments');
+			$s .= '</td></tr>';
 		}
 
 		return $s;
+	}
+
+
+
+	/**
+	 * @param string
+	 * @return string
+	 */
+	private function formatEventId($name)
+	{
+		return 'kdyby-event-' . md5($name);
+	}
+
+
+
+	/**
+	 * @param object
+	 * @return string
+	 */
+	private function formatArgsId($args)
+	{
+		return 'kdyby-event-arg-' . md5(spl_object_hash($args));
 	}
 
 
