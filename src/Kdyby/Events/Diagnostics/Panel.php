@@ -114,7 +114,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 		// [parent-ref, name, args, children]
 		$meta = array(&$this->dispatchTreePointer, $eventName, $args, array());
-		if ($this->dispatchTreePointer == NULL) {
+		if ($this->dispatchTreePointer === NULL) {
 			$this->dispatchTree[] = &$meta;
 		} else {
 			$this->dispatchTreePointer[3][] = &$meta;
