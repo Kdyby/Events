@@ -238,22 +238,9 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 		$s .= '<tr class="blank"><td colspan=2>&nbsp;</td></tr>';
 		$s .= '<tr><th colspan=2>Summary event call graph</th></tr>';
-		$treeItemRenderer = function ($item) use (&$treeItemRenderer, &$s, $h) {
-			$s .= '<ul><li>';
-			$s .= '<a href="#' . $this->formatEventId($item[1]) . '">' . $h($item[1]) . '</a>';
-			if ($item[2]) $s .= ' (<a href="#' . $this->formatArgsId($item[2]) . '">' . get_class($item[2]) . '</a>)';
-
-			if ($item[3]) {
-				foreach ($item[3] as $child) {
-					$treeItemRenderer($child);
-				}
-			}
-
-			$s .= '</li></ul>';
-		};
 		foreach ($this->dispatchTree as $item) {
 			$s .= '<tr><td colspan=2>';
-			$treeItemRenderer($item);
+			$s .= $this->renderTreeItem($item);
 			$s .= '</td></tr>';
 		}
 
@@ -263,6 +250,29 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		return '<style>' . $this->renderStyles() . '</style>'.
 			'<h1>' . $h($totalEvents) . ' registered events, ' . $h($totalListeners) . ' registered listeners</h1>' .
 			'<div class="nette-inner nette-KdybyEventsPanel"><table>' . $s . '</table></div>';
+	}
+
+	/**
+	 * Renders an item in call graph.
+	 *
+	 * @param array $item
+	 * @return string
+	 */
+	private function renderTreeItem(array $item)
+	{
+		$h = 'htmlspecialchars';
+
+		$s = '<ul><li>';
+		$s .= '<a href="#' . $this->formatEventId($item[1]) . '">' . $h($item[1]) . '</a>';
+		if ($item[2]) $s .= ' (<a href="#' . $this->formatArgsId($item[2]) . '">' . get_class($item[2]) . '</a>)';
+
+		if ($item[3]) {
+			foreach ($item[3] as $child) {
+				$s .= $this->renderTreeItem($child);
+			}
+		}
+
+		return $s . '</li></ul>';
 	}
 
 
