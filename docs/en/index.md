@@ -125,8 +125,8 @@ $app->run();
 Now when you call the method `run`, the event gets dispatched and it will call the listener with given arguments.
 
 
-Best from both worlds
----------------------
+Best of both worlds
+-------------------
 
 Now, that's a lot of code, couldn't it be shorter? Hell yeah! Let's add some syntax sugar.
 First, you have to register the extension to your `Configurator` as said in Installation. It handles registration of listeners.
