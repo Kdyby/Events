@@ -139,6 +139,18 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 
 	/**
+	 * @param callable $listener
+	 * @return Event
+	 */
+	public function unshift($listener)
+	{
+		array_unshift($this->listeners, callback($listener));
+		return $this;
+	}
+
+
+
+	/**
 	 * @return array|\callable[]|\Nette\Callback[]
 	 */
 	public function getListeners()
