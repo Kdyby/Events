@@ -317,7 +317,12 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 					'</span></span></th></tr>';
 
 			} else {
-				$s .= '<tr><td width=18>' . $addIcon . '</td><td>' . self::dumpToHtml($this->sl->getService($id)) . '</th></tr>';
+				try {
+					$s .= '<tr><td width=18>' . $addIcon . '</td><td>' . self::dumpToHtml($this->sl->getService($id)) . '</th></tr>';
+
+				} catch (\Exception $e) {
+					$s .= "<tr><td colspan=2>Service $id cannot be loaded because of exception<br><br>\n" . (string) $e . '</td></th>';
+				}
 			}
 		}
 
