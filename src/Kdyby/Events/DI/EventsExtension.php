@@ -295,8 +295,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 
 		$builder->getDefinition($this->prefix('manager'))
-			->setClass('Kdyby\Events\LazyEventManager')
-			->setArguments(array($listeners))
+			->setClass('Kdyby\Events\LazyEventManager', array($listeners))
 			->setup = $this->allowedManagerSetup;
 	}
 
