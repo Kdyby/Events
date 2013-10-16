@@ -130,7 +130,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param callable $listener
 	 * @return Event
 	 */
-	public function add($listener)
+	public function append($listener)
 	{
 		$this->listeners[] = callback($listener);
 		return $this;
@@ -142,7 +142,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param callable $listener
 	 * @return Event
 	 */
-	public function unshift($listener)
+	public function prepend($listener)
 	{
 		array_unshift($this->listeners, callback($listener));
 		return $this;
@@ -211,6 +211,22 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		}
 
 		return array(NULL, $name);
+	}
+
+
+
+	/** @deprecated */
+	public function add($listener)
+	{
+		return $this->append($listener);
+	}
+
+
+
+	/** @deprecated */
+	public function unshift($listener)
+	{
+		return $this->prepend($listener);
 	}
 
 
