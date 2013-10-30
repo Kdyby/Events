@@ -73,6 +73,11 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 	 */
 	private $registeredClasses;
 
+	/**
+	 * @var bool
+	 */
+	public $renderPanel = TRUE;
+
 
 
 	public function __construct(Nette\DI\Container $sl)
@@ -95,6 +100,9 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 	public function setServiceIds(array $listenerIds)
 	{
+		if (!$this->renderPanel) {
+			return;
+		}
 		$this->listenerIds = $listenerIds;
 	}
 
@@ -110,6 +118,9 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 	public function eventDispatch($eventName, EventArgs $args = NULL)
 	{
+		if (!$this->renderPanel) {
+			return;
+		}
 		$this->dispatchLog[$eventName][] = $args;
 
 		// [parent-ref, name, args, children]
@@ -126,6 +137,9 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 	public function eventDispatched($eventName, EventArgs $args = NULL)
 	{
+		if (!$this->renderPanel) {
+			return;
+		}
 		$this->dispatchTreePointer = &$this->dispatchTreePointer[0];
 	}
 
@@ -133,6 +147,9 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 	public function inlineCallbacks($eventName, $inlineCallbacks)
 	{
+		if (!$this->renderPanel) {
+			return;
+		}
 		$this->inlineCallbacks[$eventName] = (array) $inlineCallbacks;
 	}
 
@@ -164,6 +181,10 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 	 */
 	public function getPanel()
 	{
+		if (!$this->renderPanel) {
+			return '';
+		}
+
 		if (empty($this->events)) {
 			return NULL;
 		}
