@@ -69,11 +69,8 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 		$evm = $builder->addDefinition($this->prefix('manager'))
 			->setClass('Kdyby\Events\EventManager')
-			->setInject(FALSE);
-
-		if ($config['debugger']) {
-			$evm->addSetup('Kdyby\Events\Diagnostics\Panel::register', array('@self'));
-		}
+			->setInject(FALSE)
+			->addSetup('Kdyby\Events\Diagnostics\Panel::register(?, ?)->renderPanel = ?', array('@self', '@container', $config['debugger']));
 
 		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
 		foreach ($config['subscribers'] as $subscriber) {
