@@ -16,7 +16,7 @@
 		"issues": "https://github.com/kdyby/events/issues"
 	},
 	"require": {
-		"nette/nette": "~2.0"
+		"nette/nette": "2.0.*"
 	},
 	"require-dev": {
 		"nette/tester": "@dev"
