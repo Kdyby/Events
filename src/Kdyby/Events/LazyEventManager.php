@@ -68,7 +68,7 @@ class LazyEventManager extends EventManager
 		}
 
 		if ($eventName === NULL) {
-			foreach (array_keys($this->listenerIds) as $type) {
+			while (($type = key($this->listenerIds)) !== NULL) {
 				$this->initializeListener($type);
 			}
 		}
@@ -85,7 +85,9 @@ class LazyEventManager extends EventManager
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		foreach ((array) $unsubscribe as $eventName) {
-			$this->initializeListener($eventName);
+			if (array_key_exists($eventName, $this->listenerIds)) {
+				$this->initializeListener($eventName);
+			}
 		}
 
 		parent::removeEventListener($unsubscribe, $subscriber);
