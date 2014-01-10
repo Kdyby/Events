@@ -339,22 +339,19 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			foreach ($eventNames as $eventName) {
 				list($namespace, $event) = Kdyby\Events\Event::parseName($eventName);
 				$listeners[$eventName][] = $serviceName;
-				if ($namespace !== NULL) {
-					$listeners[$event][] = $serviceName;
 
-					if (!class_exists($namespace)) {
-						continue; // it might not even be a "classname" event namespace
+				if (!$namespace || !class_exists($namespace)) {
+					continue; // it might not even be a "classname" event namespace
+				}
+
+				// find all subclasses and register the listener to all the classes dispatching them
+				foreach ($builder->getDefinitions() as $def) {
+					if (!$class = $def->getClass()) {
+						continue; // ignore unresolved classes
 					}
 
-					// find all subclasses and register the listener to all the classes dispatching them
-					foreach ($builder->getDefinitions() as $def) {
-						if (!$class = $def->getClass()) {
-							continue; // ignore unresolved classes
-						}
-
-						if (is_subclass_of($class, $namespace)) {
-							$listeners["$class::$event"][] = $serviceName;
-						}
+					if (is_subclass_of($class, $namespace)) {
+						$listeners["$class::$event"][] = $serviceName;
 					}
 				}
 			}
