@@ -143,21 +143,18 @@ class EventManager extends Doctrine\Common\EventManager
 				$this->sortListeners($eventName);
 			}
 
-			if (count($this->sorted[$eventName]) === 0) {
-				unset($this->sorted[$eventName]);
-				return array();
-			}
-
 			return $asCallbacks ? $this->sorted[$eventName] : self::uniqueSubscribers($this->sorted[$eventName]);
 		}
 
-		foreach (array_keys($this->listeners) as $eventName) { // iterate without namespace
-			if (!isset($this->sorted[$eventName])) {
-				$this->sortListeners($eventName);
+		foreach ($this->listeners as $event => $namespaced) {
+			foreach ($namespaced as $namespace => $prioritized) {
+				if (!isset($this->sorted[$eventName = ($namespace ? $namespace . '::' : '') . $event])) {
+					$this->sortListeners($eventName);
+				}
 			}
 		}
 
-		return $asCallbacks ? $this->sorted : self::uniqueSubscribers($this->sorted);
+		return array_filter($asCallbacks ? $this->sorted : self::uniqueSubscribers($this->sorted));
 	}
 
 
@@ -230,25 +227,41 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {
-			list($namespace, $event) = Event::parseName($eventName);
-			$listener = $subscriber;
+			list($ns, $event) = Event::parseName($eventName);
 
-			foreach ($this->listeners[$event] as $namespaces => $priorities) {
+			foreach ($this->listeners[$event] as $namespace => $priorities) {
 				foreach ($priorities as $priority => $listeners) {
-					if (($key = array_search($listener, $listeners, TRUE)) !== FALSE) {
-						unset($this->listeners[$event][$namespaces][$priority][$key], $this->sorted[$eventName]);
-						if (count($this->listeners[$event][$namespaces][$priority]) === 0) {
-							unset($this->listeners[$event][$namespaces][$priority]);
-						}
-						if (count($this->listeners[$event][$namespaces]) === 0) {
-							unset($this->listeners[$event][$namespaces]);
-						}
-						if (count($this->listeners[$event]) === 0) {
-							unset($this->listeners[$event]);
-						}
+					if (($key = array_search($subscriber, $listeners, TRUE)) === FALSE) {
+						continue;
 					}
+
+					unset($this->listeners[$event][$namespace][$priority][$key]);
+					$this->cleanupListeners($event, $namespace, $priority);
+
+					if ($namespace == '') {
+						unset($this->listeners[$event][NULL][$priority][$key]);
+						$this->cleanupListeners($event, NULL, $priority);
+					}
+
+					// there are no listeners for this specific event, so no reason to call sort on next dispatch
+					$this->sorted[$eventName] = array();
 				}
 			}
+		}
+	}
+
+
+
+	private function cleanupListeners($event, $namespaces, $priority)
+	{
+		if (empty($this->listeners[$event][$namespaces][$priority])) {
+			unset($this->listeners[$event][$namespaces][$priority]);
+		}
+		if (empty($this->listeners[$event][$namespaces])) {
+			unset($this->listeners[$event][$namespaces]);
+		}
+		if (empty($this->listeners[$event])) {
+			unset($this->listeners[$event]);
 		}
 	}
 
@@ -319,15 +332,8 @@ class EventManager extends Doctrine\Common\EventManager
 			return;
 		}
 
-		$available = $sorted = array();
-		if ($namespace === NULL) {
-			foreach ($this->listeners[$event] as $namespace => $namespaced) {
-				$this->listenersInNamespace($event, $namespace, $available);
-			}
-
-		} else {
-			$this->listenersInNamespace($event, $namespace, $available);
-		}
+		$available = array();
+		$this->listenersInNamespace($event, $namespace, $available);
 
 		if (empty($available)) {
 			return;
@@ -381,7 +387,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 * @param array $array
 	 * @return array
 	 */
-	private static function uniqueSubscribers(array $array)
+	protected static function uniqueSubscribers(array $array)
 	{
 		array_walk_recursive($array, function (& $a) use (& $res) {
 			if ($a instanceof EventSubscriber) {
