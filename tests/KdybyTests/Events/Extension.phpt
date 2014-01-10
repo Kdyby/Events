@@ -198,8 +198,8 @@ class ExtensionTest extends Tester\TestCase
 		$manager->dispatchEvent('onFoo', $bazArgs = new EventArgsMock());
 		Assert::false($container->isCreated('foo'));
 		Assert::true($container->isCreated('bar'));
-		Assert::true($container->isCreated('baz'));
-		Assert::same(2, count($manager->getListeners('onFoo')));
+		Assert::false($container->isCreated('baz'));
+		Assert::same(1, count($manager->getListeners('onFoo')));
 
 		$manager->dispatchEvent('App::onFoo', $bazArgsSecond = new EventArgsMock());
 		Assert::same(1, count($manager->getListeners('App::onFoo')));
@@ -214,7 +214,6 @@ class ExtensionTest extends Tester\TestCase
 		), $bar->calls);
 
 		Assert::same(array(
-			array('KdybyTests\Events\NamespacedEventListenerMock::onFoo', array($bazArgs)),
 			array('KdybyTests\Events\NamespacedEventListenerMock::onFoo', array($bazArgsSecond)),
 		), $baz->calls);
 	}

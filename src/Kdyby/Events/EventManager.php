@@ -194,10 +194,7 @@ class EventManager extends Doctrine\Common\EventManager
 				throw new InvalidListenerException("Event listener '" . get_class($callback[0]) . "' has no method '" . $callback[1] . "'");
 			}
 
-			$this->listeners[$event][NULL][$priority][] = $subscriber;
-			if ($namespace !== NULL) {
-				$this->listeners[$event][$namespace][$priority][] = $subscriber;
-			}
+			$this->listeners[$event][$namespace][$priority][] = $subscriber;
 
 			unset($this->sorted[$event]);
 			unset($this->sorted[$eventName]);
