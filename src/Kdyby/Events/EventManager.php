@@ -80,10 +80,10 @@ class EventManager extends Doctrine\Common\EventManager
 		foreach ($this->getListeners($eventName, TRUE) as $listener) {
 			if ($eventArgs instanceof EventArgsList) {
 				/** @var EventArgsList $eventArgs */
-				$listener->invokeArgs($eventArgs->getArgs());
+				call_user_func_array($listener, $eventArgs->getArgs());
 
 			} else {
-				$listener->invoke($eventArgs);
+				call_user_func($listener, $eventArgs);
 			}
 		}
 
@@ -99,7 +99,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 *
 	 * @param string $eventName
 	 * @param bool $asCallbacks
-	 * @return Doctrine\Common\EventSubscriber[]|Nette\Callback[]
+	 * @return Doctrine\Common\EventSubscriber[]|callable[]
 	 */
 	public function getListeners($eventName = NULL, $asCallbacks = FALSE)
 	{
@@ -297,7 +297,13 @@ class EventManager extends Doctrine\Common\EventManager
 
 		krsort($available); // [priority => [[listener, method], ...], ...]
 		$sorted = call_user_func_array('array_merge', $available); // [[listener, method], ...]
-		$this->sorted[$eventName] = array_map('callback', $sorted); // [callback, ...]
+
+		if (class_exists('Nette\Utils\Callback') && method_exists('Nette\Utils\Callback', 'closure')) {
+			$this->sorted[$eventName] = array_map('Nette\Utils\Callback::closure', $sorted); // [callback, ...]
+
+		} else {
+			$this->sorted[$eventName] = array_map('callback', $sorted); // [callback, ...]
+		}
 	}
 
 
@@ -310,13 +316,18 @@ class EventManager extends Doctrine\Common\EventManager
 	{
 		$res = array();
 		array_walk_recursive($array, function ($a) use (& $res) {
-			if (!$a instanceof Nette\Callback) {
-				return;
+			if ($a instanceof \Closure && class_exists('Nette\Utils\Callback')) {
+				$a = Nette\Utils\Callback::unwrap($a);
+				if (isset($a[0]) && !in_array($a = $a[0], $res, TRUE)) {
+					$res[] = $a;
+				}
+
+			} elseif ($a instanceof Nette\Callback) {
+				if (!in_array($a = $a->native[0], $res, TRUE)) {
+					$res[] = $a;
+				}
 			}
 
-			if (!in_array($a = $a->native[0], $res, TRUE)) {
-				$res[] = $a;
-			}
 		});
 
 		return $res;
