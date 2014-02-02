@@ -1,0 +1,5 @@
+events:
+	exceptionHandler: @myHandler
+
+services:
+	myHandler: KdybyTests\Events\SampleExceptionHandler

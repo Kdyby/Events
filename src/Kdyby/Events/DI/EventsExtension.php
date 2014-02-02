@@ -45,6 +45,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		'autowire' => TRUE,
 		'optimize' => TRUE,
 		'debugger' => '%debugMode%',
+		'exceptionHandler' => NULL,
 	);
 
 	/**
@@ -71,6 +72,10 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			->setClass('Kdyby\Events\EventManager')
 			->setInject(FALSE)
 			->addSetup('Kdyby\Events\Diagnostics\Panel::register(?, ?)->renderPanel = ?', array('@self', '@container', $config['debugger']));
+
+		if ($config['exceptionHandler'] !== NULL) {
+			$evm->addSetup('setExceptionHandler', $this->filterArgs($config['exceptionHandler']));
+		}
 
 		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
 		foreach ($config['subscribers'] as $subscriber) {
@@ -294,6 +299,17 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		$builder->getDefinition($this->prefix('manager'))
 			->setClass('Kdyby\Events\LazyEventManager', array($listeners))
 			->setup = $this->allowedManagerSetup;
+	}
+
+
+
+	/**
+	 * @param string|\stdClass $statement
+	 * @return Nette\DI\Statement[]
+	 */
+	private function filterArgs($statement)
+	{
+		return Nette\DI\Compiler::filterArguments(array(is_string($statement) ? new Nette\DI\Statement($statement) : $statement));
 	}
 
 

@@ -202,6 +202,21 @@ class ExtensionTest extends Tester\TestCase
 		), $baz->calls);
 	}
 
+
+
+	public function testExceptionHandler()
+	{
+		$container = $this->createContainer('exceptionHandler');
+		$manager = $container->getService('events.manager');
+
+		// getter not needed, so hack it via reflection
+		$rp = new \ReflectionProperty('Kdyby\Events\EventManager', 'exceptionHandler');
+		$rp->setAccessible(TRUE);
+		$handler = $rp->getValue($manager);
+
+		Assert::true($handler instanceof Kdyby\Events\IExceptionHandler);
+	}
+
 }
 
 \run(new ExtensionTest());
