@@ -52,6 +52,11 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	private $panel;
 
+	/**
+	 * @var IExceptionHandler
+	 */
+	private $exceptionHandler;
+
 
 
 	/**
@@ -61,6 +66,16 @@ class EventManager extends Doctrine\Common\EventManager
 	public function setPanel(Diagnostics\Panel $panel)
 	{
 		$this->panel = $panel;
+	}
+
+
+
+	/**
+	 * @param IExceptionHandler $exceptionHandler
+	 */
+	public function setExceptionHandler(IExceptionHandler $exceptionHandler)
+	{
+		$this->exceptionHandler = $exceptionHandler;
 	}
 
 
@@ -78,12 +93,21 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 
 		foreach ($this->getListeners($eventName, TRUE) as $listener) {
-			if ($eventArgs instanceof EventArgsList) {
-				/** @var EventArgsList $eventArgs */
-				call_user_func_array($listener, $eventArgs->getArgs());
+			try {
+				if ($eventArgs instanceof EventArgsList) {
+					/** @var EventArgsList $eventArgs */
+					call_user_func_array($listener, $eventArgs->getArgs());
 
-			} else {
-				call_user_func($listener, $eventArgs);
+				} else {
+					call_user_func($listener, $eventArgs);
+				}
+
+			} catch (\Exception $e) {
+				if ($this->exceptionHandler) {
+					$this->exceptionHandler->handleException($e);
+				} else {
+					throw $e;
+				}
 			}
 		}
 

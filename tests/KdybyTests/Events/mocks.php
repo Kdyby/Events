@@ -429,3 +429,15 @@ class SampleRouter extends Nette\Application\Routers\Route
 	public $onConstruct = array();
 
 }
+
+class SampleExceptionHandler implements Kdyby\Events\IExceptionHandler
+{
+	public $exceptions = array();
+
+
+	public function handleException(\Exception $exception)
+	{
+		$this->exceptions[] = $exception;
+	}
+
+}
