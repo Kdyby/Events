@@ -35,6 +35,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 {
 	const EVENT_TAG = 'kdyby.event';
 	const SUBSCRIBER_TAG = 'kdyby.subscriber';
+	const PANEL_COUNT_MODE = 'count';
 
 	/**
 	 * @var array
@@ -68,10 +69,17 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		$builder = $this->getContainerBuilder();
 		$config = $this->getConfig($this->defaults);
 
+		$userConfig = $this->getConfig();
+		if (!isset($userConfig['debugger']) && !$config['debugger']) {
+			$config['debugger'] = self::PANEL_COUNT_MODE;
+		}
+
 		$evm = $builder->addDefinition($this->prefix('manager'))
 			->setClass('Kdyby\Events\EventManager')
-			->setInject(FALSE)
-			->addSetup('Kdyby\Events\Diagnostics\Panel::register(?, ?)->renderPanel = ?', array('@self', '@container', $config['debugger']));
+			->setInject(FALSE);
+		if ($config['debugger']) {
+			$evm->addSetup('Kdyby\Events\Diagnostics\Panel::register(?, ?)->renderPanel = ?', array('@self', '@container', $config['debugger'] !== self::PANEL_COUNT_MODE));
+		}
 
 		if ($config['exceptionHandler'] !== NULL) {
 			$evm->addSetup('setExceptionHandler', $this->filterArgs($config['exceptionHandler']));
