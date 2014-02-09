@@ -27,4 +27,10 @@ use Nette;
 interface Subscriber extends Doctrine\Common\EventSubscriber
 {
 
+	/**
+	 * Returns an array of events this subscriber wants to listen to.
+	 * @return array
+	 */
+	function getSubscribedEvents();
+
 }

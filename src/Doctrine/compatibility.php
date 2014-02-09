@@ -18,7 +18,7 @@ namespace Doctrine\Common {
 		abstract public function addEventListener(\$events, \$listener);
 		abstract public function removeEventListener(\$events, \$listener = NULL);
 	}
-	interface EventSubscriber { }
+	interface EventSubscriber { function getSubscribedEvents(); }
 }
 GEN;
 	eval($aliases);
