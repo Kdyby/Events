@@ -43,7 +43,7 @@ class EventManagerTest extends Tester\TestCase
 		$listener = new EventListenerMock();
 		$this->manager->addEventListener('onFoo', $listener);
 		Assert::true($this->manager->hasListeners('onFoo'));
-		Assert::same(array($listener), $this->manager->getListeners());
+		Assert::same(array('onFoo' => array($listener)), $this->manager->getListeners());
 	}
 
 
