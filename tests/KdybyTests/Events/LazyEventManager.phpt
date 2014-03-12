@@ -82,8 +82,13 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::true($sl->isCreated('second'));
 
 		Assert::same(array(
-			$sl->getService('first'),
-			$sl->getService('second'),
+			'onFoo' => array(
+				$sl->getService('first'),
+				$sl->getService('second'),
+			),
+			'onBar' => array(
+				$sl->getService('second'),
+			),
 		), $all);
 	}
 
