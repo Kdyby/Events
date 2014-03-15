@@ -17,7 +17,7 @@ use Kdyby\Events\EventManager;
 use Nette;
 use Nette\Diagnostics\Bar;
 use Nette\Diagnostics\Debugger;
-use Nette\Iterators\CachingIterator;
+use Nette\Latte\Runtime\CachingIterator;
 use Nette\Utils\Arrays;
 
 
