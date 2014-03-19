@@ -92,21 +92,28 @@ class EventManager extends Doctrine\Common\EventManager
 			$this->panel->eventDispatch($eventName, $eventArgs);
 		}
 
-		foreach ($this->getListeners($eventName, TRUE) as $listener) {
-			try {
-				if ($eventArgs instanceof EventArgsList) {
-					/** @var EventArgsList $eventArgs */
-					call_user_func_array($listener, $eventArgs->getArgs());
+		foreach ($this->getListeners($eventName, TRUE) as $listeners) {
+			$listeners = is_array($listeners) ? $listeners : array($listeners);
+			foreach ($listeners as $listener) {
+				try {
+					if ($listener instanceof EventSubscriber) {
+						list($namespace, $event) = Event::parseName($eventName);
+						$listener = array($listener, $event);
+					}
+					if ($eventArgs instanceof EventArgsList) {
+						/** @var EventArgsList $eventArgs */
+						call_user_func_array($listener, $eventArgs->getArgs());
 
-				} else {
-					call_user_func($listener, $eventArgs);
-				}
+					} else {
+						call_user_func($listener, $eventArgs);
+					}
 
-			} catch (\Exception $e) {
-				if ($this->exceptionHandler) {
-					$this->exceptionHandler->handleException($e);
-				} else {
-					throw $e;
+				} catch (\Exception $e) {
+					if ($this->exceptionHandler) {
+						$this->exceptionHandler->handleException($e);
+					} else {
+						throw $e;
+					}
 				}
 			}
 		}
@@ -132,6 +139,11 @@ class EventManager extends Doctrine\Common\EventManager
 				$this->sortListeners($eventName);
 			}
 
+			if (count($this->sorted[$eventName]) === 0) {
+				unset($this->sorted[$eventName]);
+				return array();
+			}
+
 			return $asCallbacks ? $this->sorted[$eventName] : self::uniqueSubscribers($this->sorted[$eventName]);
 		}
 
@@ -141,7 +153,7 @@ class EventManager extends Doctrine\Common\EventManager
 			}
 		}
 
-		return $asCallbacks ? Arrays::flatten($this->sorted) : self::uniqueSubscribers($this->sorted);
+		return $asCallbacks ? $this->sorted : self::uniqueSubscribers($this->sorted);
 	}
 
 
@@ -172,10 +184,11 @@ class EventManager extends Doctrine\Common\EventManager
 	{
 		foreach ((array) $events as $eventName) {
 			list($namespace, $event) = Event::parseName($eventName);
-			$listener = !is_array($subscriber) ? array($subscriber, $event) : $subscriber;
+			$listener = $subscriber;
+			$callback = !is_array($subscriber) ? array($subscriber, $event) : $subscriber;
 
-			if (!method_exists($listener[0], $listener[1])) {
-				throw new InvalidListenerException("Event listener '" . get_class($listener[0]) . "' has no method '" . $listener[1] . "'");
+			if (!method_exists($callback[0], $callback[1])) {
+				throw new InvalidListenerException("Event listener '" . get_class($callback[0]) . "' has no method '" . $callback[1] . "'");
 			}
 
 			$this->listeners[$event][NULL][$priority][] = $listener;
@@ -199,18 +212,40 @@ class EventManager extends Doctrine\Common\EventManager
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
-			$this->removeEventSubscriber($unsubscribe);
-			return;
+			$subscriber = $unsubscribe;
+			$unsubscribe = array();
+
+			foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
+				if ((is_array($params) && is_array($params[0])) || !is_numeric($eventName)) {
+					// [EventName => [[method, priority], ...], ...]
+					// [EventName => [method, priority], ...] && [EventName => method, .
+					$unsubscribe[] = $eventName;
+
+				} else { // [EventName, ...]
+					$unsubscribe[] = $params;
+				}
+			}
+
+			unset($this->subscribers[spl_object_hash($subscriber)]);
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {
 			list($namespace, $event) = Event::parseName($eventName);
-			$listener = !is_array($subscriber) ? array($subscriber, $event) : $subscriber;
+			$listener = $subscriber;
 
 			foreach ($this->listeners[$event] as $namespaces => $priorities) {
 				foreach ($priorities as $priority => $listeners) {
 					if (($key = array_search($listener, $listeners, TRUE)) !== FALSE) {
 						unset($this->listeners[$event][$namespaces][$priority][$key], $this->sorted[$eventName]);
+						if (count($this->listeners[$event][$namespaces][$priority]) === 0) {
+							unset($this->listeners[$event][$namespaces][$priority]);
+						}
+						if (count($this->listeners[$event][$namespaces]) === 0) {
+							unset($this->listeners[$event][$namespaces]);
+						}
+						if (count($this->listeners[$event]) === 0) {
+							unset($this->listeners[$event]);
+						}
 					}
 				}
 			}
@@ -250,21 +285,7 @@ class EventManager extends Doctrine\Common\EventManager
 
 	public function removeEventSubscriber(EventSubscriber $subscriber)
 	{
-		foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
-			if (is_array($params) && is_array($params[0])) { // [EventName => [[method, priority], ...], ...]
-				foreach ($params as $listener) {
-					$this->removeEventListener($eventName, array($subscriber, $listener[0]));
-				}
-
-			} elseif (!is_numeric($eventName)) { // [EventName => [method, priority], ...] && [EventName => method, ...]
-				$this->removeEventListener($eventName, array($subscriber, is_string($params) ? $params : $params[0]));
-
-			} else { // [EventName, ...]
-				$this->removeEventListener($params, array($subscriber, $params));
-			}
-		}
-
-		unset($this->subscribers[spl_object_hash($subscriber)]);
+		$this->removeEventListener($subscriber);
 	}
 
 
@@ -322,11 +343,19 @@ class EventManager extends Doctrine\Common\EventManager
 		krsort($available); // [priority => [[listener, method], ...], ...]
 		$sorted = call_user_func_array('array_merge', $available); // [[listener, method], ...]
 
-		if (class_exists('Nette\Utils\Callback') && method_exists('Nette\Utils\Callback', 'closure')) {
-			$this->sorted[$eventName] = array_map('Nette\Utils\Callback::closure', $sorted); // [callback, ...]
+		$this->sorted[$eventName] = array_map(array($this, 'closure'), $sorted); // [callback, ...]
+	}
 
+
+
+	public function closure($callable, $m = NULL)
+	{
+		if ($callable instanceof EventSubscriber) {
+			return $callable;
+		} elseif (class_exists('Nette\Utils\Callback') && method_exists('Nette\Utils\Callback', 'closure')) {
+			return Nette\Utils\Callback::closure($callable, $m);
 		} else {
-			$this->sorted[$eventName] = array_map('callback', $sorted); // [callback, ...]
+			return callback($callable, $m);
 		}
 	}
 
@@ -338,23 +367,21 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	private static function uniqueSubscribers(array $array)
 	{
-		$res = array();
-		array_walk_recursive($array, function ($a) use (& $res) {
-			if ($a instanceof \Closure && class_exists('Nette\Utils\Callback')) {
+		array_walk_recursive($array, function (& $a) use (& $res) {
+			if ($a instanceof EventSubscriber) {
+				//
+			} elseif ($a instanceof \Closure && class_exists('Nette\Utils\Callback')) {
 				$a = Nette\Utils\Callback::unwrap($a);
-				if (isset($a[0]) && !in_array($a = $a[0], $res, TRUE)) {
-					$res[] = $a;
-				}
 
 			} elseif ($a instanceof Nette\Callback) {
-				if (!in_array($a = $a->native[0], $res, TRUE)) {
-					$res[] = $a;
+				if (!in_array($a->native[0], $res, TRUE)) {
+					$a = $a->native[0];
 				}
 			}
 
 		});
 
-		return $res;
+		return $array;
 	}
 
 
