@@ -34,6 +34,8 @@ class LazyEventManager extends EventManager
 	 */
 	private $container;
 
+    private $initializing = array();
+
 
 
 	/**
@@ -101,7 +103,11 @@ class LazyEventManager extends EventManager
 	private function initializeListener($eventName)
 	{
 		foreach ($this->listenerIds[$eventName] as $serviceName) {
+            if(isset($this->initializing[$serviceName])) {
+                continue;
+            }
 			$subscriber = $this->container->getService($serviceName);
+            unset($this->initializing[$serviceName]);
 			/** @var Doctrine\Common\EventSubscriber $subscriber */
 
 			$this->addEventSubscriber($subscriber);
