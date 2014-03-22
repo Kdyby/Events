@@ -20,7 +20,8 @@
 		"nette/nette": "~2.1@dev"
 	},
 	"require-dev": {
-		"nette/tester": "@dev"
+		"nette/tester": "@dev",
+		"symfony/event-dispatcher": "~2.4"
 	},
 	"autoload": {
 		"psr-0": {

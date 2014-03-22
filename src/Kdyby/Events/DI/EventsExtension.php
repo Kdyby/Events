@@ -100,6 +100,12 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			$def->setAutowired(FALSE);
 			$def->addTag(self::SUBSCRIBER_TAG);
 		}
+
+		if (class_exists('Symfony\Component\EventDispatcher\Event')) {
+			$builder->addDefinition($this->prefix('symfonyProxy'))
+				->setClass('Symfony\Component\EventDispatcher\EventDispatcherInterface')
+				->setFactory('Kdyby\Events\SymfonyDispatcher');
+		}
 	}
 
 

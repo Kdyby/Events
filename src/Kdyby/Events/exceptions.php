@@ -61,3 +61,12 @@ class MemberAccessException extends \LogicException implements Exception
 {
 
 }
+
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
+class NotSupportedException extends \LogicException implements Exception
+{
+
+}
