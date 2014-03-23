@@ -68,13 +68,13 @@ When invoked by calling the property, as if it were a method `->onSuccess($this,
 
 It is massively used in forms as for example success callbacks.
 
-There is a section about them, in [Nette Framework documentation](http://doc.nette.org/en/php-language-enhancements#toc-events).
+There is a section about them in [Nette Framework documentation](http://doc.nette.org/en/php-language-enhancements#toc-events).
 
 
 Doctrine Events
 ---------------
 
-Doctrine has it's own event system. You basically have to create a class, that implements interface `Kdyby\Events\Subscriber`.
+Doctrine has its own event system. You basically have to create a class, that implements interface `Kdyby\Events\Subscriber`.
 This interface requires you to implement method `getSubscribedEvents`, which should return array.
 The array should contain list of events, that when invoked, the EventManager would call this listener.
 
