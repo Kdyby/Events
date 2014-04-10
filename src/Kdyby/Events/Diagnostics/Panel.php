@@ -17,14 +17,9 @@ use Kdyby\Events\EventManager;
 use Nette;
 use Nette\Diagnostics\Bar;
 use Nette\Diagnostics\Debugger;
-use Nette\Latte\Runtime\CachingIterator;
 use Nette\Utils\Arrays;
 
 
-
-if (!class_exists('Nette\Latte\Runtime\CachingIterator')) {
-	class_alias('Nette\Iterators\CachingIterator', 'Nette\Latte\Runtime\CachingIterator');
-}
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
@@ -104,7 +99,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 	public function setServiceIds(array $listenerIds)
 	{
-		if (!$this->renderPanel) {
+		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['listeners'])) {
 			return;
 		}
 		$this->listenerIds = $listenerIds;
@@ -125,23 +120,28 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		if (!$this->renderPanel) {
 			return;
 		}
-		$this->dispatchLog[$eventName][] = $args;
 
-		// [parent-ref, name, args, children]
-		$meta = array(&$this->dispatchTreePointer, $eventName, $args, array());
-		if ($this->dispatchTreePointer === NULL) {
-			$this->dispatchTree[] = &$meta;
-		} else {
-			$this->dispatchTreePointer[3][] = &$meta;
+		if (!is_array($this->renderPanel) || $this->renderPanel['dispatchLog']) {
+			$this->dispatchLog[$eventName][] = $args;
 		}
-		$this->dispatchTreePointer = &$meta;
+
+		if (!is_array($this->renderPanel) || $this->renderPanel['dispatchTree']) {
+			// [parent-ref, name, args, children]
+			$meta = array(&$this->dispatchTreePointer, $eventName, $args, array());
+			if ($this->dispatchTreePointer === NULL) {
+				$this->dispatchTree[] = & $meta;
+			} else {
+				$this->dispatchTreePointer[3][] = & $meta;
+			}
+			$this->dispatchTreePointer = & $meta;
+		}
 	}
 
 
 
 	public function eventDispatched($eventName, EventArgs $args = NULL)
 	{
-		if (!$this->renderPanel) {
+		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['dispatchTree'])) {
 			return;
 		}
 		$this->dispatchTreePointer = &$this->dispatchTreePointer[0];
@@ -196,12 +196,38 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		$visited = array();
 
 		$h = 'htmlspecialchars';
+
+		$s = '';
+		$s .= $this->renderPanelDispatchLog($visited);
+		$s .= $this->renderPanelEvents($visited);
+		$s .= $this->renderPanelListeners($visited);
+
+		if ($s) {
+			$s .= '<tr class="blank"><td colspan=2>&nbsp;</td></tr>';
+		}
+
+		$s .= $this->renderPanelDispatchTree();
+
+		$totalEvents = count($this->listenerIds);
+		$totalListeners = count(array_unique(Arrays::flatten($this->listenerIds)));
+
+		return '<style>' . $this->renderStyles() . '</style>'.
+			'<h1>' . $h($totalEvents) . ' registered events, ' . $h($totalListeners) . ' registered listeners</h1>' .
+			'<div class="nette-inner tracy-inner nette-KdybyEventsPanel"><table>' . $s . '</table></div>';
+	}
+
+
+
+	private function renderPanelDispatchLog(&$visited)
+	{
+		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['dispatchLog'])) {
+			return '';
+		}
+
+		$h = 'htmlspecialchars';
 		$s = '';
 
-		foreach ($it = new CachingIterator($this->dispatchLog) as $eventName => $calls) {
-			if (!$it->isFirst()) {
-				$s .= '<tr class="blank"><td colspan=2>&nbsp;</td></tr>';
-			}
+		foreach ($this->dispatchLog as $eventName => $calls) {
 			$s .= '<tr><th colspan=2 id="' . $this->formatEventId($eventName) . '">' . count($calls) . 'x ' . $h($eventName) . '</th></tr>';
 			$visited[] = $eventName;
 
@@ -217,7 +243,20 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			$s .= $this->renderCalls($calls);
 		}
 
-		foreach ($it = new CachingIterator($this->events) as $event) {
+		return $s;
+	}
+
+
+
+	private function renderPanelEvents(&$visited)
+	{
+		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['events'])) {
+			return '';
+		}
+
+		$h = 'htmlspecialchars';
+		$s = '';
+		foreach ($this->events as $event) {
 			/** @var Event $event */
 			if (in_array($event->getName(), $visited, TRUE)) {
 				continue;
@@ -240,7 +279,20 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			$s .= $this->renderCalls($calls);
 		}
 
-		foreach ($it = new CachingIterator($this->listenerIds) as $eventName => $ids) {
+		return $s;
+	}
+
+
+
+	private function renderPanelListeners(&$visited)
+	{
+		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['listeners'])) {
+			return '';
+		}
+
+		$h = 'htmlspecialchars';
+		$s = '';
+		foreach ($this->listenerIds as $eventName => $ids) {
 			if (in_array($eventName, $visited, TRUE)) {
 				continue;
 			}
@@ -261,21 +313,27 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 			$s .= $this->renderCalls($calls);
 		}
 
-		$s .= '<tr class="blank"><td colspan=2>&nbsp;</td></tr>';
-		$s .= '<tr><th colspan=2>Summary event call graph</th></tr>';
+		return $s;
+	}
+
+
+
+	private function renderPanelDispatchTree()
+	{
+		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['dispatchTree'])) {
+			return '';
+		}
+
+		$s = '<tr><th colspan=2>Summary event call graph</th></tr>';
 		foreach ($this->dispatchTree as $item) {
 			$s .= '<tr><td colspan=2>';
 			$s .= $this->renderTreeItem($item);
 			$s .= '</td></tr>';
 		}
 
-		$totalEvents = count($this->listenerIds);
-		$totalListeners = count(array_unique(Arrays::flatten($this->listenerIds)));
-
-		return '<style>' . $this->renderStyles() . '</style>'.
-			'<h1>' . $h($totalEvents) . ' registered events, ' . $h($totalListeners) . ' registered listeners</h1>' .
-			'<div class="nette-inner nette-KdybyEventsPanel"><table>' . $s . '</table></div>';
+		return $s;
 	}
+
 
 	/**
 	 * Renders an item in call graph.
@@ -443,12 +501,18 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 	protected function renderStyles()
 	{
 		return <<<CSS
-			#nette-debug .nette-panel .nette-KdybyEventsPanel { width: 670px !important; }
-			#nette-debug .nette-panel .nette-KdybyEventsPanel table { width: 655px !important; }
-			#nette-debug .nette-panel .nette-KdybyEventsPanel table th { font-size: 16px; }
-			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td:first-child { padding-bottom: 0; }
-			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr.blank td { background: white; height:25px; border-left:0; border-right:0; }
-			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td ul { background: url(data:image/gif;base64,R0lGODlhCQAJAIABAIODg////yH5BAEAAAEALAAAAAAJAAkAAAIPjI8GebDsHopSOVgb26EAADs=) 0 5px no-repeat; padding-left: 12px; list-style-type: none; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel,
+			#tracy-debug .tracy-panel .nette-KdybyEventsPanel { width: 670px !important;  }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table,
+			#tracy-debug .tracy-panel .nette-KdybyEventsPanel table { width: 655px !important; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table th,
+			#tracy-debug .tracy-panel .nette-KdybyEventsPanel table th { font-size: 16px; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td:first-child,
+			#tracy-debug .tracy-panel .nette-KdybyEventsPanel table tr td:first-child { padding-bottom: 0; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr.blank td,
+			#tracy-debug .tracy-panel .nette-KdybyEventsPanel table tr.blank td { background: white; height:25px; border-left:0; border-right:0; }
+			#nette-debug .nette-panel .nette-KdybyEventsPanel table tr td ul,
+			#tracy-debug .tracy-panel .nette-KdybyEventsPanel table tr td ul { background: url(data:image/gif;base64,R0lGODlhCQAJAIABAIODg////yH5BAEAAAEALAAAAAAJAAkAAAIPjI8GebDsHopSOVgb26EAADs=) 0 5px no-repeat; padding-left: 12px; list-style-type: none; }
 CSS;
 	}
 

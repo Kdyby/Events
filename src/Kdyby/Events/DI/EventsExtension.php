@@ -33,8 +33,14 @@ if (isset(Nette\Loaders\NetteLoader::getInstance()->renamed['Nette\Configurator'
  */
 class EventsExtension extends Nette\DI\CompilerExtension
 {
-	const EVENT_TAG = 'kdyby.event';
-	const SUBSCRIBER_TAG = 'kdyby.subscriber';
+	/** @deprecated */
+	const EVENT_TAG = self::TAG_EVENT;
+	/** @deprecated */
+	const SUBSCRIBER_TAG = self::TAG_SUBSCRIBER;
+
+	const TAG_EVENT = 'kdyby.event';
+	const TAG_SUBSCRIBER = 'kdyby.subscriber';
+
 	const PANEL_COUNT_MODE = 'count';
 
 	/**
@@ -78,7 +84,14 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			->setClass('Kdyby\Events\EventManager')
 			->setInject(FALSE);
 		if ($config['debugger']) {
-			$evm->addSetup('Kdyby\Events\Diagnostics\Panel::register(?, ?)->renderPanel = ?', array('@self', '@container', $config['debugger'] !== self::PANEL_COUNT_MODE));
+			$defaults = array('dispatchTree' => FALSE, 'dispatchLog' => TRUE, 'events' => TRUE, 'listeners' => FALSE);
+			if (is_array($config['debugger'])) {
+				$config['debugger'] = Nette\DI\Config\Helpers::merge($config['debugger'], $defaults);
+			} else {
+				$config['debugger'] = $config['debugger'] !== self::PANEL_COUNT_MODE;
+			}
+
+			$evm->addSetup('Kdyby\Events\Diagnostics\Panel::register(?, ?)->renderPanel = ?', array('@self', '@container', $config['debugger']));
 		}
 
 		if ($config['exceptionHandler'] !== NULL) {
