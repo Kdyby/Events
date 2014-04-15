@@ -343,20 +343,23 @@ class EventManager extends Doctrine\Common\EventManager
 		krsort($available); // [priority => [[listener, method], ...], ...]
 		$sorted = call_user_func_array('array_merge', $available); // [[listener, method], ...]
 
-		$this->sorted[$eventName] = array_map(array($this, 'closure'), $sorted); // [callback, ...]
-	}
+		$this->sorted[$eventName] = array_map(function ($callable) use ($event) {
+			if ($callable instanceof EventSubscriber) {
+				return $callable;
+			}
 
+			if (is_object($callable) && method_exists($callable, $event)) {
+				$callable = array($callable, $event);
+			}
 
+			if (class_exists('Nette\Utils\Callback') && method_exists('Nette\Utils\Callback', 'closure')) {
+				return Nette\Utils\Callback::closure($callable);
 
-	public function closure($callable, $m = NULL)
-	{
-		if ($callable instanceof EventSubscriber) {
-			return $callable;
-		} elseif (class_exists('Nette\Utils\Callback') && method_exists('Nette\Utils\Callback', 'closure')) {
-			return Nette\Utils\Callback::closure($callable, $m);
-		} else {
-			return callback($callable, $m);
-		}
+			} else {
+				return callback($callable);
+			}
+
+		}, $sorted); // [callback, ...]
 	}
 
 

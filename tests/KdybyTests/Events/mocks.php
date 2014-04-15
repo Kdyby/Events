@@ -408,6 +408,19 @@ class SecondInvalidListenerMock extends Nette\Object implements Kdyby\Events\Sub
 }
 
 
+class ListenerWithoutInterface extends Nette\Object
+{
+
+	public $calls = array();
+
+	public function onClear()
+	{
+		$this->calls[] = array(__METHOD__, func_get_args());
+	}
+
+}
+
+
 class RouterFactory extends Nette\Object
 {
 

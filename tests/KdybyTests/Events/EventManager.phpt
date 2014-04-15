@@ -92,6 +92,23 @@ class EventManagerTest extends Tester\TestCase
 
 
 
+	public function testListenerWithoutInterface()
+	{
+		Assert::false($this->manager->hasListeners('onClear'));
+		$this->manager->addEventListener(array('onClear'), $listener = new ListenerWithoutInterface());
+		Assert::true($this->manager->hasListeners('onClear'));
+
+		Assert::same(array(
+			array($listener, 'onClear'),
+		), $this->manager->getListeners('onClear'));
+
+		Assert::same(array('onClear' => array(
+			array($listener, 'onClear'),
+		)), $this->manager->getListeners());
+	}
+
+
+
 	public function testDispatching()
 	{
 		$listener = new EventListenerMock();
@@ -201,6 +218,19 @@ class EventManagerTest extends Tester\TestCase
 		Assert::same(array(
 			array(__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::firstMethod', array($args)),
 			array(__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::secondMethod', array($args)),
+		), $listener->calls);
+	}
+
+
+
+	public function testEventsDispatching_ListenerWithoutInterface()
+	{
+		$this->manager->addEventListener(array('onClear'), $listener = new ListenerWithoutInterface());
+
+		$this->manager->dispatchEvent('onClear', $args = new EventArgsMock());
+
+		Assert::same(array(
+			array(__NAMESPACE__ . '\\ListenerWithoutInterface::onClear', array($args)),
 		), $listener->calls);
 	}
 
