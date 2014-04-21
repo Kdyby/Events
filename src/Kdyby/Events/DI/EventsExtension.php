@@ -277,6 +277,10 @@ class EventsExtension extends Nette\DI\CompilerExtension
 	{
 		foreach ($builder->getDefinitions() as $def) {
 			/** @var Nette\DI\ServiceDefinition $def */
+			if ($def->factory instanceof Nette\DI\Statement && $def->factory->entity instanceof Nette\DI\ServiceDefinition) {
+				continue; // alias
+			}
+
 			if (!class_exists($class = $builder->expand($def->class))) {
 				if (!$def->factory) {
 					continue;
