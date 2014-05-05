@@ -10,13 +10,22 @@ php:
   - 5.4
   - 5.5
   - 5.6
-#  - hhvm
+  - hhvm
 
-#matrix:
-#  allow_failures:
-#    - env: nette-dev
+matrix:
+  allow_failures:
+    - php: hhvm
+    - php: 5.6
+      env: nette-dev
+    - php: 5.5
+      env: nette-dev
+    - php: 5.6
+      env: nette-dev
+    - php: 5.3.3
+      env: nette-dev
 
 before_script:
+  - "php tests/prepare-composer.php"
   - composer self-update
   - composer install --no-interaction --prefer-source --dev
 
