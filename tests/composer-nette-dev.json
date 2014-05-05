@@ -17,12 +17,33 @@
 		"issues": "https://github.com/kdyby/events/issues"
 	},
 	"require": {
-		"nette/nette": "~2.1@dev"
-	},
-	"require-dev": {
 		"symfony/event-dispatcher": "~2.4",
 
-		"nette/tester": "@dev"
+		"nette/nette": "@dev",
+		"nette/application": "@dev",
+		"nette/bootstrap": "@dev",
+		"nette/caching": "@dev",
+		"nette/component-model": "@dev",
+		"nette/database": "@dev",
+		"nette/di": "@dev",
+		"nette/finder": "@dev",
+		"nette/forms": "@dev",
+		"nette/http": "@dev",
+		"nette/mail": "@dev",
+		"nette/neon": "@dev",
+		"nette/php-generator": "@dev",
+		"nette/reflection": "@dev",
+		"nette/robot-loader": "@dev",
+		"nette/safe-stream": "@dev",
+		"nette/security": "@dev",
+		"nette/tokenizer": "@dev",
+		"nette/utils": "@dev",
+		"latte/latte": "@dev",
+		"tracy/tracy": "@dev"
+	},
+	"require-dev": {
+		"nette/tester": "@dev",
+		"symfony/event-dispatcher": "~2.4"
 	},
 	"autoload": {
 		"psr-0": {
