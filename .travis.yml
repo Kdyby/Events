@@ -1,12 +1,9 @@
 language: php
 
 env:
-  nette-2.1:
-    - "NETTE=default"
-  nette-2.2:
-    - "NETTE=nette-2.2"
-  nette-dev:
-    - "NETTE=nette-dev"
+  - NETTE=default
+  - NETTE=nette-2.2
+  - NETTE=nette-dev
 
 php:
   - 5.3.3
@@ -15,9 +12,9 @@ php:
   - 5.6
 #  - hhvm
 
-matrix:
-  allow_failures:
-    - env: nette-dev
+#matrix:
+#  allow_failures:
+#    - env: nette-dev
 
 before_script:
   - composer self-update
