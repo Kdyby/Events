@@ -10,4 +10,7 @@ if (getenv('NETTE') !== 'default') {
 	copy($composerFile, $rootDir . '/composer.json');
 
 	echo "Using tests/", basename($composerFile);
+
+} else {
+	echo "Using default composer.json";
 }
