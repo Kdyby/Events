@@ -14,9 +14,13 @@ use Doctrine;
 use Doctrine\Common\EventSubscriber;
 use Kdyby;
 use Nette;
-use Nette\Utils\Arrays;
+use Nette\Utils\ObjectMixin;
 
 
+
+if (!class_exists('Nette\Utils\ObjectMixin')) {
+	class_alias('Nette\ObjectMixin', 'Nette\Utils\ObjectMixin');
+}
 
 /**
  * Registry of system-wide listeners that get's invoked, when the event, that they are listening to, is dispatched.
@@ -415,7 +419,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function __call($name, $args)
 	{
-		return Nette\ObjectMixin::call($this, $name, $args);
+		return ObjectMixin::call($this, $name, $args);
 	}
 
 
@@ -431,7 +435,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public static function __callStatic($name, $args)
 	{
-		Nette\ObjectMixin::callStatic(get_called_class(), $name, $args);
+		ObjectMixin::callStatic(get_called_class(), $name, $args);
 	}
 
 
@@ -453,9 +457,9 @@ class EventManager extends Doctrine\Common\EventManager
 			list($class, $name) = explode('::', $name);
 		}
 		if ($callback === NULL) {
-			return Nette\ObjectMixin::getExtensionMethod($class, $name);
+			return ObjectMixin::getExtensionMethod($class, $name);
 		} else {
-			Nette\ObjectMixin::setExtensionMethod($class, $name, $callback);
+			ObjectMixin::setExtensionMethod($class, $name, $callback);
 		}
 	}
 
@@ -471,7 +475,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function &__get($name)
 	{
-		return Nette\ObjectMixin::get($this, $name);
+		return ObjectMixin::get($this, $name);
 	}
 
 
@@ -487,7 +491,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function __set($name, $value)
 	{
-		Nette\ObjectMixin::set($this, $name, $value);
+		ObjectMixin::set($this, $name, $value);
 	}
 
 
@@ -501,7 +505,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function __isset($name)
 	{
-		return Nette\ObjectMixin::has($this, $name);
+		return ObjectMixin::has($this, $name);
 	}
 
 
@@ -516,7 +520,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 */
 	public function __unset($name)
 	{
-		Nette\ObjectMixin::remove($this, $name);
+		ObjectMixin::remove($this, $name);
 	}
 
 }
