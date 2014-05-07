@@ -293,18 +293,25 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				}
 			}
 
-			$properties = Nette\Reflection\ClassType::from($class)->getProperties(Nette\Reflection\Property::IS_PUBLIC);
+			$class = Nette\Reflection\ClassType::from($class);
+			$properties = $class->getProperties(Nette\Reflection\Property::IS_PUBLIC);
 			foreach ($properties as $property) {
 				if (!preg_match('#^on[A-Z]#', $name = $property->getName())) {
 					continue 1;
 				}
 
-				$def->addSetup('$' . $name, array(
-					new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
-						array($property->getDeclaringClass()->getName(), $name),
-						new Code\PhpLiteral('$service->' . $name)
-					))
-				));
+				$currentClass = $class;
+				$declaringClassName = $property->getDeclaringClass()->getName();
+				do {
+					$currentClassName = $currentClass->getName();
+					$def->addSetup('$' . $name, array(
+						new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
+							array($currentClassName, $name),
+							new Code\PhpLiteral('$service->' . $name)
+						))
+					));
+					$currentClass = $currentClass->getParentClass();
+				} while ($declaringClassName != $currentClassName);
 			}
 		}
 	}

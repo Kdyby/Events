@@ -116,6 +116,30 @@ class ExtensionTest extends Tester\TestCase
 
 
 
+	public function testInherited()
+	{
+		$container = $this->createContainer('inherited');
+
+		$leafObject = $container->getService('leaf');
+		/** @var LeafClass $leafObject */
+		Assert::true($leafObject->onCreate instanceof Kdyby\Events\Event);
+		Assert::same('KdybyTests\Events\ParentClass::onCreate', $leafObject->onCreate->getName());
+
+		$subscriber = $container->getService('subscriber');
+		/** @var InheritSubscriber $subscriber */
+		$leafObject->create();
+		Assert::true(isset($subscriber->eventCalls['KdybyTests\Events\ParentClass::onCreate']));
+		Assert::equal(1, $subscriber->eventCalls['KdybyTests\Events\ParentClass::onCreate']);
+
+		Assert::true(isset($subscriber->eventCalls['KdybyTests\Events\LeafClass::onCreate']));
+		Assert::equal(1, $subscriber->eventCalls['KdybyTests\Events\LeafClass::onCreate']);
+
+		// not subscribed for middle class
+		Assert::false(isset($subscriber->eventCalls['KdybyTests\Events\InheritedClass::onCreate']));
+	}
+
+
+
 	public function testOptimize()
 	{
 		$container = $this->createContainer('optimize');
