@@ -293,8 +293,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				}
 			}
 
-			$properties = Nette\Reflection\ClassType::from($class)->getProperties(Nette\Reflection\Property::IS_PUBLIC);
-			foreach ($properties as $property) {
+			foreach ($this->resolveAutowiringProperties($class) as $property) {
 				if (!preg_match('#^on[A-Z]#', $name = $property->getName())) {
 					continue 1;
 				}
@@ -307,6 +306,18 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				));
 			}
 		}
+	}
+
+
+
+	/**
+	 * @param string $class
+	 * @return Nette\Reflection\Property[]
+	 */
+	protected function resolveAutowiringProperties($class)
+	{
+		return Nette\Reflection\ClassType::from($class)
+			->getProperties(Nette\Reflection\Property::IS_PUBLIC);
 	}
 
 
