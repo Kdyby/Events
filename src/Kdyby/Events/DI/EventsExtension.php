@@ -293,31 +293,26 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				}
 			}
 
-			foreach ($this->resolveAutowiringProperties($class) as $property) {
-				if (!preg_match('#^on[A-Z]#', $name = $property->getName())) {
-					continue 1;
-				}
-
-				$def->addSetup('$' . $name, array(
-					new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
-						array($property->getDeclaringClass()->getName(), $name),
-						new Code\PhpLiteral('$service->' . $name)
-					))
-				));
-			}
+			$this->bindEventProperties($def, Nette\Reflection\ClassType::from($class));
 		}
 	}
 
 
 
-	/**
-	 * @param string $class
-	 * @return Nette\Reflection\Property[]
-	 */
-	protected function resolveAutowiringProperties($class)
+	protected function bindEventProperties(Nette\DI\ServiceDefinition $def, Nette\Reflection\ClassType $class)
 	{
-		return Nette\Reflection\ClassType::from($class)
-			->getProperties(Nette\Reflection\Property::IS_PUBLIC);
+		foreach ($class->getProperties(Nette\Reflection\Property::IS_PUBLIC) as $property) {
+			if (!preg_match('#^on[A-Z]#', $name = $property->getName())) {
+				continue 1;
+			}
+
+			$def->addSetup('$' . $name, array(
+				new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
+					array($property->getDeclaringClass()->getName(), $name),
+					new Code\PhpLiteral('$service->' . $name)
+				))
+			));
+		}
 	}
 
 
