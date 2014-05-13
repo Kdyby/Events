@@ -40,8 +40,9 @@
 		"tracy/tracy": "~2.2@rc"
 	},
 	"require-dev": {
+		"symfony/event-dispatcher": "~2.4",
 		"nette/tester": "@dev",
-		"symfony/event-dispatcher": "~2.4"
+		"jakub-onderka/php-parallel-lint": "~0.6"
 	},
 	"autoload": {
 		"psr-0": {
