@@ -184,6 +184,14 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 			$init->addBody($line . ';');
 		}
+
+		if (!$foundNetteInitEnd) {
+			$init->addBody(Code\Helpers::format(
+				'$this->getService(?)->createEvent(?)->dispatch($this);',
+				$this->prefix('manager'),
+				array('Nette\\DI\\Container', 'onInitialize')
+			));
+		}
 	}
 
 
