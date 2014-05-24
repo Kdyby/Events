@@ -17,9 +17,14 @@
 		"issues": "https://github.com/kdyby/events/issues"
 	},
 	"require": {
-		"nette/nette": "~2.1@dev"
+		"nette/di": "~2.2@dev",
+		"nette/utils": "~2.2@dev"
 	},
 	"require-dev": {
+		"nette/nette": "~2.2@dev",
+		"nette/bootstrap": "~2.2@dev",
+		"nette/neon": "~2.2@dev",
+
 		"symfony/event-dispatcher": "~2.4",
 
 		"nette/tester": "@dev",

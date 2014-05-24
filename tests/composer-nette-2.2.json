@@ -17,9 +17,14 @@
 		"issues": "https://github.com/kdyby/events/issues"
 	},
 	"require": {
-		"nette/nette": "2.1.*"
+		"nette/di": "2.2.*",
+		"nette/utils": "2.2.*"
 	},
 	"require-dev": {
+		"nette/nette": "2.2.*",
+		"nette/bootstrap": "2.2.*",
+		"nette/neon": "2.2.*",
+
 		"symfony/event-dispatcher": "~2.4",
 		"nette/tester": "@dev",
 		"jakub-onderka/php-parallel-lint": "~0.6"
