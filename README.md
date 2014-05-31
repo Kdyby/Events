@@ -1,5 +1,9 @@
-Kdyby/Events [![Build Status](https://secure.travis-ci.org/Kdyby/Events.png?branch=master)](http://travis-ci.org/Kdyby/Events)
-===========================
+Kdyby/Events
+======
+
+[![Build Status](https://travis-ci.org/Kdyby/Events.svg?branch=master)](https://travis-ci.org/Kdyby/Events)
+[![Downloads this Month](https://img.shields.io/packagist/dm/Kdyby/Events.svg)](https://packagist.org/packages/Kdyby/Events)
+[![Latest stable](img.shields.io/packagist/v/Kdyby/Events.svg)](https://packagist.org/packages/Kdyby/Events)
 
 
 Requirements
