@@ -2,7 +2,7 @@ Kdyby/Events
 ======
 
 [![Build Status](https://travis-ci.org/Kdyby/Events.svg?branch=master)](https://travis-ci.org/Kdyby/Events)
-[![Downloads this Month](https://img.shields.io/packagist/dm/Kdyby/Events.svg)](https://packagist.org/packages/Kdyby/Events)
+[![Downloads this Month](https://img.shields.io/packagist/dm/kdyby/events.svg)](https://packagist.org/packages/kdyby/events)
 [![Latest stable](https://img.shields.io/packagist/v/kdyby/events.svg)](https://packagist.org/packages/kdyby/events)
 
 
