@@ -417,11 +417,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 	private static function dumpToHtml($structure)
 	{
-		if (class_exists('Tracy\Dumper')) {
-			return Tracy\Dumper::toHtml($structure, array(Tracy\Dumper::COLLAPSE => TRUE));
-		}
-
-		return Tracy\Helpers::clickableDump($structure, TRUE);
+		return Tracy\Dumper::toHtml($structure, array(Tracy\Dumper::COLLAPSE => TRUE));
 	}
 
 
