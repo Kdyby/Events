@@ -30,7 +30,7 @@ $ composer require kdyby/events:~2.1.1
 Documentation
 ------------
 
-Lear more in the [documentation](https://github.com/Kdyby/Events/blob/nette-2.1/docs/en/index.md).
+Learn more in the [documentation](https://github.com/Kdyby/Events/blob/nette-2.1/docs/en/index.md).
 
 
 -----
