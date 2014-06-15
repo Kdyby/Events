@@ -387,9 +387,9 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$h = 'htmlspecialchars';
 		$s = '';
 		foreach ($ids as $id) {
-			if ($id instanceof Nette\Callback) {
+			if (is_callable($id)) {
 				$s .= '<tr><td width=18>' . $addIcon . '</td><td><pre class="nette-dump"><span class="nette-dump-object">' .
-					(string) $id .
+					Nette\Utils\Callback::toString($id) .
 					'</span></span></th></tr>';
 
 				continue;

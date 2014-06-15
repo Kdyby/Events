@@ -13,6 +13,7 @@ namespace Kdyby\Events;
 use Doctrine;
 use Kdyby;
 use Nette;
+use Nette\Utils\Callback;
 
 
 
@@ -23,7 +24,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
 	/**
-	 * @var Nette\Callback[]
+	 * @var callable[]
 	 */
 	private $listeners = array();
 
@@ -118,7 +119,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		}
 
 		foreach ($this->getListeners() as $handler) {
-			if ($handler->invokeArgs(array_values($args)) === FALSE) {
+			if (Callback::invokeArgs($handler, array_values($args)) === FALSE) {
 				return;
 			}
 		}
@@ -132,7 +133,8 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function append($listener)
 	{
-		$this->listeners[] = callback($listener);
+		Callback::check($listener, TRUE);
+		$this->listeners[] = $listener;
 		return $this;
 	}
 
@@ -144,14 +146,15 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 */
 	public function prepend($listener)
 	{
-		array_unshift($this->listeners, callback($listener));
+		Callback::check($listener, TRUE);
+		array_unshift($this->listeners, $listener);
 		return $this;
 	}
 
 
 
 	/**
-	 * @return array|\callable[]|\Nette\Callback[]
+	 * @return array|callable[]
 	 */
 	public function getListeners()
 	{
@@ -167,7 +170,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		$name = $this->getName();
 		$evm = $this->eventManager;
 		$argsClass = $this->argsClass;
-		$listeners[] = callback(function () use ($name, $evm, $argsClass) {
+		$listeners[] = function () use ($name, $evm, $argsClass) {
 			if ($argsClass === NULL) {
 				$args = new EventArgsList(func_get_args());
 
@@ -176,7 +179,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 			}
 
 			$evm->dispatchEvent($name, $args);
-		});
+		};
 
 		return $listeners;
 	}
@@ -265,15 +268,17 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 	/**
 	 * @param int|NULL $index
-	 * @param mixed $item
+	 * @param callable $item
 	 */
 	public function offsetSet($index, $item)
 	{
+		Callback::check($item, TRUE);
+
 		if ($index === NULL) { // append
-			$this->listeners[] = callback($item);
+			$this->listeners[] = $item;
 
 		} else { // replace
-			$this->listeners[$index] = callback($item);
+			$this->listeners[$index] = $item;
 		}
 	}
 
@@ -281,7 +286,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 	/**
 	 * @param mixed $index
-	 * @return callable|mixed|\Nette\Callback
+	 * @return callable
 	 * @throws OutOfRangeException
 	 */
 	public function offsetGet($index)
