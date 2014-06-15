@@ -356,12 +356,7 @@ class EventManager extends Doctrine\Common\EventManager
 				$callable = array($callable, $event);
 			}
 
-			if (class_exists('Nette\Utils\Callback') && method_exists('Nette\Utils\Callback', 'closure')) {
-				return Nette\Utils\Callback::closure($callable);
-
-			} else {
-				return callback($callable);
-			}
+			return Nette\Utils\Callback::closure($callable);
 
 		}, $sorted); // [callback, ...]
 	}
@@ -377,15 +372,9 @@ class EventManager extends Doctrine\Common\EventManager
 		array_walk_recursive($array, function (& $a) use (& $res) {
 			if ($a instanceof EventSubscriber) {
 				//
-			} elseif ($a instanceof \Closure && class_exists('Nette\Utils\Callback')) {
+			} elseif ($a instanceof \Closure) {
 				$a = Nette\Utils\Callback::unwrap($a);
-
-			} elseif ($a instanceof Nette\Callback) {
-				if (!in_array($a->native[0], $res, TRUE)) {
-					$a = $a->native[0];
-				}
 			}
-
 		});
 
 		return $array;
