@@ -204,6 +204,7 @@ And the compile-time validation for method presence still works!
 Listener priorities
 -------------------
 
+Events are **executed** by priority in **descending order** from highest to lowest.
 You should **never** rely on the order, in which are listeners called, but there are cases when you just can't dodge the bullet.
 
 
