@@ -22,7 +22,7 @@
 	"require-dev": {
 		"symfony/event-dispatcher": "~2.4",
 		"nette/tester": "@dev",
-		"jakub-onderka/php-parallel-lint": "~0.6"
+		"jakub-onderka/php-parallel-lint": "~0.7"
 	},
 	"autoload": {
 		"psr-0": {
@@ -34,10 +34,5 @@
 		"files": [
 			"src/Doctrine/compatibility.php"
 		]
-	},
-	"extra": {
-		"branch-alias": {
-			"dev-master": "2.0-dev"
-		}
 	}
 }
