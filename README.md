@@ -23,7 +23,7 @@ Installation
 The best way to install Kdyby/Events is using  [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require kdyby/events:~2.1
+$ composer require kdyby/events:~2.2
 ```
 
 
