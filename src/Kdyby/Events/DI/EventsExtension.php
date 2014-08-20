@@ -71,7 +71,8 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 		$evm = $builder->addDefinition($this->prefix('manager'))
 			->setClass('Kdyby\Events\EventManager')
-			->setInject(FALSE);
+			->addTag(\Nette\DI\Extensions\InjectExtension::TAG_INJECT, FALSE);
+			
 		if ($config['debugger']) {
 			$defaults = array('dispatchTree' => FALSE, 'dispatchLog' => TRUE, 'events' => TRUE, 'listeners' => FALSE);
 			if (is_array($config['debugger'])) {
