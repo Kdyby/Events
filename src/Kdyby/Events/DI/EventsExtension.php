@@ -311,7 +311,11 @@ class EventsExtension extends Nette\DI\CompilerExtension
 	{
 		foreach ($class->getProperties(Nette\Reflection\Property::IS_PUBLIC) as $property) {
 			if (!preg_match('#^on[A-Z]#', $name = $property->getName())) {
-				continue 1;
+				continue;
+			}
+
+			if ($property->getAnnotation('persistent') || $property->getAnnotation('inject')) { // definitely not an event
+				continue;
 			}
 
 			$def->addSetup('$' . $name, array(
