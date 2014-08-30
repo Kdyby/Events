@@ -303,7 +303,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				continue;
 			}
 
-			if ($property->getAnnotation('persistent') || $property->getAnnotation('inject')) { // definitely not an event
+			if ($property->hasAnnotation('persistent') || $property->hasAnnotation('inject')) { // definitely not an event
 				continue;
 			}
 
