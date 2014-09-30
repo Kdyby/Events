@@ -53,25 +53,63 @@ class ExtensionTest extends Tester\TestCase
 
 
 
-	public function testValidate()
+	public function testValidate_direct()
 	{
 		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.direct');
 		}, "Nette\\Utils\\AssertionException", 'Please, do not register listeners directly to service \'events.manager\'. %a%');
+	}
 
-		Assert::exception(function () use ($me) {
+
+
+	public function testValidate_missing()
+	{
+		$me = $this;
+
+		try {
 			$me->createContainer('validate.missing');
-		}, "Nette\\Utils\\AssertionException", 'Please, specify existing class for service \'events.subscriber.%a%\' explicitly, and make sure, that the class exists and can be autoloaded.');
+			Assert::fail("Expected exception");
+
+		} catch (Nette\Utils\AssertionException $e) {
+			Assert::match('Please, specify existing class for service \'events.subscriber.%a%\' explicitly, and make sure, that the class exists and can be autoloaded.', $e->getMessage());
+
+		} catch (Nette\DI\ServiceCreationException $e) {
+			Assert::match("Class NonExistingClass_%a% used in service 'events.subscriber.%a%' not found or is not instantiable.", $e->getMessage());
+
+		} catch (\Exception $e) {
+			Assert::fail($e->getMessage());
+		}
+	}
+
+
+
+	public function testValidate_fake()
+	{
+		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.fake');
 		}, "Nette\\Utils\\AssertionException", 'Subscriber \'events.subscriber.%a%\' doesn\'t implement Kdyby\Events\Subscriber.');
+	}
+
+
+
+	public function testValidate_invalid()
+	{
+		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.invalid');
 		}, "Nette\\Utils\\AssertionException", 'Event listener KdybyTests\Events\FirstInvalidListenerMock::onFoo() is not implemented.');
+	}
+
+
+
+	public function testValidate_invalid2()
+	{
+		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.invalid2');
