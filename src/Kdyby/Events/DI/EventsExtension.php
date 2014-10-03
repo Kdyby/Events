@@ -309,7 +309,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 			$def->addSetup('$' . $name, array(
 				new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
-					array($property->getDeclaringClass()->getName(), $name),
+					array($class->getName(), $name),
 					new Code\PhpLiteral('$service->' . $name)
 				))
 			));
@@ -330,8 +330,18 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				$listeners[$eventName][] = $serviceName;
 				if ($namespace !== NULL) {
 					$listeners[$event][] = $serviceName;
+					foreach ($builder->getDefinitions() as $def) {
+						$class = $def->getClass();
+						if (is_subclass_of($class, $namespace)) {
+							$listeners["$class::$event"][] = $serviceName;
+						}
+					}
 				}
 			}
+		}
+
+		foreach ($listeners as $id => $subscribers) {
+			$listeners[$id] = array_unique($subscribers);
 		}
 
 		$builder->getDefinition($this->prefix('manager'))
