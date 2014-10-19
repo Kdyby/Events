@@ -408,6 +408,7 @@ class SecondInvalidListenerMock extends Nette\Object implements Kdyby\Events\Sub
 }
 
 
+
 class ListenerWithoutInterface extends Nette\Object
 {
 
@@ -419,6 +420,7 @@ class ListenerWithoutInterface extends Nette\Object
 	}
 
 }
+
 
 
 class RouterFactory extends Nette\Object
@@ -434,6 +436,8 @@ class RouterFactory extends Nette\Object
 
 }
 
+
+
 class SampleRouter extends Nette\Application\Routers\Route
 {
 
@@ -442,6 +446,8 @@ class SampleRouter extends Nette\Application\Routers\Route
 	public $onConstruct = array();
 
 }
+
+
 
 class SampleExceptionHandler implements Kdyby\Events\IExceptionHandler
 {
@@ -452,5 +458,53 @@ class SampleExceptionHandler implements Kdyby\Events\IExceptionHandler
 	{
 		$this->exceptions[] = $exception;
 	}
+}
 
+
+
+class ParentClass extends Nette\Object
+{
+	public $onCreate;
+
+	public function create() {
+		$this->onCreate();
+	}
+}
+
+
+
+class InheritedClass extends ParentClass
+{
+}
+
+
+
+class LeafClass extends InheritedClass
+{
+}
+
+
+
+class InheritSubscriber implements Kdyby\Events\Subscriber
+{
+	public $eventCalls = array();
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+			'KdybyTests\Events\LeafClass::onCreate',
+			'KdybyTests\Events\ParentClass::onCreate',
+		);
+	}
+
+
+
+	public function onCreate() {
+		$backtrace = debug_backtrace();
+		$event = $backtrace[2]['args'][0];
+		$this->eventCalls[$event] = 1 + (isset($this->eventCalls[$event]) ? $this->eventCalls[$event] : 0);
+	}
 }
