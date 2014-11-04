@@ -261,3 +261,25 @@ FatListener::appStartup
 SlimListener::slowStartup
 ```
 
+Debugging
+---------
+
+Kdyby\Events comes with integrated panel for Nette\Tracy, which makes it easier to debug your application. The panel contains dispatch tree, list of dispatched events and lists of registered events and registered listeners.
+
+However, if you don't want to use it, you can disable the whole panel in your config.neon.
+
+```yml
+events:
+    debugger: on # off
+```
+
+Or you can disable it's categories.
+
+```yml
+events:
+    debugger: # these are the default values
+        dispatchTree: off
+        dispatchLog: on
+        events: on
+        listeners: off
+```
