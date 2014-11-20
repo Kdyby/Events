@@ -13,19 +13,11 @@ The best way to install Kdyby/Events is using  [Composer](http://getcomposer.org
 $ composer require kdyby/events:@dev
 ```
 
-With dev Nette, you can enable the extension using your neon config.
+And then you should enable the extension using your neon config.
 
 ```yml
 extensions:
 	events: Kdyby\Events\DI\EventsExtension
-```
-
-If you're using stable Nette, you have to register them in `app/bootstrap.php`
-
-```php
-Kdyby\Events\DI\EventsExtension::register($configurator);
-
-return $configurator->createContainer();
 ```
 
 
