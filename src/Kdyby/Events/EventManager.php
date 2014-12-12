@@ -35,21 +35,21 @@ class EventManager extends Doctrine\Common\EventManager
 	 *
 	 * @var array[]
 	 */
-	private $listeners = array();
+	protected $listeners = array();
 
 	/**
 	 * [Event => [Subscriber, Subscriber, [callable], ...]]
 	 *
 	 * @var array[]
 	 */
-	private $sorted = array();
+	protected $sorted = array();
 
 	/**
 	 * [SubscriberHash => Subscriber]
 	 *
 	 * @var array[]
 	 */
-	private $subscribers = array();
+	protected $subscribers = array();
 
 	/**
 	 * @var Diagnostics\Panel
@@ -236,6 +236,9 @@ class EventManager extends Doctrine\Common\EventManager
 				// there are no listeners for this specific event, so no reason to call sort on next dispatch
 				$this->sorted[$eventName] = array();
 			}
+
+			unset($this->sorted[$event]);
+			unset($this->sorted[$eventName]);
 		}
 	}
 

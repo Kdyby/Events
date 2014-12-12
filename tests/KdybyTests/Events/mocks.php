@@ -54,6 +54,11 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 
 	public $calls = array();
 
+	/**
+	 * @var \Closure|NULL
+	 */
+	public $onCall;
+
 
 	/**
 	 * Returns an array of events this subscriber wants to listen to.
@@ -77,6 +82,9 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 	public function onMagic(FooMock $foo, $int)
 	{
 		$this->calls[] = array(__METHOD__, func_get_args());
+		if ($this->onCall) {
+			call_user_func_array($this->onCall, __METHOD__);
+		}
 	}
 
 
@@ -87,6 +95,9 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 	public function onStartup(StartupEventArgs $args)
 	{
 		$this->calls[] = array(__METHOD__, func_get_args());
+		if ($this->onCall) {
+			call_user_func_array($this->onCall, __METHOD__);
+		}
 	}
 
 }

@@ -168,6 +168,21 @@ class EventTest extends Tester\TestCase
 		Assert::same(4, $args->int);
 	}
 
+
+
+	public function testDispatch_toManager_globalFirst()
+	{
+		$this->dataToManagerDispatch($foo = new FooMock, $listener = new LoremListener, $calls);
+
+		$listener->onCall = function () {
+
+		};
+
+		$foo->onMagic->dispatch(array($foo, 3));
+		Assert::same(array(array('KdybyTests\Events\EventTest::KdybyTests\Events\{closure}', array($foo, 3))), $calls);
+		Assert::same(array(array('KdybyTests\Events\LoremListener::onMagic', array($foo, 3))), $listener->calls);
+	}
+
 }
 
 \run(new EventTest());

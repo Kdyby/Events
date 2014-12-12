@@ -24,6 +24,15 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
 	/**
+	 * Changes the order of listeners being invoked,
+	 * The default is that the closures and listeners registered directly are first,
+	 * but this property can change that, so the global is first.
+	 *
+	 * @var bool
+	 */
+	public $globalDispatchFirst = FALSE;
+
+	/**
 	 * @var callable[]
 	 */
 	private $listeners = array();
@@ -67,7 +76,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 		if (is_array($defaults) || $defaults instanceof \Traversable) {
 			foreach ($defaults as $listener) {
-				$this->add($listener);
+				$this->append($listener);
 			}
 		}
 	}
@@ -119,7 +128,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		}
 
 		foreach ($this->getListeners() as $handler) {
-			if (Callback::invokeArgs($handler, array_values($args)) === FALSE) {
+			if (call_user_func_array($handler, array_values($args)) === FALSE) {
 				return;
 			}
 		}
@@ -162,15 +171,16 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 		if ($this->panel) {
 			$this->panel->inlineCallbacks($this->getName(), $listeners);
+		}
 
-		} elseif (!$this->eventManager || !$this->eventManager->hasListeners($this->getName())) {
+		if (!$this->eventManager || !$this->eventManager->hasListeners($this->getName())) {
 			return $listeners;
 		}
 
 		$name = $this->getName();
 		$evm = $this->eventManager;
 		$argsClass = $this->argsClass;
-		$listeners[] = function () use ($name, $evm, $argsClass) {
+		$globalDispatch = function () use ($name, $evm, $argsClass) {
 			if ($argsClass === NULL) {
 				$args = new EventArgsList(func_get_args());
 
@@ -180,6 +190,13 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 			$evm->dispatchEvent($name, $args);
 		};
+
+		if ($this->globalDispatchFirst) {
+			array_unshift($listeners, $globalDispatch);
+
+		} else {
+			$listeners[] = $globalDispatch;
+		}
 
 		return $listeners;
 	}
