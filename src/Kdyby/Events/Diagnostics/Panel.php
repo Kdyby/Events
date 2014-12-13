@@ -15,11 +15,28 @@ use Kdyby;
 use Kdyby\Events\Event;
 use Kdyby\Events\EventManager;
 use Nette;
-use Nette\Diagnostics\Bar;
-use Nette\Diagnostics\Debugger;
+use Nette\Utils\Callback;
+use Tracy\Bar;
+use Tracy\Debugger;
+use Tracy\Dumper;
 use Nette\Utils\Arrays;
 
 
+
+if (!class_exists('Tracy\Debugger')) {
+	class_alias('Nette\Diagnostics\Debugger', 'Tracy\Debugger');
+}
+
+if (!class_exists('Tracy\Bar')) {
+	class_alias('Nette\Diagnostics\Bar', 'Tracy\Bar');
+	class_alias('Nette\Diagnostics\BlueScreen', 'Tracy\BlueScreen');
+	class_alias('Nette\Diagnostics\Helpers', 'Tracy\Helpers');
+	class_alias('Nette\Diagnostics\IBarPanel', 'Tracy\IBarPanel');
+}
+
+if (!class_exists('Tracy\Dumper')) {
+	class_alias('Nette\Diagnostics\Dumper', 'Tracy\Dumper');
+}
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
@@ -384,11 +401,22 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		$registeredClasses = $this->getClassMap();
 
 		$h = 'htmlspecialchars';
+
+		$shortFilename = function (Nette\Reflection\GlobalFunction $refl) {
+			$title = '.../' . basename($refl->getFileName()) . ':' . $refl->getStartLine();
+
+			if ($editor = Tracy\Helpers::editorUri($refl->getFileName(), $refl->getStartLine())) {
+				return sprintf(' defined at <a href="%s">%s</a>', htmlspecialchars($editor), $title);
+			}
+
+			return ' defined at ' . $title;
+		};
+
 		$s = '';
 		foreach ($ids as $id) {
 			if ($id instanceof Nette\Callback) {
 				$s .= '<tr><td width=18>' . $addIcon . '</td><td><pre class="nette-dump"><span class="nette-dump-object">' .
-					(string) $id .
+					Callback::toString($id) . ($id instanceof \Closure ? $shortFilename(Callback::toReflection($id)) : '') .
 					'</span></span></th></tr>';
 
 				continue;
