@@ -15,6 +15,7 @@ use Kdyby;
 use Kdyby\Events\Event;
 use Kdyby\Events\EventManager;
 use Nette;
+use Nette\Utils\Callback;
 use Tracy\Bar;
 use Tracy\Debugger;
 use Nette\Utils\Arrays;
@@ -385,11 +386,22 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$registeredClasses = $this->getClassMap();
 
 		$h = 'htmlspecialchars';
+
+		$shortFilename = function (Nette\Reflection\GlobalFunction $refl) {
+			$title = '.../' . basename($refl->getFileName()) . ':' . $refl->getStartLine();
+
+			if ($editor = Tracy\Helpers::editorUri($refl->getFileName(), $refl->getStartLine())) {
+				return sprintf(' defined at <a href="%s">%s</a>', htmlspecialchars($editor), $title);
+			}
+
+			return ' defined at ' . $title;
+		};
+
 		$s = '';
 		foreach ($ids as $id) {
 			if (is_callable($id)) {
 				$s .= '<tr><td width=18>' . $addIcon . '</td><td><pre class="nette-dump"><span class="nette-dump-object">' .
-					Nette\Utils\Callback::toString($id) .
+					Callback::toString($id) . ($id instanceof \Closure ? $shortFilename(Callback::toReflection($id)) : '') .
 					'</span></span></th></tr>';
 
 				continue;
