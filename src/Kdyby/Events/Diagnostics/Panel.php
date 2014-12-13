@@ -557,19 +557,9 @@ CSS;
 		/** @var Panel $panel */
 
 		$panel->setEventManager($eventManager);
-		static::getDebuggerBar()->addPanel($panel);
+		Debugger::getBar()->addPanel($panel);
 
 		return $panel;
-	}
-
-
-
-	/**
-	 * @return Bar
-	 */
-	private static function getDebuggerBar()
-	{
-		return method_exists('Nette\Diagnostics\Debugger', 'getBar') ? Debugger::getBar() : Debugger::$bar;
 	}
 
 }
