@@ -7,6 +7,11 @@ events:
 
 services:
 	leaf: KdybyTests\Events\LeafClass
+
 	subscriber:
 		class: KdybyTests\Events\InheritSubscriber
+		tags: [kdyby.subscriber]
+
+	subscriber2:
+		class: KdybyTests\Events\SecondInheritSubscriber
 		tags: [kdyby.subscriber]

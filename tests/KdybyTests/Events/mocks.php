@@ -13,6 +13,7 @@ namespace KdybyTests\Events;
 use Nette;
 use Kdyby;
 use Kdyby\Events\Event;
+use Tracy;
 
 
 
@@ -507,5 +508,34 @@ class InheritSubscriber implements Kdyby\Events\Subscriber
 		$backtrace = debug_backtrace();
 		$event = $backtrace[2]['args'][0];
 		$this->eventCalls[$event] = 1 + (isset($this->eventCalls[$event]) ? $this->eventCalls[$event] : 0);
+	}
+}
+
+
+
+class SecondInheritSubscriber implements Kdyby\Events\Subscriber
+{
+	public $eventCalls = array();
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+			'KdybyTests\Events\ParentClass::onCreate',
+		);
+	}
+
+
+
+	public function onCreate()
+	{
+		if (!$event = Tracy\Helpers::findTrace(debug_backtrace(), 'Kdyby\Events\EventManager::dispatchEvent')) {
+			$this->eventCalls['unknown'] += 1;
+		} else {
+			$eventName = $event['args'][0];
+			$this->eventCalls[$eventName] = 1 + (isset($this->eventCalls[$eventName]) ? $this->eventCalls[$eventName] : 0);
+		}
 	}
 }

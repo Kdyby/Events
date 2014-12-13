@@ -223,6 +223,20 @@ class EventManagerTest extends Tester\TestCase
 
 
 
+	public function testEventsDispatching_MultipleEventMethods_namespaced()
+	{
+		$this->manager->addEventSubscriber($listener = new MultipleEventMethodsListenerMock());
+
+		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
+
+		Assert::same(array(
+			array(__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::firstMethod', array($args)),
+			array(__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::secondMethod', array($args)),
+		), $listener->calls);
+	}
+
+
+
 	public function testEventsDispatching_ListenerWithoutInterface()
 	{
 		$this->manager->addEventListener(array('onClear'), $listener = new ListenerWithoutInterface());
