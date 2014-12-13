@@ -158,21 +158,29 @@ class ExtensionTest extends Tester\TestCase
 	{
 		$container = $this->createContainer('inherited');
 
-		$leafObject = $container->getService('leaf');
 		/** @var LeafClass $leafObject */
+		$leafObject = $container->getService('leaf');
+
 		Assert::true($leafObject->onCreate instanceof Kdyby\Events\Event);
 		Assert::same('KdybyTests\Events\LeafClass::onCreate', $leafObject->onCreate->getName());
 
-		$subscriber = $container->getService('subscriber');
-		/** @var InheritSubscriber $subscriber */
 		$leafObject->create();
 
-		Assert::count(1, $subscriber->eventCalls);
-		Assert::true(isset($subscriber->eventCalls['KdybyTests\Events\LeafClass::onCreate']));
-		Assert::equal(2, $subscriber->eventCalls['KdybyTests\Events\LeafClass::onCreate']);
+		/** @var InheritSubscriber $subscriber */
+		$subscriber = $container->getService('subscriber');
 
-		// not subscribed for middle class
-		Assert::false(isset($subscriber->eventCalls['KdybyTests\Events\InheritedClass::onCreate']));
+		/** @var SecondInheritSubscriber $subscriber */
+		$subscriber2 = $container->getService('subscriber2');
+
+		Assert::same(array(
+			'KdybyTests\Events\LeafClass::onCreate' => 2,
+			// not subscribed for middle class
+		), $subscriber->eventCalls);
+
+		Assert::same(array(
+			'KdybyTests\Events\LeafClass::onCreate' => 1,
+			// not subscribed for middle class
+		), $subscriber2->eventCalls);
 	}
 
 
