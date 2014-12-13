@@ -1,0 +1,12 @@
+events:
+	optimize: no
+	validate: no
+	autowire: yes
+	subscribers:
+		
+
+services:
+	leaf: KdybyTests\Events\LeafClass
+	subscriber:
+		class: KdybyTests\Events\InheritSubscriber
+		tags: [kdyby.subscriber]
