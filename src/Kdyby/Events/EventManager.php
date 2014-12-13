@@ -337,7 +337,14 @@ class EventManager extends Doctrine\Common\EventManager
 			}
 
 		} else {
-			$available = !empty($this->listeners[$event][$namespace]) ? $this->listeners[$event][$namespace] : array();
+			$available = array();
+			do {
+				if (!empty($this->listeners[$event][$namespace])) {
+					foreach ($this->listeners[$event][$namespace] as $callback) {
+						$available[] = $callback;
+					}
+				}
+			} while ($namespace = get_parent_class($namespace));
 		}
 
 		if (empty($available)) {
