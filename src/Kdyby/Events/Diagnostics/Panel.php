@@ -19,6 +19,7 @@ use Nette\Utils\Callback;
 use Tracy\Bar;
 use Tracy\Debugger;
 use Tracy\Dumper;
+use Tracy\Helpers;
 use Nette\Utils\Arrays;
 
 
@@ -352,6 +353,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 	}
 
 
+
 	/**
 	 * Renders an item in call graph.
 	 *
@@ -405,7 +407,7 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 		$shortFilename = function (Nette\Reflection\GlobalFunction $refl) {
 			$title = '.../' . basename($refl->getFileName()) . ':' . $refl->getStartLine();
 
-			if ($editor = Tracy\Helpers::editorUri($refl->getFileName(), $refl->getStartLine())) {
+			if ($editor = Helpers::editorUri($refl->getFileName(), $refl->getStartLine())) {
 				return sprintf(' defined at <a href="%s">%s</a>', htmlspecialchars($editor), $title);
 			}
 
@@ -444,11 +446,11 @@ class Panel extends Nette\Object implements Nette\Diagnostics\IBarPanel
 
 	private static function dumpToHtml($structure)
 	{
-		if (class_exists('Nette\Diagnostics\Dumper')) {
-			return Nette\Diagnostics\Dumper::toHtml($structure, array(Nette\Diagnostics\Dumper::COLLAPSE => TRUE));
+		if (class_exists('Tracy\Dumper')) {
+			return Dumper::toHtml($structure, array(Dumper::COLLAPSE => TRUE, Dumper::DEPTH => 2));
 		}
 
-		return Nette\Diagnostics\Helpers::clickableDump($structure, TRUE);
+		return Helpers::clickableDump($structure, TRUE);
 	}
 
 
