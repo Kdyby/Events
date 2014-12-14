@@ -200,20 +200,21 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param string $name
 	 * @return array
 	 */
-	public static function parseName($name)
+	public static function parseName(&$name)
 	{
 		if (is_array($name)) {
 			return $name;
 		}
 
-		if (preg_match('~^([^\w]?(?P<namespace>.*\w+)[^\w]{1,2})?(?P<name>[a-z]\w+)$~i', $name, $m)) {
-			return array($m['namespace'] ?: NULL, $m['name']);
+		if (preg_match('~^([^\w]?(?P<namespace>.*\w+)(?P<separator>[^\w]{1,2}))?(?P<name>[a-z]\w+)$~i', $name, $m)) {
+			$name = ($m['namespace'] ? $m['namespace'] . $m['separator'] : '') . $m['name'];
+			return array($m['namespace'] ?: NULL, $m['name'], $m['separator'] ?: NULL);
 
 		} else {
 			$name = ltrim($name, '\\');
 		}
 
-		return array(NULL, $name);
+		return array(NULL, $name, NULL);
 	}
 
 

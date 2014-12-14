@@ -66,7 +66,7 @@ class NamespacedEventManager extends EventManager
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getListeners($eventName = null, $asCallbacks = FALSE)
+	public function getListeners($eventName = null)
 	{
 		if ($eventName === NULL) {
 			$listeners = array();
@@ -77,7 +77,7 @@ class NamespacedEventManager extends EventManager
 				}
 			}
 
-			return $asCallbacks ? $listeners : self::uniqueSubscribers($listeners);
+			return $listeners;
 		}
 
 		list($ns, $event) = Event::parseName($eventName);
@@ -87,8 +87,8 @@ class NamespacedEventManager extends EventManager
 		}
 
 		return array_merge(
-			$this->evm->getListeners($event, $asCallbacks),
-			$this->evm->getListeners($this->namespace . $event, $asCallbacks)
+			$this->evm->getListeners($event),
+			$this->evm->getListeners($this->namespace . $event)
 		);
 	}
 

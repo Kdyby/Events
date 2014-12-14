@@ -30,10 +30,10 @@ class EventTest extends Tester\TestCase
 	public function dataParseName()
 	{
 		return array(
-			array(array(NULL, 'onFoo'), 'onFoo'),
-			array(array('App', 'onFoo'), 'App::onFoo'),
-			array(array('App', 'onFoo'), '\\App::onFoo'),
-			array(array('app.blog', 'foo'), 'app.blog.foo'),
+			array(array(NULL, 'onFoo', NULL), 'onFoo'),
+			array(array('App', 'onFoo', '::'), 'App::onFoo'),
+			array(array('App', 'onFoo', '::'), '\\App::onFoo'),
+			array(array('app.blog', 'foo', '.'), 'app.blog.foo'),
 		);
 	}
 
