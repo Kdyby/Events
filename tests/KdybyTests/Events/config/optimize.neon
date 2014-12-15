@@ -20,6 +20,10 @@ services:
 		class: KdybyTests\Events\MethodAliasListenerMock
 		tags: [kdyby.subscriber]
 
+	MultipleMethodAliases:
+		class: KdybyTests\Events\MultipleMethodAliasesListenerMock
+		tags: [kdyby.subscriber]
+
 	priorityMethod:
 		class: KdybyTests\Events\PriorityMethodAliasListenerMock
 		tags: [kdyby.subscriber]

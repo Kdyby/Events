@@ -194,6 +194,20 @@ class EventManagerTest extends Tester\TestCase
 
 
 
+	public function testEventsDispatching_MultipleMethodAliases()
+	{
+		$this->manager->addEventSubscriber($listener = new MultipleMethodAliasesListenerMock());
+
+		$this->manager->dispatchEvent('onDiscard', $args = new EventArgsMock());
+
+		Assert::same(array(
+			array(__NAMESPACE__ . '\\MethodAliasListenerMock::customMethodA', array($args)),
+			array(__NAMESPACE__ . '\\MethodAliasListenerMock::customMethodB', array($args)),
+		), $listener->calls);
+	}
+
+
+
 	public function testEventsDispatching_Priority()
 	{
 		$this->manager->addEventSubscriber($lower = new PriorityMethodAliasListenerMock());
