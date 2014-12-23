@@ -61,7 +61,7 @@ class LazyEventManager extends EventManager
 	 * @param bool $asCallbacks
 	 * @return \Doctrine\Common\EventSubscriber[]
 	 */
-	public function getListeners($eventName = NULL, $asCallbacks = FALSE)
+	public function getListeners($eventName = NULL)
 	{
 		if (!empty($this->listenerIds[$eventName])) {
 			$this->initializeListener($eventName);
@@ -73,7 +73,7 @@ class LazyEventManager extends EventManager
 			}
 		}
 
-		return parent::getListeners($eventName, $asCallbacks);
+		return parent::getListeners($eventName);
 	}
 
 

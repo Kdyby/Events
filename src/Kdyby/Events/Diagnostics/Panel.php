@@ -337,6 +337,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	}
 
 
+
 	/**
 	 * Renders an item in call graph.
 	 *
@@ -429,7 +430,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 	private static function dumpToHtml($structure)
 	{
-		return Tracy\Dumper::toHtml($structure, array(Tracy\Dumper::COLLAPSE => TRUE));
+		return Dumper::toHtml($structure, array(Dumper::COLLAPSE => TRUE, Dumper::DEPTH => 2));
 	}
 
 

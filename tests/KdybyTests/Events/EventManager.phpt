@@ -133,7 +133,7 @@ class EventManagerTest extends Tester\TestCase
 	{
 		return array(
 			array('App::onFoo', array('App::onFoo')),
-			array('onFoo', array('App::onFoo', 'onFoo')),
+			array('onFoo', array('onFoo')),
 			array('Other::onFoo', array()),
 		);
 	}
@@ -174,7 +174,6 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('domain.users.updated', $second = new EventArgsMock());
 
 		Assert::same(array(
-			array(__NAMESPACE__ . '\\CustomNamespacedEventListenerMock::updated', array($first)),
 			array(__NAMESPACE__ . '\\CustomNamespacedEventListenerMock::updated', array($second)),
 		), $listener->calls);
 	}
@@ -185,7 +184,7 @@ class EventManagerTest extends Tester\TestCase
 	{
 		$this->manager->addEventSubscriber($listener = new MethodAliasListenerMock());
 
-		$this->manager->dispatchEvent('onDiscard', $args = new EventArgsMock());
+		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
 
 		Assert::same(array(
 			array(__NAMESPACE__ . '\\MethodAliasListenerMock::customMethod', array($args)),
@@ -199,7 +198,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->addEventSubscriber($lower = new PriorityMethodAliasListenerMock());
 		$this->manager->addEventSubscriber($higher = new HigherPriorityMethodAliasListenerMock());
 
-		$this->manager->dispatchEvent('onDiscard', $args = new EventArgsMock());
+		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
 
 		Assert::same(array(
 			array(__NAMESPACE__ . '\\HigherPriorityMethodAliasListenerMock::customMethod', array($args)),
@@ -213,7 +212,7 @@ class EventManagerTest extends Tester\TestCase
 	{
 		$this->manager->addEventSubscriber($listener = new MultipleEventMethodsListenerMock());
 
-		$this->manager->dispatchEvent('onDiscard', $args = new EventArgsMock());
+		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
 
 		Assert::same(array(
 			array(__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::firstMethod', array($args)),
