@@ -348,7 +348,7 @@ class EventManager extends Doctrine\Common\EventManager
 				$callable = array($callable, $event);
 			}
 
-			return $callable;
+			return Nette\Utils\Callback::closure($callable);
 		}, $sorted); // [callback, ...]
 	}
 
