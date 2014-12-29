@@ -465,10 +465,10 @@ class SampleExceptionHandler implements Kdyby\Events\IExceptionHandler
 
 class ParentClass extends Nette\Object
 {
-	public $onCreate;
+	public $onCreate = array();
 
-	public function create() {
-		$this->onCreate();
+	public function create($arg = NULL) {
+		$this->onCreate($arg);
 	}
 }
 
@@ -537,5 +537,80 @@ class SecondInheritSubscriber implements Kdyby\Events\Subscriber
 			$eventName = $event['args'][0];
 			$this->eventCalls[$eventName] = 1 + (isset($this->eventCalls[$eventName]) ? $this->eventCalls[$eventName] : 0);
 		}
+	}
+}
+
+
+
+class ParentClassOnlyListener implements Kdyby\Events\Subscriber
+{
+
+	public $eventCalls = array();
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array('KdybyTests\Events\ParentClass::onCreate');
+	}
+
+
+
+	public function onCreate()
+	{
+		$this->eventCalls[] = func_get_args();
+	}
+}
+
+
+
+class InheritClassOnlyListener implements Kdyby\Events\Subscriber
+{
+
+	public $eventCalls = array();
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array('KdybyTests\Events\InheritedClass::onCreate');
+	}
+
+
+
+	public function onCreate()
+	{
+		$this->eventCalls[] = func_get_args();
+	}
+}
+
+
+
+class LeafClassOnlyListener implements Kdyby\Events\Subscriber
+{
+
+	public $eventCalls = array();
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array('KdybyTests\Events\LeafClass::onCreate');
+	}
+
+
+
+	public function onCreate()
+	{
+		$this->eventCalls[] = func_get_args();
 	}
 }
