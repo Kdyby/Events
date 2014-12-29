@@ -247,6 +247,101 @@ class EventManagerTest extends Tester\TestCase
 		), $listener->calls);
 	}
 
+
+
+	public function testEventDispatching_Inheritance_hasListeners()
+	{
+		$this->manager->addEventSubscriber($parentClassOnly = new ParentClassOnlyListener());
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\ParentClass::onCreate'));
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\InheritedClass::onCreate'));
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\LeafClass::onCreate'));
+
+		$this->manager->addEventSubscriber($inheritClassOnly = new InheritClassOnlyListener());
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\ParentClass::onCreate'));
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\InheritedClass::onCreate'));
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\LeafClass::onCreate'));
+
+		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\ParentClass::onCreate'));
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\InheritedClass::onCreate'));
+		Assert::true($this->manager->hasListeners('KdybyTests\Events\LeafClass::onCreate'));
+	}
+
+
+
+	public function testEventDispatching_Inheritance_getListeners()
+	{
+		$this->manager->addEventSubscriber($parentClassOnly = new ParentClassOnlyListener());
+		$this->manager->addEventSubscriber($inheritClassOnly = new InheritClassOnlyListener());
+		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
+
+		Assert::same(array(
+			$parentClassOnly,
+		), $this->manager->getListeners('KdybyTests\Events\ParentClass::onCreate'));
+
+		Assert::same(array(
+			$inheritClassOnly,
+			$parentClassOnly,
+		), $this->manager->getListeners('KdybyTests\Events\InheritedClass::onCreate'));
+
+		Assert::same(array(
+			$leafClassOnly,
+			$inheritClassOnly,
+			$parentClassOnly,
+		), $this->manager->getListeners('KdybyTests\Events\LeafClass::onCreate'));
+	}
+
+
+
+	public function testEventDispatching_Inheritance_ListeningOnParentClass()
+	{
+		$this->manager->addEventSubscriber($parentClassOnly = new ParentClassOnlyListener());
+		$this->manager->addEventSubscriber($inheritClassOnly = new InheritClassOnlyListener());
+		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
+
+		$parentClass = new ParentClass();
+		$parentClass->onCreate = $this->manager->createEvent('KdybyTests\Events\ParentClass::onCreate');
+		$parentClass->create(1);
+
+		Assert::same(array(array(1)), $parentClassOnly->eventCalls);
+		Assert::same(array(), $inheritClassOnly->eventCalls);
+		Assert::same(array(), $leafClassOnly->eventCalls);
+	}
+
+
+
+	public function testEventDispatching_Inheritance_ListeningOnInheritedClass()
+	{
+		$this->manager->addEventSubscriber($parentClassOnly = new ParentClassOnlyListener());
+		$this->manager->addEventSubscriber($inheritClassOnly = new InheritClassOnlyListener());
+		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
+
+		$inheritedClass = new InheritedClass();
+		$inheritedClass->onCreate = $this->manager->createEvent('KdybyTests\Events\InheritedClass::onCreate');
+		$inheritedClass->create(1);
+
+		Assert::same(array(array(1)), $parentClassOnly->eventCalls);
+		Assert::same(array(array(1)), $inheritClassOnly->eventCalls);
+		Assert::same(array(), $leafClassOnly->eventCalls);
+	}
+
+
+
+	public function testEventDispatching_Inheritance_ListeningOnLeafClass()
+	{
+		$this->manager->addEventSubscriber($parentClassOnly = new ParentClassOnlyListener());
+		$this->manager->addEventSubscriber($inheritClassOnly = new InheritClassOnlyListener());
+		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
+
+		$leafClass = new LeafClass();
+		$leafClass->onCreate = $this->manager->createEvent('KdybyTests\Events\LeafClass::onCreate');
+		$leafClass->create(1);
+
+		Assert::same(array(array(1)), $parentClassOnly->eventCalls);
+		Assert::same(array(array(1)), $inheritClassOnly->eventCalls);
+		Assert::same(array(array(1)), $leafClassOnly->eventCalls);
+	}
+
 }
 
 \run(new EventManagerTest());
