@@ -300,9 +300,6 @@ class EventManager extends Doctrine\Common\EventManager
 	private function sortListeners($eventName)
 	{
 		$this->sorted[$eventName] = array();
-		if (!isset($this->listeners[$eventName])) {
-			return;
-		}
 
 		$available = array();
 		list($namespace, $event, $separator) = Event::parseName($eventName);
