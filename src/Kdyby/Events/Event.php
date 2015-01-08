@@ -67,7 +67,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 		if (is_array($defaults) || $defaults instanceof \Traversable) {
 			foreach ($defaults as $listener) {
-				$this->add($listener);
+				$this->append($listener);
 			}
 		}
 	}
