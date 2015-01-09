@@ -24,6 +24,15 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
 	/**
+	 * Changes the order of listeners being invoked,
+	 * The default is that the closures and listeners registered directly are first,
+	 * but this property can change that, so the global is first.
+	 *
+	 * @var bool
+	 */
+	public $globalDispatchFirst = FALSE;
+
+	/**
 	 * @var callable[]
 	 */
 	private $listeners = array();
@@ -170,7 +179,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		$name = $this->getName();
 		$evm = $this->eventManager;
 		$argsClass = $this->argsClass;
-		$listeners[] = function () use ($name, $evm, $argsClass) {
+		$globalDispatch = function () use ($name, $evm, $argsClass) {
 			if ($argsClass === NULL) {
 				$args = new EventArgsList(func_get_args());
 
@@ -180,6 +189,13 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 			$evm->dispatchEvent($name, $args);
 		};
+
+		if ($this->globalDispatchFirst) {
+			array_unshift($listeners, $globalDispatch);
+
+		} else {
+			$listeners[] = $globalDispatch;
+		}
 
 		return $listeners;
 	}

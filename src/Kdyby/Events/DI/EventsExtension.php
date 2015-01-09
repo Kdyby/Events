@@ -42,7 +42,13 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		'optimize' => TRUE,
 		'debugger' => '%debugMode%',
 		'exceptionHandler' => NULL,
+		'globalDispatchFirst' => FALSE,
 	);
+
+	/**
+	 * @var array
+	 */
+	private $config;
 
 	/**
 	 * @var array
@@ -108,6 +114,8 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				->setClass('Symfony\Component\EventDispatcher\EventDispatcherInterface')
 				->setFactory('Kdyby\Events\SymfonyDispatcher');
 		}
+		
+		$this->config = $config;
 	}
 
 
@@ -115,7 +123,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 	public function beforeCompile()
 	{
 		$builder = $this->getContainerBuilder();
-		$config = $this->getConfig($this->defaults);
+		$config = $this->config;
 
 		$manager = $builder->getDefinition($this->prefix('manager'));
 		foreach (array_keys($builder->findByTag(self::SUBSCRIBER_TAG)) as $serviceName) {
@@ -129,6 +137,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 		Nette\Utils\Validators::assertField($config, 'autowire', 'bool');
 		if ($config['autowire']) {
+			Nette\Utils\Validators::assertField($config, 'globalDispatchFirst', 'bool');
 			$this->autowireEvents($builder);
 		}
 
@@ -310,7 +319,11 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			$def->addSetup('$' . $name, array(
 				new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', array(
 					array($class->getName(), $name),
-					new Code\PhpLiteral('$service->' . $name)
+					new Code\PhpLiteral('$service->' . $name),
+					NULL,
+					$property->hasAnnotation('globalDispatchFirst')
+						? (bool) $property->getAnnotation('globalDispatchFirst')
+						: $this->config['globalDispatchFirst'],
 				))
 			));
 		}

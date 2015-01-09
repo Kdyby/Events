@@ -1,0 +1,2 @@
+services:
+	dispatchOrderMock: KdybyTests\Events\DispatchOrderMock

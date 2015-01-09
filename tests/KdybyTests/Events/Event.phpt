@@ -168,6 +168,56 @@ class EventTest extends Tester\TestCase
 		Assert::same(4, $args->int);
 	}
 
+
+
+	public function testDispatchOrderGlobalFirst()
+	{
+		$listener = new EventListenerMock();
+		$evm = new Kdyby\Events\EventManager();
+		$evm->addEventSubscriber($listener);
+
+		$event = new Event('onFoo');
+		$event->injectEventManager($evm);
+		$event->globalDispatchFirst = TRUE;
+
+		$event[] = function () use ($listener) {
+			$listener->calls[] = __METHOD__;
+		};
+
+		$args = new EventArgsMock();
+		$event->dispatch($args);
+
+		Assert::same(array(
+			array('KdybyTests\Events\EventListenerMock::onFoo', array($args)),
+			'KdybyTests\Events\EventTest::KdybyTests\Events\{closure}',
+		), $listener->calls);
+	}
+
+
+
+	public function testDispatchOrderGlobalLast()
+	{
+		$listener = new EventListenerMock();
+		$evm = new Kdyby\Events\EventManager();
+		$evm->addEventSubscriber($listener);
+
+		$event = new Event('onFoo');
+		$event->injectEventManager($evm);
+		$event->globalDispatchFirst = FALSE;
+
+		$event[] = function () use ($listener) {
+			$listener->calls[] = __METHOD__;
+		};
+
+		$args = new EventArgsMock();
+		$event->dispatch($args);
+
+		Assert::same(array(
+			'KdybyTests\Events\EventTest::KdybyTests\Events\{closure}',
+			array('KdybyTests\Events\EventListenerMock::onFoo', array($args)),
+		), $listener->calls);
+	}
+
 }
 
 \run(new EventTest());
