@@ -309,7 +309,34 @@ class ExtensionTest extends Tester\TestCase
 		$foo3 = $fooFactory->create();
 		Assert::type('Kdyby\Events\Event', $foo3->onBar);
 		Assert::notSame($foo, $foo3);
+	}
 
+
+
+	public function testGlobalDispatchFirst()
+	{
+		$container = $this->createContainer('globalDispatchFirst');
+		$manager = $container->getService('events.manager');
+		/** @var Kdyby\Events\EventManager $manager */
+
+		$mock = $container->getService('dispatchOrderMock');
+		Assert::true($mock->onGlobalDispatchFirst->globalDispatchFirst);
+		Assert::false($mock->onGlobalDispatchLast->globalDispatchFirst);
+		Assert::true($mock->onGlobalDispatchDefault->globalDispatchFirst);
+	}
+
+
+
+	public function testGlobalDispatchLast()
+	{
+		$container = $this->createContainer('globalDispatchLast');
+		$manager = $container->getService('events.manager');
+		/** @var Kdyby\Events\EventManager $manager */
+
+		$mock = $container->getService('dispatchOrderMock');
+		Assert::true($mock->onGlobalDispatchFirst->globalDispatchFirst);
+		Assert::false($mock->onGlobalDispatchLast->globalDispatchFirst);
+		Assert::false($mock->onGlobalDispatchDefault->globalDispatchFirst);
 	}
 
 }

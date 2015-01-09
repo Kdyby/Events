@@ -636,3 +636,27 @@ class LeafClassOnlyListener implements Kdyby\Events\Subscriber
 		$this->eventCalls[] = func_get_args();
 	}
 }
+
+
+
+class DispatchOrderMock extends Nette\Object
+{
+
+	/**
+	 * @globalDispatchFirst
+	 * @var array|callable[]|Event
+	 */
+	public $onGlobalDispatchFirst = array();
+
+	/**
+	 * @globalDispatchFirst false
+	 * @var array|callable[]|Event
+	 */
+	public $onGlobalDispatchLast = array();
+
+	/**
+	 * @var array|callable[]|Event
+	 */
+	public $onGlobalDispatchDefault = array();
+
+}

@@ -277,6 +277,39 @@ FatListener::orderSuccess
 SlimListener::slowOrderSuccess
 ```
 
+
+Dispatch Order
+--------------
+
+When using Nette Events properties you can bind a normal callback and a listener from Doctrine Events to the same event. In this case the callbacks are invoked first by default. In some cases, for example when you use a redirect in the callback, you might want to reverse the order to call global listeners first.
+
+You can change the default behaviour for all events in your config.neon.
+
+```yml
+events:
+	globalDispatchFirst: on
+```
+
+You can also change the behaviour for one event only using annotation.
+
+```php
+class OrderProcess extends Nette\Object
+{
+	/**
+	 * This event will always dispatch the global listeners first.
+	 * @globalDispatchFirst
+	 */
+	public $onStartup = array();
+
+	/**
+	 * This event will always dispatch the callbacks first even if you changed the default behaviour in config.neon.
+	 * @globalDispatchFirst false
+	 */
+	public $onSuccess = array();
+}
+```
+
+
 Debugging
 ---------
 

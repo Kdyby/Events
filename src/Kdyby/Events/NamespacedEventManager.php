@@ -168,9 +168,9 @@ class NamespacedEventManager extends EventManager
 	/**
 	 * {@inheritDoc}
 	 */
-	public function createEvent($name, $defaults = array(), $argsClass = NULL)
+	public function createEvent($name, $defaults = array(), $argsClass = NULL, $globalDispatchFirst = FALSE)
 	{
-		return $this->evm->createEvent($this->namespace . $name, $defaults, $argsClass);
+		return $this->evm->createEvent($this->namespace . $name, $defaults, $argsClass, $globalDispatchFirst);
 	}
 
 }
