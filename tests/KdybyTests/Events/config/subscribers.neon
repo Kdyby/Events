@@ -4,4 +4,3 @@ events:
 	autowire: no
 	subscribers:
 		- KdybyTests\Events\EventListenerMock
-
