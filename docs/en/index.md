@@ -89,6 +89,8 @@ class FooListener extends Nette\Object implements Kdyby\Events\Subscriber
 Now when I invoke the event `onStartup`, the listener method should get called
 
 ```php
+namespace Nette\Application;
+
 use Kdyby\Events\EventManager;
 use Kdyby\Events\EventArgsList;
 
@@ -103,7 +105,7 @@ class Application
 
 	public function run()
 	{
-		$this->evm->dispatchEvent('onStartup', new EventArgsList(array($this)));
+		$this->evm->dispatchEvent('Nette\Application\Application::onStartup', new EventArgsList(array($this)));
 	}
 }
 
