@@ -46,8 +46,7 @@
 
 		"symfony/event-dispatcher": "~2.5",
 
-		"nette/tester": "@dev",
-		"jakub-onderka/php-parallel-lint": "~0.7"
+		"nette/tester": "@dev"
 	},
 	"autoload": {
 		"psr-0": {
