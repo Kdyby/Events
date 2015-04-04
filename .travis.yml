@@ -9,7 +9,6 @@ env:
     - NETTE=nette-2.3 COMPOSER_EXTRA_ARGS="--prefer-lowest"
 
 php:
-  - 5.3.3
   - 5.4
   - 5.5
   - 5.6
