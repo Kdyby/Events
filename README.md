@@ -9,7 +9,7 @@ Kdyby/Events
 Requirements
 ------------
 
-Kdyby/Events requires PHP 5.3.2 or higher.
+Kdyby/Events requires PHP 5.4 or higher.
 
 - [Nette Framework](https://github.com/nette/nette)
 
@@ -23,7 +23,7 @@ Installation
 The best way to install Kdyby/Events is using  [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require kdyby/events:~2.2
+$ composer require kdyby/events
 ```
 
 

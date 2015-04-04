@@ -10,7 +10,7 @@ Installation
 The best way to install Kdyby/Events is using  [Composer](http://getcomposer.org/):
 
 ```sh
-$ composer require kdyby/events:~2.2
+$ composer require kdyby/events
 ```
 
 And then you should enable the extension using your neon config.
