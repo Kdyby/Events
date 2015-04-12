@@ -79,7 +79,7 @@ class FooListener extends Nette\Object implements Kdyby\Events\Subscriber
 		return array('onStartup');
 	}
 
-	public function onStartup(Application $app)
+	public function onStartup(MyNamespace\Application $app)
 	{
 		// this will get called on each of application starts
 	}
@@ -89,6 +89,8 @@ class FooListener extends Nette\Object implements Kdyby\Events\Subscriber
 Now when I invoke the event `onStartup`, the listener method should get called
 
 ```php
+namespace MyNamespace;
+
 use Kdyby\Events\EventManager;
 use Kdyby\Events\EventArgsList;
 
@@ -103,7 +105,7 @@ class Application
 
 	public function run()
 	{
-		$this->evm->dispatchEvent('onStartup', new EventArgsList(array($this)));
+		$this->evm->dispatchEvent('MyNamespace\Application::onStartup', new EventArgsList(array($this)));
 	}
 }
 
@@ -173,8 +175,8 @@ class FooListener extends Nette\Object implements Kdyby\Events\Subscriber
 	public function getSubscribedEvents()
 	{
 		return array(
-			'Nette\Application\Application::onStartup' => 'appStartup',
-			'NuclearReactor::onStartup' => 'reactorStartup'
+			'MyNapespace\Application::onStartup' => 'appStartup',
+			'MyNamespace\NuclearReactor::onStartup' => 'reactorStartup'
 		);
 	}
 
