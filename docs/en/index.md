@@ -7,7 +7,7 @@ This extension is here to provide robust events system for Nette Framework.
 Installation
 -----------
 
-The best way to install Kdyby/Events is using  [Composer](http://getcomposer.org/):
+The best way to install Kdyby/Events is using [Composer](http://getcomposer.org/):
 
 ```sh
 $ composer require kdyby/events:~2.2
@@ -24,9 +24,13 @@ extensions:
 Nette Events
 ------------
 
-By extending `Nette\Object`, you're obtaining a very simple event system. Every property prefixed by "on", is an event.
+By extending `Nette\Object`, you're obtaining a very simple event system. Every property prefixed by "on" is an event.
 
 ```php
+namespace App;
+
+use Nette;
+
 class OrderProcess extends Nette\Object
 {
 	public $onSuccess = array();
@@ -47,7 +51,7 @@ class OrderProcess extends Nette\Object
 }
 ```
 
-By passing callbacks to the event, you're making them listeners
+Listeners are created by passing them to the event as callbacks
 
 ```php
 $process = new OrderProcess($orders);
@@ -68,53 +72,63 @@ Doctrine Events
 
 Doctrine has its own event system. You basically have to create a class, that implements interface `Kdyby\Events\Subscriber`.
 This interface requires you to implement method `getSubscribedEvents`, which should return array.
-The array should contain list of events, that when invoked, the EventManager would call this listener.
+The array should contain list of events to which the listener subscribes. EventManager will call the listener when these events are invoked.
 
 
 ```php
+namespace App;
+
+use Nette;
+
 class FooListener extends Nette\Object implements Kdyby\Events\Subscriber
 {
 	public function getSubscribedEvents()
 	{
-		return array('onStartup');
+		return array('App\OrderProcess::onSuccess');
 	}
 
-	public function onStartup(Application $app)
+	public function onSuccess(OrderProcess $process)
 	{
-		// this will get called on each of application starts
+		// this will get called on order process success
 	}
 }
 ```
 
-Now when I invoke the event `onStartup`, the listener method should get called
+Now when I invoke the event `onSuccess`, the listener method will get called
 
 ```php
+namespace App;
+
 use Kdyby\Events\EventManager;
 use Kdyby\Events\EventArgsList;
 
-class Application
+class OrderProcess
 {
+	private $orders;
 	private $evm;
 
-	public function __construct(EventManager $evm)
+	public function __construct(Orders $orders, EventManager $evm)
 	{
+		$this->orders = $orders;
 		$this->evm = $evm;
 	}
 
-	public function run()
+	public function process()
 	{
-		$this->evm->dispatchEvent('onStartup', new EventArgsList(array($this)));
+		if ($order = $this->orders->create($values)) {
+			$this->evm->dispatchEvent('App\OrderProcess::onSuccess', new EventArgsList(array($this)));
+		}
 	}
 }
 
 $evm = new EventManager();
 $evm->addEventSubscriber(new FooListener());
 
-$app = new Application($evm);
-$app->run();
+$op = new OrderProcess($evm);
+$op->process();
 ```
 
-Now when you call the method `run`, the event gets dispatched and it will call the listener with given arguments.
+Now when you call the method `process()`, the event gets dispatched and it will call the listener with given arguments.
 
 
 Best of both worlds
@@ -126,12 +140,12 @@ First, you have to register the extension to your `Configurator` as said in Inst
 ```yml
 services:
 	foo:
-		class: FooListener
+		class: App\FooListener
 		tags: [kdyby.subscriber]
 ```
 
 When you tag the service with `kdyby.subscriber`, it's automatically registered to the EventManager.
-Your listener is also automatically analysed whether it really contains the methods it should, because after all, there is interface only for the `getSubscribedEvents` method.
+Your listener is also automatically analysed whether it really contains the methods it should, because after all, there is interface only for the `getSubscribedEvents()` method.
 
 Also, all the services your register, are automatically analysed whether they extend `Nette\Object`, because if they do, they could be containing some Nette events.
 If your service contains public property that looks like Nette event, it gets replaced by instance of `Kdyby\Events\Event`.
@@ -153,39 +167,44 @@ Event namespacing
 -----------------
 
 All the generated events are (and should be) namespaced by the class name, they're attached to.
-So for example the event `onRequest` in class `Nette\Application\Application`
-would have the full name `Nette\Application\Application::onRequest`.
+So for example the event `onFailure` in class `OrderProcess`
+would have the full name `App\OrderProcess::onFailure`.
 
 The rule is, that listener should implement a method, that gets called on the event dispatch.
-In this case, it would have to implement method `onRequest` which is the longest part of the event name, that can be used as method name.
+In this case, it would have to implement method `onFailure()` which is the longest part of the event name, that can be used as method name.
 
-If you don't like that, you can still use the dots and have events named for example `app.request`, but the suggested convention is class name namespace.
+If you don't like that, you can still use the dots and have events named for example `orderProcess.failure`, but the suggested convention is class name namespace.
 
 
 Method aliasing
 ---------------
 
-But what if you wanna listen on two events, that are both named `onRequest`, but in different namespaces? No worries, you can just alias them and name the method as you like.
+But what if you wanna listen on two events, that are both named `onSuccess`, but in different namespaces? No worries, you can just alias them and name the method as you like.
 
 ```php
+namespace App;
+
+use Nette;
+use Kdyby;
+
 class FooListener extends Nette\Object implements Kdyby\Events\Subscriber
 {
 	public function getSubscribedEvents()
 	{
 		return array(
-			'Nette\Application\Application::onStartup' => 'appStartup',
-			'NuclearReactor::onStartup' => 'reactorStartup'
+			'App\OrderProcess::onSuccess' => 'orderSuccess',
+			'App\StoreProcess::onSuccess' => 'storeSuccess'
 		);
 	}
 
-	public function appStartup(Application $app)
+	public function orderSuccess(OrderProcess $process)
 	{
-		// todo
+		// gets called when OrderProcess::onSuccess is invoked
 	}
 
-	public function reactorStartup(Reactor $reactor)
+	public function storeSuccess(StoreProcess $process)
 	{
-		// todo
+		// gets called when StoreProcess::onSuccess is invoked
 	}
 }
 ```
@@ -201,18 +220,23 @@ You should **never** rely on the order, in which are listeners called, but there
 
 
 ```php
+namespace App;
+
+use Nette;
+use Kdyby;
+
 class FatListener extends Nette\Object implements Kdyby\Events\Subscriber
 {
 	public function getSubscribedEvents()
 	{
 		return array(
-			'Nette\Application\Application::onStartup' => array(
-				array('appStartup', 10)
+			'App\OrderProcess::onSuccess' => array(
+				array('orderSuccess', 10)
 			),
 		);
 	}
 
-	public function appStartup(Application $app)
+	public function orderSuccess(OrderProcess $process)
 	{
 		echo __METHOD__, "\n";
 	}
@@ -225,19 +249,19 @@ class SlimListener extends Nette\Object implements Kdyby\Events\Subscriber
 	public function getSubscribedEvents()
 	{
 		return array(
-			'Nette\Application\Application::onStartup' => array(
-				array('appStartup', 15)
-				array('slowStartup', 5)
+			'App\OrderProcess::onSuccess' => array(
+				array('orderSuccess', 15)
+				array('slowOrderSuccess', 5)
 			),
 		);
 	}
 
-	public function appStartup(Application $app)
+	public function orderSuccess(OrderProcess $process)
 	{
 		echo __METHOD__, "\n";
 	}
 
-	public function slowStartup(Application $app)
+	public function slowOrderSuccess(OrderProcess $process)
 	{
 		echo __METHOD__, "\n";
 	}
@@ -245,12 +269,12 @@ class SlimListener extends Nette\Object implements Kdyby\Events\Subscriber
 }
 ```
 
-Can you guess what will be the output, when the application is started? It should output exactly this.
+Can you guess what will be the output, when the order proccess succeeded? It should output exactly this.
 
 ```
-SlimListener::appStartup
-FatListener::appStartup
-SlimListener::slowStartup
+SlimListener::orderSuccess
+FatListener::orderSuccess
+SlimListener::slowOrderSuccess
 ```
 
 Debugging
