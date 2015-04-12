@@ -388,7 +388,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 		$h = 'htmlspecialchars';
 
-		$shortFilename = function (Nette\Reflection\GlobalFunction $refl) {
+		$shortFilename = function (\ReflectionMethod $refl) {
 			$title = '.../' . basename($refl->getFileName()) . ':' . $refl->getStartLine();
 
 			if ($editor = Tracy\Helpers::editorUri($refl->getFileName(), $refl->getStartLine())) {
