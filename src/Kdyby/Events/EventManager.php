@@ -202,27 +202,18 @@ class EventManager extends Doctrine\Common\EventManager
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
-			$subscriber = $unsubscribe;
-			$unsubscribe = array();
-
-			foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
-				if ((is_array($params) && is_array($params[0])) || !is_numeric($eventName)) {
-					// [EventName => [[method, priority], ...], ...]
-					// [EventName => [method, priority], ...] && [EventName => method, .
-					$unsubscribe[] = $eventName;
-
-				} else { // [EventName, ...]
-					$unsubscribe[] = $params;
-				}
-			}
-
-			unset($this->subscribers[spl_object_hash($subscriber)]);
+			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {
+			$eventName = ltrim($eventName, '\\');
 			foreach ($this->listeners[$eventName] as $priority => $listeners) {
-				if (($key = array_search($subscriber, $listeners, TRUE)) === FALSE) {
-					continue;
+				foreach ($listeners as $k => $listener) {
+					if (!($listener == $subscriber || (is_array($listener) && $listener[0] == $subscriber))) {
+						continue(2);
+					}
+					$key = $k;
+					break;
 				}
 
 				unset($this->listeners[$eventName][$priority][$key]);
@@ -237,6 +228,33 @@ class EventManager extends Doctrine\Common\EventManager
 				$this->sorted[$eventName] = array();
 			}
 		}
+	}
+
+
+
+	/**
+	 * @param EventSubscriber $unsubscribe
+	 * @return array
+	 */
+	protected function extractSubscriber(EventSubscriber $unsubscribe)
+	{
+		$subscriber = $unsubscribe;
+		$unsubscribe = array();
+
+		foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
+			if ((is_array($params) && is_array($params[0])) || !is_numeric($eventName)) {
+				// [EventName => [[method, priority], ...], ...]
+				// [EventName => [method, priority], ...] && [EventName => method, .
+				$unsubscribe[] = $eventName;
+
+			} else { // [EventName, ...]
+				$unsubscribe[] = $params;
+			}
+		}
+
+		unset($this->subscribers[spl_object_hash($subscriber)]);
+
+		return array($unsubscribe, $subscriber);
 	}
 
 

@@ -11,6 +11,7 @@
 namespace Kdyby\Events;
 
 use Doctrine;
+use Doctrine\Common\EventSubscriber;
 use Kdyby;
 use Nette;
 
@@ -84,6 +85,10 @@ class LazyEventManager extends EventManager
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
+		if ($unsubscribe instanceof EventSubscriber) {
+			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
+		}
+
 		foreach ((array) $unsubscribe as $eventName) {
 			if (array_key_exists($eventName, $this->listenerIds)) {
 				$this->initializeListener($eventName);
