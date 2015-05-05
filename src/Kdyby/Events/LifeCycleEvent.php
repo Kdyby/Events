@@ -11,9 +11,6 @@
 namespace Kdyby\Events;
 
 use Kdyby;
-use Nette\Application\Application;
-use Nette\Application\IResponse;
-use Nette\Application\Request;
 use Nette;
 
 
