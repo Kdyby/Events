@@ -21,7 +21,6 @@
 		"nette/utils": "2.2.*@dev"
 	},
 	"require-dev": {
-		"nette/nette": "2.2.*@dev",
 		"nette/application": "2.2.*@dev",
 		"nette/bootstrap": "2.2.*@dev",
 		"nette/caching": "2.2.*@dev",
