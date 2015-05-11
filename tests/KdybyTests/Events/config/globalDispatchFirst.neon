@@ -1,0 +1,5 @@
+events:
+	globalDispatchFirst: yes
+
+services:
+	dispatchOrderMock: KdybyTests\Events\DispatchOrderMock

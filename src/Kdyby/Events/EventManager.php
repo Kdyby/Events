@@ -281,11 +281,13 @@ class EventManager extends Doctrine\Common\EventManager
 	 * @param string|array $name
 	 * @param array $defaults
 	 * @param string $argsClass
+	 * @param bool $globalDispatchFirst	 
 	 * @return Event
 	 */
-	public function createEvent($name, $defaults = array(), $argsClass = NULL)
+	public function createEvent($name, $defaults = array(), $argsClass = NULL, $globalDispatchFirst = FALSE)
 	{
 		$event = new Event($name, $defaults, $argsClass);
+		$event->globalDispatchFirst = $globalDispatchFirst;
 		$event->injectEventManager($this);
 
 		if ($this->panel) {
