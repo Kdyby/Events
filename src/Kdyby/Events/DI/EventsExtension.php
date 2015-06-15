@@ -267,6 +267,16 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 
 
+	private function isAlias(Nette\DI\ServiceDefinition $definition)
+	{
+		return $definition->factory instanceof Nette\DI\Statement && (
+				$definition->factory->entity instanceof Nette\DI\ServiceDefinition
+				|| (is_string($definition->factory->entity) && substr($definition->factory->entity, 0, 1) === '@')
+			);
+	}
+
+
+
 	/**
 	 * @param \Nette\DI\ContainerBuilder $builder
 	 */
@@ -274,7 +284,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 	{
 		foreach ($builder->getDefinitions() as $def) {
 			/** @var Nette\DI\ServiceDefinition $def */
-			if ($def->factory instanceof Nette\DI\Statement && $def->factory->entity instanceof Nette\DI\ServiceDefinition) {
+			if ($this->isAlias($def)) {
 				continue; // alias
 			}
 
