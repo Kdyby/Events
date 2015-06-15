@@ -1,0 +1,10 @@
+events:
+	optimize: no
+	validate: no
+	autowire: yes
+
+services:
+	application:
+		class: NULL
+		factory: Nette\Application\Application
+	alias: @application
