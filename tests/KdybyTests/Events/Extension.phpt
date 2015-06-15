@@ -285,6 +285,11 @@ class ExtensionTest extends Tester\TestCase
 		Assert::true($handler instanceof Kdyby\Events\IExceptionHandler);
 	}
 
+	public function testAutowireAlias() {
+		$container = $this->createContainer('alias');
+		Assert::same($container->getService('alias'), $container->getService('application'));
+	}
+
 }
 
 \run(new ExtensionTest());
