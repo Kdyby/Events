@@ -4,9 +4,9 @@ sudo: false
 
 env:
   matrix:
-    - NETTE=nette-2.3-dev PREFER_LOWEST=""
-    - NETTE=nette-2.3 PREFER_LOWEST=""
-    - NETTE=nette-2.3 PREFER_LOWEST="--prefer-lowest"
+    - NETTE=nette-2.3-dev COMPOSER_EXTRA_ARGS=""
+    - NETTE=nette-2.3 COMPOSER_EXTRA_ARGS=""
+    - NETTE=nette-2.3 COMPOSER_EXTRA_ARGS="--prefer-lowest"
 
 php:
   - 5.4
@@ -27,7 +27,7 @@ install:
   - mkdir -p vendor/bin
   - wget -O vendor/bin/composer-nette https://raw.githubusercontent.com/Kdyby/TesterExtras/master/bin/composer-nette.php
   - php vendor/bin/composer-nette
-  - composer update --no-interaction --prefer-source $PREFER_LOWEST
+  - composer update --no-interaction --prefer-source $COMPOSER_EXTRA_ARGS
 
 before_script:
   - composer create-project --prefer-source --no-interaction jakub-onderka/php-parallel-lint vendor/php-parallel-lint ~0.8
