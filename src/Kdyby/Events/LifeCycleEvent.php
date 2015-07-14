@@ -24,26 +24,31 @@ final class LifeCycleEvent extends Nette\Object
 	/**
 	 * Occurs before the application loads presenter
 	 */
-	const onStartup = 'onStartup';
+	const onStartup = 'Nette\\Application\\Application::onStartup';
 
 	/**
 	 * Occurs before the application shuts down
 	 */
-	const onShutdown = 'onShutdown';
+	const onShutdown = 'Nette\\Application\\Application::onShutdown';
 
 	/**
 	 * Occurs when a new request is ready for dispatch;
 	 */
-	const onRequest = 'onRequest';
+	const onRequest = 'Nette\\Application\\Application::onRequest';
+
+	/**
+	 * Occurs when a presenter is created
+	 */
+	const onPresenter = 'Nette\\Application\\Application::onPresenter';
 
 	/**
 	 * Occurs when a new response is received
 	 */
-	const onResponse = 'onResponse';
+	const onResponse = 'Nette\\Application\\Application::onResponse';
 
 	/**
 	 * Occurs when an unhandled exception occurs in the application
 	 */
-	const onError = 'onError';
+	const onError = 'Nette\\Application\\Application::onError';
 
 }
