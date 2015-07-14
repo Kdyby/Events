@@ -43,7 +43,7 @@
 		"tracy/tracy": "~2.3@dev",
 		"nette/utils": "~2.3@dev",
 
-		"symfony/event-dispatcher": "~2.5",
+		"symfony/event-dispatcher": "~2.3",
 
 		"nette/tester": "~1.4@rc",
 		"jakub-onderka/php-parallel-lint": "~0.7"
