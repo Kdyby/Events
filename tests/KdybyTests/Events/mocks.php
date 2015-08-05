@@ -45,6 +45,28 @@ class FooMock extends Nette\Object
 }
 
 
+interface FooMockAccessor
+{
+
+	/**
+	 * @return FooMock
+	 */
+	public function get();
+
+}
+
+
+interface FooMockFactory
+{
+
+	/**
+	 * @return FooMock
+	 */
+	public function create();
+
+}
+
+
 
 /**
  * @author Filip Procházka <filip@prochazka.su>

@@ -1,0 +1,8 @@
+events:
+	optimize: no
+	validate: no
+	autowire: yes
+services:
+	foo: KdybyTests\Events\FooMock
+	fooAccessor: KdybyTests\Events\FooMockAccessor
+	fooFactory: KdybyTests\Events\FooMockFactory

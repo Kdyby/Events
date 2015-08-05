@@ -293,6 +293,25 @@ class ExtensionTest extends Tester\TestCase
 		Assert::same($container->getService('alias'), $container->getService('application'));
 	}
 
+
+	public function testFactoryAndAccessor()
+	{
+		$container = $this->createContainer('factory.accessor');
+
+		$foo = $container->getService('foo');
+		Assert::type('Kdyby\Events\Event', $foo->onBar);
+
+		$fooAccessor = $container->getService('fooAccessor');
+		$foo2 = $fooAccessor->get();
+		Assert::same($foo, $foo2);
+
+		$fooFactory = $container->getService('fooFactory');
+		$foo3 = $fooFactory->create();
+		Assert::type('Kdyby\Events\Event', $foo3->onBar);
+		Assert::notSame($foo, $foo3);
+
+	}
+
 }
 
 \run(new ExtensionTest());
