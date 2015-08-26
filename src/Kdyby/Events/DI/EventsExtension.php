@@ -299,6 +299,9 @@ class EventsExtension extends Nette\DI\CompilerExtension
 					continue;
 				}
 			}
+			if ($def->getImplementType() === 'get') {
+				continue;
+			}
 
 			$this->bindEventProperties($def, Nette\Reflection\ClassType::from($class));
 		}
