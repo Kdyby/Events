@@ -199,6 +199,34 @@ class EventListenerMock implements Kdyby\Events\Subscriber
 
 }
 
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
+class MagicEventListenerMock implements Kdyby\Events\Subscriber
+{
+
+	public $calls = array();
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+			'onQuux',
+			'onCorge',
+		);
+	}
+
+	public function __call($name, $arguments)
+	{
+		$args = $arguments[0];
+		$args->calls[] = array(__CLASS__ . '::' . $name, $arguments);
+		$this->calls[] = array(__CLASS__ . '::' . $name, $arguments);
+	}
+
+}
+
 
 
 /**
