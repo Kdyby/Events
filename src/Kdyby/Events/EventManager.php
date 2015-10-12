@@ -198,12 +198,14 @@ class EventManager extends Doctrine\Common\EventManager
 	 * Removes an event listener from the specified events.
 	 *
 	 * @param string|array $unsubscribe
-	 * @param Doctrine\Common\EventSubscriber|array $subscriber
+	 * @param Doctrine\Common\EventSubscriber|array|callable $subscriber
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
 			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
+		} elseif (is_callable($unsubscribe)) {
+			list($unsubscribe, $subscriber) = $this->extractCallable($unsubscribe);
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {
@@ -254,6 +256,30 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 
 		unset($this->subscribers[spl_object_hash($subscriber)]);
+
+		return array($unsubscribe, $subscriber);
+	}
+
+
+
+	/**
+	 * @param callable $unsubscribe
+	 * @return array
+	 */
+	protected function extractCallable(callable $unsubscribe)
+	{
+		$subscriber = $unsubscribe;
+		$unsubscribe = array();
+
+		foreach ($this->listeners as $event => $prioritized) {
+			foreach ($prioritized as $listeners) {
+				foreach ($listeners as $listener) {
+					if ($listener == $subscriber) {
+						$unsubscribe[] = $event;
+					}
+				}
+			}
+		}
 
 		return array($unsubscribe, $subscriber);
 	}
