@@ -183,8 +183,12 @@ class EventManager extends Doctrine\Common\EventManager
 			$callback = !is_callable($subscriber) ? [$subscriber, $event] : $subscriber;
 
 			if (!is_callable($callback)) {
-				throw new InvalidListenerException("Event listener '" . get_class($callback[0]) .
-					"' is not callable and has no method '" . $callback[1] . "'");
+				if (is_object($callback[0])) {
+					throw new InvalidListenerException("Event listener '" . get_class($callback[0]) . "'  has no method '" . $callback[1] . "'");
+				} else {
+					throw new InvalidListenerException("Event listener '" . $callback[0] .
+						"' is not callable.");
+				}
 			}
 
 			$this->listeners[$eventName][$priority][] = $subscriber;

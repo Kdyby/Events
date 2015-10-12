@@ -33,9 +33,6 @@ class LazyEventManagerTest extends Tester\TestCase
 	{
 		$sl = new ListenersContainer();
 
-		$baz = function () {};
-		$sl->addService('baz', $baz);
-
 		$lazy = new LazyEventManager(array(
 			'App::onFoo' => array(
 				'first',
@@ -46,11 +43,11 @@ class LazyEventManagerTest extends Tester\TestCase
 			'onBar' => array(
 				'second',
 			),
-			'onBaz' => array(
-				$baz,
-			),
 			'Article::onDiscard' => array(
 				'third',
+			),
+			'onBaz' => array(
+				'fourth',
 			),
 		), $sl);
 
@@ -74,7 +71,7 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::true($sl->isCreated('second'));
 
 		Assert::same(array($sl->getService('second')), $fooListener);
-		Assert::same(array($sl->getService('baz')), $bazListener);
+		Assert::same(array($sl->getService('fourth')), $bazListener);
 	}
 
 
@@ -104,14 +101,14 @@ class LazyEventManagerTest extends Tester\TestCase
 			'onBar' => array(
 				$sl->getService('second'),
 			),
-			'onBaz' => array(
-				$sl->getService('baz'),
-			),
 			'Article::onDiscard' => array(
 				array(
 					$sl->getService('third'),
 					'customMethod'
 				)
+			),
+			'onBaz' => array(
+				$sl->getService('fourth'),
 			),
 		), $all);
 	}
@@ -126,7 +123,7 @@ class LazyEventManagerTest extends Tester\TestCase
 		$first = $sl->getService('first');
 		$second = $sl->getService('second');
 		$third = $sl->getService('third');
-		$baz = $sl->getService('baz');
+		$fourth = $sl->getService('fourth');
 
 		Assert::true($lazy->hasListeners('App::onFoo'));
 		Assert::true($lazy->hasListeners('onFoo'));
@@ -137,7 +134,7 @@ class LazyEventManagerTest extends Tester\TestCase
 		$lazy->removeEventSubscriber($first);
 		$lazy->removeEventSubscriber($second);
 		$lazy->removeEventSubscriber($third);
-		$lazy->removeEventListener($baz); // callable is listener, not subscriber
+		$lazy->removeEventListener($fourth); // callable is listener, not subscriber
 
 		Assert::false($lazy->hasListeners('App::onFoo'));
 		Assert::false($lazy->hasListeners('onFoo'));
@@ -170,6 +167,13 @@ class ListenersContainer extends Container
 	protected function createServiceThird()
 	{
 		return new MethodAliasListenerMock();
+	}
+
+
+
+	protected function createServiceFourth()
+	{
+		return function () {};
 	}
 
 }

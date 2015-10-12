@@ -110,11 +110,15 @@ class LazyEventManager extends EventManager
 		foreach ($this->listenerIds[$eventName] as $serviceName) {
 			if (is_callable($serviceName)) {
 				$this->addEventListener($eventName, $serviceName);
-			} else {
-				$subscriber = $this->container->getService($serviceName);
-				/** @var Doctrine\Common\EventSubscriber $subscriber */
+				continue;
+			}
 
-				$this->addEventSubscriber($subscriber);
+			$listener = $this->container->getService($serviceName);
+			if (is_callable($listener)) {
+				$this->addEventListener($eventName, $listener);
+			} else {
+				/** @var Doctrine\Common\EventSubscriber $listener */
+				$this->addEventSubscriber($listener);
 			}
 		}
 
