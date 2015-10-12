@@ -165,7 +165,7 @@ class EventArgsMock extends Kdyby\Events\EventArgs
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
+class EventListenerMock implements Kdyby\Events\Subscriber
 {
 
 	public $calls = array();

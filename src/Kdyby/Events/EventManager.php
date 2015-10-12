@@ -171,7 +171,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 * Adds an event listener that listens on the specified events.
 	 *
 	 * @param string|array $events The event(s) to listen on.
-	 * @param Doctrine\Common\EventSubscriber|array $subscriber The listener object.
+	 * @param Doctrine\Common\EventSubscriber|array|callable $subscriber The listener object.
 	 * @param int $priority
 	 *
 	 * @throws InvalidListenerException
@@ -180,10 +180,11 @@ class EventManager extends Doctrine\Common\EventManager
 	{
 		foreach ((array) $events as $eventName) {
 			list($namespace, $event) = Event::parseName($eventName);
-			$callback = !is_array($subscriber) ? array($subscriber, $event) : $subscriber;
+			$callback = !is_callable($subscriber) ? [$subscriber, $event] : $subscriber;
 
-			if (!method_exists($callback[0], $callback[1])) {
-				throw new InvalidListenerException("Event listener '" . get_class($callback[0]) . "' has no method '" . $callback[1] . "'");
+			if (!is_callable($callback)) {
+				throw new InvalidListenerException("Event listener '" . get_class($callback[0]) .
+					"' is not callable and has no method '" . $callback[1] . "'");
 			}
 
 			$this->listeners[$eventName][$priority][] = $subscriber;

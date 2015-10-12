@@ -48,6 +48,16 @@ class EventManagerTest extends Tester\TestCase
 
 
 
+	public function testListenerIsCallable()
+	{
+		$listener = function () {};
+		$this->manager->addEventListener('onFoo', $listener);
+		Assert::true($this->manager->hasListeners('onFoo'));
+		Assert::same(array('onFoo' => array($listener)), $this->manager->getListeners());
+	}
+
+
+
 	public function testRemovingListenerFromSpecificEvent()
 	{
 		$listener = new EventListenerMock();
@@ -122,6 +132,33 @@ class EventManagerTest extends Tester\TestCase
 		Assert::same(array(
 			array('KdybyTests\Events\EventListenerMock::onFoo', array($eventArgs))
 		), $listener->calls);
+	}
+
+
+
+	public function testDispatchingCallable()
+	{
+		$triggerCounter = 0;
+		$listener = function () use (& $triggerCounter) {
+			$triggerCounter++;
+		};
+
+		$this->manager->addEventListener('onFoo', $listener);
+		$this->manager->addEventListener('onBar', $listener);
+		Assert::true($this->manager->hasListeners('onFoo'));
+		Assert::true($this->manager->hasListeners('onBar'));
+
+		Assert::same(0, $triggerCounter);
+
+		$eventArgs = new EventArgsMock();
+		$this->manager->dispatchEvent('onFoo', $eventArgs);
+
+		Assert::same(1, $triggerCounter);
+
+		$eventArgs = new EventArgsMock();
+		$this->manager->dispatchEvent('onBar', $eventArgs);
+
+		Assert::same(2, $triggerCounter);
 	}
 
 
