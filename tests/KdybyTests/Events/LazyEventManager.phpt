@@ -33,6 +33,9 @@ class LazyEventManagerTest extends Tester\TestCase
 	{
 		$sl = new ListenersContainer();
 
+		$baz = function () {};
+		$sl->addService('baz', $baz);
+
 		$lazy = new LazyEventManager(array(
 			'App::onFoo' => array(
 				'first',
@@ -42,6 +45,9 @@ class LazyEventManagerTest extends Tester\TestCase
 			),
 			'onBar' => array(
 				'second',
+			),
+			'onBaz' => array(
+				$baz,
 			),
 			'Article::onDiscard' => array(
 				'third',
@@ -62,11 +68,13 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::false($sl->isCreated('second'));
 
 		$fooListener = $lazy->getListeners('onFoo');
+		$bazListener = $lazy->getListeners('onBaz');
 
 		Assert::false($sl->isCreated('first'));
 		Assert::true($sl->isCreated('second'));
 
 		Assert::same(array($sl->getService('second')), $fooListener);
+		Assert::same(array($sl->getService('baz')), $bazListener);
 	}
 
 
@@ -96,6 +104,9 @@ class LazyEventManagerTest extends Tester\TestCase
 			'onBar' => array(
 				$sl->getService('second'),
 			),
+			'onBaz' => array(
+				$sl->getService('baz'),
+			),
 			'Article::onDiscard' => array(
 				array(
 					$sl->getService('third'),
@@ -115,19 +126,23 @@ class LazyEventManagerTest extends Tester\TestCase
 		$first = $sl->getService('first');
 		$second = $sl->getService('second');
 		$third = $sl->getService('third');
+		$baz = $sl->getService('baz');
 
 		Assert::true($lazy->hasListeners('App::onFoo'));
 		Assert::true($lazy->hasListeners('onFoo'));
 		Assert::true($lazy->hasListeners('onBar'));
+		Assert::true($lazy->hasListeners('onBaz'));
 		Assert::true($lazy->hasListeners('Article::onDiscard'));
 
 		$lazy->removeEventSubscriber($first);
 		$lazy->removeEventSubscriber($second);
 		$lazy->removeEventSubscriber($third);
+		$lazy->removeEventListener($baz); // callable is listener, not subscriber
 
 		Assert::false($lazy->hasListeners('App::onFoo'));
 		Assert::false($lazy->hasListeners('onFoo'));
 		Assert::false($lazy->hasListeners('onBar'));
+		Assert::false($lazy->hasListeners('onBaz'));
 		Assert::false($lazy->hasListeners('Article::onDiscard'));
 	}
 
