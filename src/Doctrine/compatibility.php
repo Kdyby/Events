@@ -8,19 +8,6 @@
  * For the full copyright and license information, please view the file license.txt that was distributed with this source code.
  */
 
-if (!defined('KDYBY_TO_DOCTRINE_EVENTS') && !class_exists('Doctrine\Common\EventManager')) {
-	$aliases = <<<GEN
-namespace Doctrine\Common {
-	class EventArgs {}
-	abstract class EventManager {
-		public function addEventSubscriber(EventSubscriber \$subscriber) { \$this->addEventListener(\$subscriber->getSubscribedEvents(), \$subscriber); }
-		public function removeEventSubscriber(EventSubscriber \$subscriber) { \$this->removeEventListener(\$subscriber->getSubscribedEvents(), \$subscriber); }
-		abstract public function addEventListener(\$events, \$listener);
-		abstract public function removeEventListener(\$events, \$listener = NULL);
-	}
-	interface EventSubscriber { function getSubscribedEvents(); }
-}
-GEN;
-	eval($aliases);
-	define('KDYBY_TO_DOCTRINE_EVENTS', 1);
+if (!class_exists('Doctrine\Common\EventManager')) {
+	require(__DIR__ . '/aliases.php');
 }
