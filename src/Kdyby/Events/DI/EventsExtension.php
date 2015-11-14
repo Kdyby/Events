@@ -71,7 +71,8 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		$config = $this->getConfig($this->defaults);
 
 		$userConfig = $this->getConfig();
-		if (!isset($userConfig['debugger']) && !$config['debugger']) {
+		$isCli = in_array(php_sapi_name(), ['cli', 'phpdbg'], TRUE);
+		if ($isCli || (!isset($userConfig['debugger']) && !$config['debugger'])) {
 			$config['debugger'] = self::PANEL_COUNT_MODE;
 		}
 
