@@ -180,7 +180,7 @@ class EventManager extends Doctrine\Common\EventManager
 	{
 		foreach ((array) $events as $eventName) {
 			list($namespace, $event) = Event::parseName($eventName);
-			$callback = !is_callable($subscriber) ? [$subscriber, $event] : $subscriber;
+			$callback = !is_callable($subscriber) ? array($subscriber, $event) : $subscriber;
 
 			if (!is_callable($callback)) {
 				if (is_object($callback[0])) {
