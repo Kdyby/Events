@@ -204,6 +204,37 @@ class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
+class EventListenerMock2 extends Nette\Object implements Kdyby\Events\Subscriber
+{
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+				'onFoo',
+				'onBar'
+		);
+	}
+
+
+	public function onFoo()
+	{
+	}
+
+
+	public function onBar()
+	{
+	}
+
+}
+
+
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
 class NamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
