@@ -222,10 +222,13 @@ class EventManager extends Doctrine\Common\EventManager
 				}
 				if (empty($this->listeners[$eventName])) {
 					unset($this->listeners[$eventName]);
+					// there are no listeners for this specific event, so no reason to call sort on next dispatch
+					$this->sorted[$eventName] = array();
+				} else {
+					// otherwise it needs to be sorted again
+					unset($this->sorted[$eventName]);
 				}
 
-				// there are no listeners for this specific event, so no reason to call sort on next dispatch
-				$this->sorted[$eventName] = array();
 			}
 		}
 	}
