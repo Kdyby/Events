@@ -269,7 +269,7 @@ class SlimListener extends Nette\Object implements Kdyby\Events\Subscriber
 }
 ```
 
-Can you guess what will be the output, when the order proccess succeeded? It should output exactly this.
+Can you guess what will be the output, when the order process succeeded? It should output exactly this.
 
 ```
 SlimListener::orderSuccess
