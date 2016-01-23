@@ -210,7 +210,7 @@ class EventManager extends Doctrine\Common\EventManager
 			foreach ($this->listeners[$eventName] as $priority => $listeners) {
 				foreach ($listeners as $k => $listener) {
 					if (!($listener == $subscriber || (is_array($listener) && $listener[0] == $subscriber))) {
-						continue(2);
+						continue;
 					}
 					$key = $k;
 					break;
