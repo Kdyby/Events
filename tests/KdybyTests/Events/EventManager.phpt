@@ -161,6 +161,21 @@ class EventManagerTest extends Tester\TestCase
 	}
 
 
+
+	public function testRemovingListenersIssue90()
+	{
+		$listener1 = new EventListenerMock();
+		$listener2 = new EventListenerMock2();
+		$this->manager->addEventListener('onFoo', $listener1);
+		$this->manager->addEventListener('onFoo', $listener2);
+		Assert::count(2, $this->manager->getListeners('onFoo'));
+
+		$this->manager->removeEventListener('onFoo', $listener2);
+		Assert::count(1, $this->manager->getListeners('onFoo'));
+		Assert::same(['onFoo' => [$listener1]], $this->manager->getListeners());
+	}
+
+
 	public function testListenerDontHaveRequiredMethodException()
 	{
 		$evm = $this->manager;
