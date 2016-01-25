@@ -216,6 +216,10 @@ class EventManager extends Doctrine\Common\EventManager
 					break;
 				}
 
+				if(!isset($key)) {
+					continue;
+				}
+
 				unset($this->listeners[$eventName][$priority][$key]);
 				if (empty($this->listeners[$eventName][$priority])) {
 					unset($this->listeners[$eventName][$priority]);
@@ -229,6 +233,7 @@ class EventManager extends Doctrine\Common\EventManager
 					unset($this->sorted[$eventName]);
 				}
 
+				unset($key);
 			}
 		}
 	}
