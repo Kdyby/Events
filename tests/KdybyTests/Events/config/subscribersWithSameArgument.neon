@@ -1,0 +1,10 @@
+events:
+	optimize: no
+	validate: no
+	autowire: no
+	subscribers:
+		- KdybyTests\Events\EventListenerConstructorMock(@routerFactory)
+		- KdybyTests\Events\EventListenerConstructorMock2(@routerFactory)
+
+services:
+	routerFactory: KdybyTests\Events\RouterFactory

@@ -233,6 +233,72 @@ class EventListenerMock2 extends Nette\Object implements Kdyby\Events\Subscriber
 
 
 /**
+ * @author Pavol Sivý <pavol@sivy.net>
+ */
+class EventListenerConstructorMock extends Nette\Object implements Kdyby\Events\Subscriber
+{
+
+	public function __construct(RouterFactory $routerFactory)
+	{
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return [
+				'onFoo',
+		];
+	}
+
+
+
+	public function onFoo(EventArgsMock $args)
+	{
+		// pass
+	}
+
+}
+
+
+
+/**
+ * @author Pavol Sivý <pavol@sivy.net>
+ */
+class EventListenerConstructorMock2 extends Nette\Object implements Kdyby\Events\Subscriber
+{
+
+	public function __construct(RouterFactory  $routerFactory)
+	{
+	}
+
+
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return [
+				'onFoo',
+		];
+	}
+
+
+
+	public function onFoo(EventArgsMock $args)
+	{
+		// pass
+	}
+
+}
+
+
+
+/**
  * @author Filip Procházka <filip@prochazka.su>
  */
 class NamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber

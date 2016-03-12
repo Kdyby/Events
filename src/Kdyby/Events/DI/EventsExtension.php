@@ -93,8 +93,9 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 
 		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
-		foreach ($config['subscribers'] as $subscriber) {
-			$def = $builder->addDefinition($this->prefix('subscriber.' . md5(Nette\Utils\Json::encode($subscriber))));
+		foreach ($config['subscribers'] as $i => $subscriber) {
+			$def = $builder->addDefinition($this->prefix('subscriber.' . $i));
+
 			$def->setFactory(Nette\DI\Compiler::filterArguments([
 				is_string($subscriber) ? new Nette\DI\Statement($subscriber) : $subscriber
 			])[0]);
