@@ -53,6 +53,19 @@ class ExtensionTest extends Tester\TestCase
 
 
 
+	public function testRegisterListenersWithSameArguments()
+	{
+		$container = $this->createContainer('subscribersWithSameArgument');
+		$manager = $container->getService('events.manager');
+
+		/** @var Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof Kdyby\Events\EventManager);
+		Assert::equal(1, count($manager->getListeners()));
+		Assert::equal(2, count(current($manager->getListeners())));
+	}
+
+
+
 	public function testValidate_direct()
 	{
 		$me = $this;
