@@ -116,10 +116,12 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	{
 		if (!is_array($args)) {
 			$args = func_get_args();
+		} else {
+			$args = array_values($args);
 		}
 
 		foreach ($this->getListeners() as $handler) {
-			if (Callback::invokeArgs($handler, array_values($args)) === FALSE) {
+			if (call_user_func_array($handler, $args) === FALSE) {
 				return;
 			}
 		}
