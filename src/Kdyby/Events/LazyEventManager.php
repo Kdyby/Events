@@ -81,12 +81,14 @@ class LazyEventManager extends EventManager
 
 	/**
 	 * @param array|string $unsubscribe
-	 * @param Doctrine\Common\EventSubscriber|array $subscriber
+	 * @param Doctrine\Common\EventSubscriber|array|callable $subscriber
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
 			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
+		} elseif (is_callable($unsubscribe)) {
+			list($unsubscribe, $subscriber) = $this->extractCallable($unsubscribe);
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {
@@ -106,10 +108,18 @@ class LazyEventManager extends EventManager
 	private function initializeListener($eventName)
 	{
 		foreach ($this->listenerIds[$eventName] as $serviceName) {
-			$subscriber = $this->container->getService($serviceName);
-			/** @var Doctrine\Common\EventSubscriber $subscriber */
+			if (is_callable($serviceName)) {
+				$this->addEventListener($eventName, $serviceName);
+				continue;
+			}
 
-			$this->addEventSubscriber($subscriber);
+			$listener = $this->container->getService($serviceName);
+			if (is_callable($listener)) {
+				$this->addEventListener($eventName, $listener);
+			} else {
+				/** @var Doctrine\Common\EventSubscriber $listener */
+				$this->addEventSubscriber($listener);
+			}
 		}
 
 		unset($this->listenerIds[$eventName]);

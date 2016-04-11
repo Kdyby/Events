@@ -165,7 +165,7 @@ class EventArgsMock extends Kdyby\Events\EventArgs
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
-class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
+class EventListenerMock implements Kdyby\Events\Subscriber
 {
 
 	public $calls = array();
@@ -195,6 +195,34 @@ class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 	{
 		$args->calls[] = array(__METHOD__, func_get_args());
 		$this->calls[] = array(__METHOD__, func_get_args());
+	}
+
+}
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
+class MagicEventListenerMock implements Kdyby\Events\Subscriber
+{
+
+	public $calls = array();
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return array(
+			'onQuux',
+			'onCorge',
+		);
+	}
+
+	public function __call($name, $arguments)
+	{
+		$args = $arguments[0];
+		$args->calls[] = array(__CLASS__ . '::' . $name, $arguments);
+		$this->calls[] = array(__CLASS__ . '::' . $name, $arguments);
 	}
 
 }
