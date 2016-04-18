@@ -76,7 +76,7 @@ class ExtensionTest extends Tester\TestCase
 			Assert::match('Please, specify existing class for service \'events.subscriber.%a%\' explicitly, and make sure, that the class exists and can be autoloaded.', $e->getMessage());
 
 		} catch (Nette\DI\ServiceCreationException $e) {
-			Assert::match("Class NonExistingClass_%a% used in service 'events.subscriber.%a%' not found or is not instantiable.", $e->getMessage());
+			Assert::match("Class NonExistingClass_%a% used in service 'events.subscriber.%a%' not found%a?%.", $e->getMessage());
 
 		} catch (\Exception $e) {
 			Assert::fail($e->getMessage());
