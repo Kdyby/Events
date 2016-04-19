@@ -68,17 +68,17 @@ class NamespacedEventManagerTest extends Tester\TestCase
 
 		$ns = new NamespacedEventManager('App::', $evm);
 
-		$ns->dispatchEvent('onFoo', new Kdyby\Events\EventArgsList(array($args = new EventArgsMock())));
+		$ns->dispatchEvent('onFoo', new Kdyby\Events\EventArgsList([$args = new EventArgsMock()]));
 
-		Assert::same(array(), $first->calls);
+		Assert::same([], $first->calls);
 
-		Assert::same(array(
-			array('KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', array($args)),
-		), $second->calls);
+		Assert::same([
+			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
+		], $second->calls);
 
-		Assert::same(array(
-			array('KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', array($args)),
-		), $args->calls);
+		Assert::same([
+			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
+		], $args->calls);
 	}
 
 
@@ -92,20 +92,20 @@ class NamespacedEventManagerTest extends Tester\TestCase
 		$ns = new NamespacedEventManager('App::', $evm);
 		$ns->dispatchGlobalEvents = TRUE;
 
-		$ns->dispatchEvent('onFoo', new Kdyby\Events\EventArgsList(array($args = new EventArgsMock())));
+		$ns->dispatchEvent('onFoo', new Kdyby\Events\EventArgsList([$args = new EventArgsMock()]));
 
-		Assert::same(array(
-			array('KdybyTests\\Events\\EventListenerMock::onFoo', array($args)),
-		), $first->calls);
+		Assert::same([
+			['KdybyTests\\Events\\EventListenerMock::onFoo', [$args]],
+		], $first->calls);
 
-		Assert::same(array(
-			array('KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', array($args)),
-		), $second->calls);
+		Assert::same([
+			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
+		], $second->calls);
 
-		Assert::same(array(
-			array('KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', array($args)),
-			array('KdybyTests\\Events\\EventListenerMock::onFoo', array($args)),
-		), $args->calls);
+		Assert::same([
+			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
+			['KdybyTests\\Events\\EventListenerMock::onFoo', [$args]],
+		], $args->calls);
 	}
 
 }

@@ -42,17 +42,17 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	/**
 	 * @var array
 	 */
-	private $events = array();
+	private $events = [];
 
 	/**
 	 * @var array
 	 */
-	private $dispatchLog = array();
+	private $dispatchLog = [];
 
 	/**
 	 * @var array
 	 */
-	private $dispatchTree = array();
+	private $dispatchTree = [];
 
 	/**
 	 * @var array|NULL
@@ -62,12 +62,12 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	/**
 	 * @var array
 	 */
-	private $listenerIds = array();
+	private $listenerIds = [];
 
 	/**
 	 * @var array
 	 */
-	private $inlineCallbacks = array();
+	private $inlineCallbacks = [];
 
 	/**
 	 * @var array
@@ -129,7 +129,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 		if (!is_array($this->renderPanel) || $this->renderPanel['dispatchTree']) {
 			// [parent-ref, name, args, children]
-			$meta = array(&$this->dispatchTreePointer, $eventName, $args, array());
+			$meta = [&$this->dispatchTreePointer, $eventName, $args, []];
 			if ($this->dispatchTreePointer === NULL) {
 				$this->dispatchTree[] = & $meta;
 			} else {
@@ -195,7 +195,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 			return NULL;
 		}
 
-		$visited = array();
+		$visited = [];
 
 		$h = 'htmlspecialchars';
 
@@ -365,14 +365,14 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 	private function getEventCalls($eventName)
 	{
-		return !empty($this->dispatchLog[$eventName]) ? $this->dispatchLog[$eventName] : array();
+		return !empty($this->dispatchLog[$eventName]) ? $this->dispatchLog[$eventName] : [];
 	}
 
 
 
 	private function getInlineCallbacks($eventName)
 	{
-		return !empty($this->inlineCallbacks[$eventName]) ? $this->inlineCallbacks[$eventName] : array();
+		return !empty($this->inlineCallbacks[$eventName]) ? $this->inlineCallbacks[$eventName] : [];
 	}
 
 
@@ -430,7 +430,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 	private static function dumpToHtml($structure)
 	{
-		return Dumper::toHtml($structure, array(Dumper::COLLAPSE => TRUE, Dumper::DEPTH => 2));
+		return Dumper::toHtml($structure, [Dumper::COLLAPSE => TRUE, Dumper::DEPTH => 2]);
 	}
 
 
@@ -449,7 +449,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$refl->setAccessible(TRUE);
 		$meta = $refl->getValue($this->sl);
 
-		$this->registeredClasses = array();
+		$this->registeredClasses = [];
 		foreach ($meta['types'] as $type => $serviceIds) {
 			if (isset($this->registeredClasses[$type])) {
 				$this->registeredClasses[$type] = FALSE;

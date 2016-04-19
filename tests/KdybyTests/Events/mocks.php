@@ -30,17 +30,17 @@ class FooMock extends Nette\Object
 	/**
 	 * @var array|callable[]|Event
 	 */
-	public $onBar = array();
+	public $onBar = [];
 
 	/**
 	 * @var array|callable[]|Event
 	 */
-	public $onMagic = array();
+	public $onMagic = [];
 
 	/**
 	 * @var array|callable[]|Event
 	 */
-	public $onStartup = array();
+	public $onStartup = [];
 
 }
 
@@ -74,7 +74,7 @@ interface FooMockFactory
 class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 
 	/**
@@ -84,10 +84,10 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'onMagic',
 			'onStartup'
-		);
+		];
 	}
 
 
@@ -98,7 +98,7 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function onMagic(FooMock $foo, $int)
 	{
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 
@@ -108,7 +108,7 @@ class LoremListener extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function onStartup(StartupEventArgs $args)
 	{
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -156,7 +156,7 @@ class EventArgsMock extends Kdyby\Events\EventArgs
 	/**
 	 * @var array
 	 */
-	public $calls = array();
+	public $calls = [];
 
 }
 
@@ -168,33 +168,33 @@ class EventArgsMock extends Kdyby\Events\EventArgs
 class EventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'onFoo',
 			'onBar'
-		);
+		];
 	}
 
 
 
 	public function onFoo(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 
 
 	public function onBar(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -212,10 +212,10 @@ class EventListenerMock2 extends Nette\Object implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 				'onFoo',
 				'onBar'
-		);
+		];
 	}
 
 
@@ -238,24 +238,24 @@ class EventListenerMock2 extends Nette\Object implements Kdyby\Events\Subscriber
 class NamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'\App::onFoo'
-		);
+		];
 	}
 
 
 
 	public function onFoo(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -268,24 +268,24 @@ class NamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\S
 class MethodAliasListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'Article::onDiscard' => 'customMethod'
-		);
+		];
 	}
 
 
 
 	public function customMethod(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -298,24 +298,24 @@ class MethodAliasListenerMock extends Nette\Object implements Kdyby\Events\Subsc
 class PriorityMethodAliasListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
-			'Article::onDiscard' => array('customMethod', 10)
-		);
+		return [
+			'Article::onDiscard' => ['customMethod', 10]
+		];
 	}
 
 
 
 	public function customMethod(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -328,24 +328,24 @@ class PriorityMethodAliasListenerMock extends Nette\Object implements Kdyby\Even
 class HigherPriorityMethodAliasListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
-			'Article::onDiscard' => array('customMethod', 25)
-		);
+		return [
+			'Article::onDiscard' => ['customMethod', 25]
+		];
 	}
 
 
 
 	public function customMethod(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -358,35 +358,35 @@ class HigherPriorityMethodAliasListenerMock extends Nette\Object implements Kdyb
 class MultipleEventMethodsListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
-			'Article::onDiscard' => array(
-				array('firstMethod', 25),
-				array('secondMethod', 10),
-			)
-		);
+		return [
+			'Article::onDiscard' => [
+				['firstMethod', 25],
+				['secondMethod', 10],
+			]
+		];
 	}
 
 
 
 	public function firstMethod(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 
 
 	public function secondMethod(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -399,24 +399,24 @@ class MultipleEventMethodsListenerMock extends Nette\Object implements Kdyby\Eve
 class CustomNamespacedEventListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'domain.users.updated'
-		);
+		];
 	}
 
 
 
 	public function updated(EventArgsMock $args)
 	{
-		$args->calls[] = array(__METHOD__, func_get_args());
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$args->calls[] = [__METHOD__, func_get_args()];
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -434,9 +434,9 @@ class FirstInvalidListenerMock extends Nette\Object implements Kdyby\Events\Subs
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'onFoo'
-		);
+		];
 	}
 
 }
@@ -454,9 +454,9 @@ class SecondInvalidListenerMock extends Nette\Object implements Kdyby\Events\Sub
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'Application::onBar'
-		);
+		];
 	}
 
 }
@@ -466,11 +466,11 @@ class SecondInvalidListenerMock extends Nette\Object implements Kdyby\Events\Sub
 class ListenerWithoutInterface extends Nette\Object
 {
 
-	public $calls = array();
+	public $calls = [];
 
 	public function onClear()
 	{
-		$this->calls[] = array(__METHOD__, func_get_args());
+		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
 }
@@ -495,9 +495,9 @@ class RouterFactory extends Nette\Object
 class SampleRouter extends Nette\Application\Routers\Route
 {
 
-	public $onMatch = array();
+	public $onMatch = [];
 
-	public $onConstruct = array();
+	public $onConstruct = [];
 
 }
 
@@ -505,7 +505,7 @@ class SampleRouter extends Nette\Application\Routers\Route
 
 class SampleExceptionHandler implements Kdyby\Events\IExceptionHandler
 {
-	public $exceptions = array();
+	public $exceptions = [];
 
 
 	public function handleException(\Exception $exception)
@@ -518,7 +518,7 @@ class SampleExceptionHandler implements Kdyby\Events\IExceptionHandler
 
 class ParentClass extends Nette\Object
 {
-	public $onCreate = array();
+	public $onCreate = [];
 
 	public function create($arg = NULL) {
 		$this->onCreate($arg);
@@ -541,17 +541,17 @@ class LeafClass extends InheritedClass
 
 class InheritSubscriber implements Kdyby\Events\Subscriber
 {
-	public $eventCalls = array();
+	public $eventCalls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'KdybyTests\Events\LeafClass::onCreate',
 			'KdybyTests\Events\ParentClass::onCreate',
-		);
+		];
 	}
 
 
@@ -568,16 +568,16 @@ class InheritSubscriber implements Kdyby\Events\Subscriber
 
 class SecondInheritSubscriber implements Kdyby\Events\Subscriber
 {
-	public $eventCalls = array();
+	public $eventCalls = [];
 
 	/**
 	 * @return array
 	 */
 	public function getSubscribedEvents()
 	{
-		return array(
+		return [
 			'KdybyTests\Events\ParentClass::onCreate',
-		);
+		];
 	}
 
 
@@ -598,7 +598,7 @@ class SecondInheritSubscriber implements Kdyby\Events\Subscriber
 class ParentClassOnlyListener implements Kdyby\Events\Subscriber
 {
 
-	public $eventCalls = array();
+	public $eventCalls = [];
 
 
 
@@ -607,7 +607,7 @@ class ParentClassOnlyListener implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return array('KdybyTests\Events\ParentClass::onCreate');
+		return ['KdybyTests\Events\ParentClass::onCreate'];
 	}
 
 
@@ -623,7 +623,7 @@ class ParentClassOnlyListener implements Kdyby\Events\Subscriber
 class InheritClassOnlyListener implements Kdyby\Events\Subscriber
 {
 
-	public $eventCalls = array();
+	public $eventCalls = [];
 
 
 
@@ -632,7 +632,7 @@ class InheritClassOnlyListener implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return array('KdybyTests\Events\InheritedClass::onCreate');
+		return ['KdybyTests\Events\InheritedClass::onCreate'];
 	}
 
 
@@ -648,7 +648,7 @@ class InheritClassOnlyListener implements Kdyby\Events\Subscriber
 class LeafClassOnlyListener implements Kdyby\Events\Subscriber
 {
 
-	public $eventCalls = array();
+	public $eventCalls = [];
 
 
 
@@ -657,7 +657,7 @@ class LeafClassOnlyListener implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return array('KdybyTests\Events\LeafClass::onCreate');
+		return ['KdybyTests\Events\LeafClass::onCreate'];
 	}
 
 
@@ -677,17 +677,17 @@ class DispatchOrderMock extends Nette\Object
 	 * @globalDispatchFirst
 	 * @var array|callable[]|Event
 	 */
-	public $onGlobalDispatchFirst = array();
+	public $onGlobalDispatchFirst = [];
 
 	/**
 	 * @globalDispatchFirst false
 	 * @var array|callable[]|Event
 	 */
-	public $onGlobalDispatchLast = array();
+	public $onGlobalDispatchLast = [];
 
 	/**
 	 * @var array|callable[]|Event
 	 */
-	public $onGlobalDispatchDefault = array();
+	public $onGlobalDispatchDefault = [];
 
 }

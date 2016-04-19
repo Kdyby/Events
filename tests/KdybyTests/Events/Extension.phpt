@@ -34,7 +34,7 @@ class ExtensionTest extends Tester\TestCase
 	{
 		$config = new Nette\Configurator();
 		$config->setTempDirectory(TEMP_DIR);
-		$config->addParameters(array('container' => array('class' => 'SystemContainer_' . md5($configFile))));
+		$config->addParameters(['container' => ['class' => 'SystemContainer_' . md5($configFile)]]);
 		Kdyby\Events\DI\EventsExtension::register($config);
 		$config->addConfig(__DIR__ . '/config/' . $configFile . '.neon');
 		return $config->createContainer();
@@ -172,15 +172,15 @@ class ExtensionTest extends Tester\TestCase
 		/** @var SecondInheritSubscriber $subscriber */
 		$subscriber2 = $container->getService('subscriber2');
 
-		Assert::same(array(
+		Assert::same([
 			'KdybyTests\Events\LeafClass::onCreate' => 2,
 			// not subscribed for middle class
-		), $subscriber->eventCalls);
+		], $subscriber->eventCalls);
 
-		Assert::same(array(
+		Assert::same([
 			'KdybyTests\Events\LeafClass::onCreate' => 1,
 			// not subscribed for middle class
-		), $subscriber2->eventCalls);
+		], $subscriber2->eventCalls);
 	}
 
 
@@ -209,13 +209,13 @@ class ExtensionTest extends Tester\TestCase
 		$bar = $container->getService('bar');
 		/** @var EventListenerMock $bar */
 
-		Assert::same(array(
-			array('KdybyTests\Events\EventListenerMock::onFoo', array($bazArgs))
-		), $bar->calls);
+		Assert::same([
+			['KdybyTests\Events\EventListenerMock::onFoo', [$bazArgs]]
+		], $bar->calls);
 
-		Assert::same(array(
-			array('KdybyTests\Events\NamespacedEventListenerMock::onFoo', array($bazArgsSecond)),
-		), $baz->calls);
+		Assert::same([
+			['KdybyTests\Events\NamespacedEventListenerMock::onFoo', [$bazArgsSecond]],
+		], $baz->calls);
 	}
 
 
@@ -239,9 +239,9 @@ class ExtensionTest extends Tester\TestCase
 		$baz = $container->getService('baz');
 		/** @var NamespacedEventListenerMock $baz */
 
-		Assert::same(array(
-			array('KdybyTests\Events\NamespacedEventListenerMock::onFoo', array($bazArgs))
-		), $baz->calls);
+		Assert::same([
+			['KdybyTests\Events\NamespacedEventListenerMock::onFoo', [$bazArgs]]
+		], $baz->calls);
 	}
 
 
@@ -265,9 +265,9 @@ class ExtensionTest extends Tester\TestCase
 		$baz = $container->getService('foo');
 		/** @var NamespacedEventListenerMock $baz */
 
-		Assert::same(array(
-			array('KdybyTests\Events\LoremListener::onStartup', array($bazArgs))
-		), $baz->calls);
+		Assert::same([
+			['KdybyTests\Events\LoremListener::onStartup', [$bazArgs]]
+		], $baz->calls);
 	}
 
 

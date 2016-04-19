@@ -33,22 +33,22 @@ class LazyEventManagerTest extends Tester\TestCase
 	{
 		$sl = new ListenersContainer();
 
-		$lazy = new LazyEventManager(array(
-			'App::onFoo' => array(
+		$lazy = new LazyEventManager([
+			'App::onFoo' => [
 				'first',
-			),
-			'onFoo' => array(
+			],
+			'onFoo' => [
 				'second',
-			),
-			'onBar' => array(
+			],
+			'onBar' => [
 				'second',
-			),
-			'Article::onDiscard' => array(
+			],
+			'Article::onDiscard' => [
 				'third',
-			),
-		), $sl);
+			],
+		], $sl);
 
-		return array(array($sl, $lazy));
+		return [[$sl, $lazy]];
 	}
 
 
@@ -66,7 +66,7 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::false($sl->isCreated('first'));
 		Assert::true($sl->isCreated('second'));
 
-		Assert::same(array($sl->getService('second')), $fooListener);
+		Assert::same([$sl->getService('second')], $fooListener);
 	}
 
 
@@ -86,23 +86,23 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::true($sl->isCreated('second'));
 		Assert::true($sl->isCreated('third'));
 
-		Assert::same(array(
-			'App::onFoo' => array(
+		Assert::same([
+			'App::onFoo' => [
 				$sl->getService('first'),
-			),
-			'onFoo' => array(
+			],
+			'onFoo' => [
 				$sl->getService('second'),
-			),
-			'onBar' => array(
+			],
+			'onBar' => [
 				$sl->getService('second'),
-			),
-			'Article::onDiscard' => array(
-				array(
+			],
+			'Article::onDiscard' => [
+				[
 					$sl->getService('third'),
 					'customMethod'
-				)
-			),
-		), $all);
+				]
+			],
+		], $all);
 	}
 
 

@@ -35,7 +35,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * @var callable[]
 	 */
-	private $listeners = array();
+	private $listeners = [];
 
 	/**
 	 * @var string
@@ -69,7 +69,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param array $defaults
 	 * @param string $argsClass
 	 */
-	public function __construct($name, $defaults = array(), $argsClass = NULL)
+	public function __construct($name, $defaults = [], $argsClass = NULL)
 	{
 		list($this->namespace, $this->name) = self::parseName($name);
 		$this->argsClass = $argsClass;
@@ -121,7 +121,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 *
 	 * @param array $args
 	 */
-	public function dispatch($args = array())
+	public function dispatch($args = [])
 	{
 		if (!is_array($args)) {
 			$args = func_get_args();
@@ -226,13 +226,13 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 		if (preg_match('~^([^\w]?(?P<namespace>.*\w+)(?P<separator>[^\w]{1,2}))?(?P<name>[a-z]\w+)$~i', $name, $m)) {
 			$name = ($m['namespace'] ? $m['namespace'] . $m['separator'] : '') . $m['name'];
-			return array($m['namespace'] ?: NULL, $m['name'], $m['separator'] ?: NULL);
+			return [$m['namespace'] ?: NULL, $m['name'], $m['separator'] ?: NULL];
 
 		} else {
 			$name = ltrim($name, '\\');
 		}
 
-		return array(NULL, $name, NULL);
+		return [NULL, $name, NULL];
 	}
 
 

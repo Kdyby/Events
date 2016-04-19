@@ -46,7 +46,7 @@ class SymfonyDispatcher extends Nette\Object implements EventDispatcherInterface
 
 	public function dispatch($eventName, SymfonyEvent $event = null)
 	{
-		$this->evm->dispatchEvent($eventName, new EventArgsList(array($event)));
+		$this->evm->dispatchEvent($eventName, new EventArgsList([$event]));
 	}
 
 

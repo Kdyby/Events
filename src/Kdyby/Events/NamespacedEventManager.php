@@ -69,7 +69,7 @@ class NamespacedEventManager extends EventManager
 	public function getListeners($eventName = null)
 	{
 		if ($eventName === NULL) {
-			$listeners = array();
+			$listeners = [];
 			foreach ($this->evm->getListeners(NULL, TRUE) as $eventName => $subscribers) {
 				list($ns, $event) = Event::parseName($eventName);
 				if ($ns === NULL || stripos($this->namespace, $ns) !== FALSE) {
@@ -117,7 +117,7 @@ class NamespacedEventManager extends EventManager
 	{
 		foreach ((array) $events as $eventName) {
 			list($ns, $event) = Event::parseName($eventName);
-			$this->evm->addEventListener(array($ns === NULL ? $this->namespace . $event : $eventName), $subscriber);
+			$this->evm->addEventListener([$ns === NULL ? $this->namespace . $event : $eventName], $subscriber);
 		}
 	}
 
@@ -130,7 +130,7 @@ class NamespacedEventManager extends EventManager
 	{
 		if ($unsubscribe instanceof Doctrine\Common\EventSubscriber) {
 			$subscriber = $unsubscribe;
-			$unsubscribe = array();
+			$unsubscribe = [];
 
 			foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
 				if ((is_array($params) && is_array($params[0])) || !is_numeric($eventName)) {
@@ -168,7 +168,7 @@ class NamespacedEventManager extends EventManager
 	/**
 	 * {@inheritDoc}
 	 */
-	public function createEvent($name, $defaults = array(), $argsClass = NULL, $globalDispatchFirst = FALSE)
+	public function createEvent($name, $defaults = [], $argsClass = NULL, $globalDispatchFirst = FALSE)
 	{
 		return $this->evm->createEvent($this->namespace . $name, $defaults, $argsClass, $globalDispatchFirst);
 	}
