@@ -78,6 +78,13 @@ class SymfonyDispatcher extends Nette\Object implements EventDispatcherInterface
 
 
 
+	public function getListenerPriority($eventName, $listener)
+	{
+		throw new NotSupportedException();
+	}
+
+
+
 	public function getListeners($eventName = null)
 	{
 		return $this->getListeners($eventName);
