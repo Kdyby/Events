@@ -59,7 +59,6 @@ class LazyEventManager extends EventManager
 
 	/**
 	 * @param string $eventName
-	 * @param bool $asCallbacks
 	 * @return \Doctrine\Common\EventSubscriber[]
 	 */
 	public function getListeners($eventName = NULL)
