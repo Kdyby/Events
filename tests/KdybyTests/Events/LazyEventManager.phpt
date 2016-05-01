@@ -46,6 +46,9 @@ class LazyEventManagerTest extends Tester\TestCase
 			'Article::onDiscard' => [
 				'third',
 			],
+			'onQuux' => [
+				'fifth',
+			],
 		], $sl);
 
 		return [[$sl, $lazy]];
@@ -60,13 +63,17 @@ class LazyEventManagerTest extends Tester\TestCase
 	{
 		Assert::false($sl->isCreated('first'));
 		Assert::false($sl->isCreated('second'));
+		Assert::false($sl->isCreated('fifth'));
 
 		$fooListener = $lazy->getListeners('onFoo');
+		$quuxListener = $lazy->getListeners('onQuux');
 
 		Assert::false($sl->isCreated('first'));
 		Assert::true($sl->isCreated('second'));
+		Assert::true($sl->isCreated('fifth'));
 
 		Assert::same([$sl->getService('second')], $fooListener);
+		Assert::same([$sl->getService('fifth')], $quuxListener);
 	}
 
 
@@ -79,12 +86,14 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::false($sl->isCreated('first'));
 		Assert::false($sl->isCreated('second'));
 		Assert::false($sl->isCreated('third'));
+		Assert::false($sl->isCreated('fifth'));
 
 		$all = $lazy->getListeners();
 
 		Assert::true($sl->isCreated('first'));
 		Assert::true($sl->isCreated('second'));
 		Assert::true($sl->isCreated('third'));
+		Assert::true($sl->isCreated('fifth'));
 
 		Assert::same([
 			'App::onFoo' => [
@@ -102,6 +111,12 @@ class LazyEventManagerTest extends Tester\TestCase
 					'customMethod'
 				]
 			],
+			'onQuux' => [
+				$sl->getService('fifth'),
+			],
+			'onCorge' => [
+				$sl->getService('fifth'),
+			],
 		], $all);
 	}
 
@@ -115,20 +130,24 @@ class LazyEventManagerTest extends Tester\TestCase
 		$first = $sl->getService('first');
 		$second = $sl->getService('second');
 		$third = $sl->getService('third');
+		$fifth = $sl->getService('fifth');
 
 		Assert::true($lazy->hasListeners('App::onFoo'));
 		Assert::true($lazy->hasListeners('onFoo'));
 		Assert::true($lazy->hasListeners('onBar'));
 		Assert::true($lazy->hasListeners('Article::onDiscard'));
+		Assert::true($lazy->hasListeners('onQuux'));
 
 		$lazy->removeEventSubscriber($first);
 		$lazy->removeEventSubscriber($second);
 		$lazy->removeEventSubscriber($third);
+		$lazy->removeEventSubscriber($fifth);
 
 		Assert::false($lazy->hasListeners('App::onFoo'));
 		Assert::false($lazy->hasListeners('onFoo'));
 		Assert::false($lazy->hasListeners('onBar'));
 		Assert::false($lazy->hasListeners('Article::onDiscard'));
+		Assert::false($lazy->hasListeners('onQuux'));
 	}
 
 }
@@ -155,6 +174,13 @@ class ListenersContainer extends Container
 	protected function createServiceThird()
 	{
 		return new MethodAliasListenerMock();
+	}
+
+
+
+	protected function createServiceFifth()
+	{
+		return new MagicEventListenerMock();
 	}
 
 }

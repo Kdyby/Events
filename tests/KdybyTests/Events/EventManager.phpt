@@ -48,32 +48,69 @@ class EventManagerTest extends Tester\TestCase
 
 
 
+	public function testListenerIsMissingMethod()
+	{
+		Assert::exception(function () {
+			$this->manager->addEventListener('onStartup', new EventListenerMock());
+		}, 'Kdyby\Events\InvalidListenerException', 'Event listener "KdybyTests\Events\EventListenerMock" has no method "onStartup"');
+	}
+
+
+
+	public function testListenerMagic()
+	{
+		$listener = new MagicEventListenerMock();
+		$this->manager->addEventListener('onBaz', $listener);
+		Assert::true($this->manager->hasListeners('onBaz'));
+		Assert::same(['onBaz' => [$listener]], $this->manager->getListeners());
+	}
+
+
+
 	public function testRemovingListenerFromSpecificEvent()
 	{
-		$listener = new EventListenerMock();
-		$this->manager->addEventListener('onFoo', $listener);
-		$this->manager->addEventListener('onBar', $listener);
+		$subscriber = new EventListenerMock();
+		$callableSubscriber = new MagicEventListenerMock();
+
+		$this->manager->addEventListener('onFoo', $subscriber);
+		$this->manager->addEventListener('onBar', $subscriber);
+		$this->manager->addEventListener('onQuux', $callableSubscriber);
+		$this->manager->addEventListener('onCorge', $callableSubscriber);
 		Assert::true($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
+		Assert::true($this->manager->hasListeners('onQuux'));
+		Assert::true($this->manager->hasListeners('onCorge'));
 
-		$this->manager->removeEventListener('onFoo', $listener);
+		$this->manager->removeEventListener('onFoo', $subscriber);
+		$this->manager->removeEventListener('onQuux', $callableSubscriber);
 		Assert::false($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
+		Assert::false($this->manager->hasListeners('onQuux'));
+		Assert::true($this->manager->hasListeners('onCorge'));
 	}
 
 
 
 	public function testRemovingListenerCompletely()
 	{
-		$listener = new EventListenerMock();
-		$this->manager->addEventListener('onFoo', $listener);
-		$this->manager->addEventListener('onBar', $listener);
+		$subscriber = new EventListenerMock();
+		$callableSubscriber = new MagicEventListenerMock();
+
+		$this->manager->addEventListener('onFoo', $subscriber);
+		$this->manager->addEventListener('onBar', $subscriber);
+		$this->manager->addEventListener('onQuux', $callableSubscriber);
+		$this->manager->addEventListener('onCorge', $callableSubscriber);
 		Assert::true($this->manager->hasListeners('onFoo'));
 		Assert::true($this->manager->hasListeners('onBar'));
+		Assert::true($this->manager->hasListeners('onQuux'));
+		Assert::true($this->manager->hasListeners('onCorge'));
 
-		$this->manager->removeEventListener($listener);
+		$this->manager->removeEventListener($subscriber);
+		$this->manager->removeEventListener($callableSubscriber);
 		Assert::false($this->manager->hasListeners('onFoo'));
 		Assert::false($this->manager->hasListeners('onBar'));
+		Assert::false($this->manager->hasListeners('onQuux'));
+		Assert::false($this->manager->hasListeners('onCorge'));
 		Assert::same([], $this->manager->getListeners());
 	}
 
@@ -140,6 +177,23 @@ class EventManagerTest extends Tester\TestCase
 
 		Assert::same([
 			['KdybyTests\Events\EventListenerMock::onFoo', [$eventArgs]]
+		], $listener->calls);
+	}
+
+
+
+	public function testDispatchingMagic()
+	{
+		$listener = new MagicEventListenerMock();
+		$this->manager->addEventSubscriber($listener);
+		Assert::true($this->manager->hasListeners('onQuux'));
+		Assert::true($this->manager->hasListeners('onCorge'));
+
+		$eventArgs = new EventArgsMock();
+		$this->manager->dispatchEvent('onQuux', $eventArgs);
+
+		Assert::same([
+			['KdybyTests\Events\MagicEventListenerMock::onQuux', [$eventArgs]]
 		], $listener->calls);
 	}
 

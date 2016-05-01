@@ -296,6 +296,34 @@ class EventListenerConstructorMock2 extends Nette\Object implements Kdyby\Events
 
 }
 
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
+class MagicEventListenerMock extends Nette\Object implements Kdyby\Events\CallableSubscriber
+{
+
+	public $calls = [];
+
+	/**
+	 * @return array
+	 */
+	public function getSubscribedEvents()
+	{
+		return [
+			'onQuux',
+			'onCorge',
+		];
+	}
+
+	public function __call($name, $arguments)
+	{
+		$args = $arguments[0];
+		$args->calls[] = [__CLASS__ . '::' . $name, $arguments];
+		$this->calls[] = [__CLASS__ . '::' . $name, $arguments];
+	}
+
+}
+
 
 
 /**
