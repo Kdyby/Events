@@ -11,8 +11,6 @@
 namespace Kdyby\Events;
 
 use Doctrine;
-use Kdyby;
-use Nette;
 
 
 

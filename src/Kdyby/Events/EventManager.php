@@ -12,7 +12,6 @@ namespace Kdyby\Events;
 
 use Doctrine;
 use Doctrine\Common\EventSubscriber;
-use Kdyby;
 use Nette;
 use Nette\Utils\ObjectMixin;
 

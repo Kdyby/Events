@@ -10,7 +10,6 @@
 
 namespace Kdyby\Events;
 
-use Kdyby;
 use Nette;
 use Symfony\Component\EventDispatcher\Event as SymfonyEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;

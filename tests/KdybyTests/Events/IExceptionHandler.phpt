@@ -11,7 +11,6 @@
 namespace KdybyTests\Events;
 
 use Kdyby;
-use Nette;
 use Tester;
 use Tester\Assert;
 

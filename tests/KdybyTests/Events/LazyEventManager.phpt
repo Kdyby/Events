@@ -10,9 +10,7 @@
 
 namespace KdybyTests\Events;
 
-use Kdyby;
 use Kdyby\Events\LazyEventManager;
-use Nette;
 use Nette\DI\Container;
 use Tester;
 use Tester\Assert;

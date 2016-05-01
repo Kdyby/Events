@@ -10,9 +10,6 @@
 
 namespace Kdyby\Events;
 
-use Kdyby;
-use Nette;
-
 
 
 /**

@@ -11,7 +11,6 @@
 namespace KdybyTests\Events;
 
 use Doctrine\Common\EventArgs;
-use Nette;
 use Tester;
 use Tester\Assert;
 
