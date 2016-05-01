@@ -236,12 +236,11 @@ class EventManager extends Doctrine\Common\EventManager
 
 
 	/**
-	 * @param EventSubscriber $unsubscribe
+	 * @param EventSubscriber $subscriber
 	 * @return array
 	 */
-	protected function extractSubscriber(EventSubscriber $unsubscribe)
+	protected function extractSubscriber(EventSubscriber $subscriber)
 	{
-		$subscriber = $unsubscribe;
 		$unsubscribe = [];
 
 		foreach ($subscriber->getSubscribedEvents() as $eventName => $params) {
