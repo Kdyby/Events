@@ -171,7 +171,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 * Adds an event listener that listens on the specified events.
 	 *
 	 * @param string|array $events The event(s) to listen on.
-	 * @param Doctrine\Common\EventSubscriber|array $subscriber The listener object.
+	 * @param Doctrine\Common\EventSubscriber|\Closure|array $subscriber The listener object.
 	 * @param int $priority
 	 *
 	 * @throws InvalidListenerException
@@ -181,14 +181,16 @@ class EventManager extends Doctrine\Common\EventManager
 		foreach ((array) $events as $eventName) {
 			list($namespace, $event) = Event::parseName($eventName);
 
-			$callback = !is_array($subscriber) ? [$subscriber, $event] : $subscriber;
-			if ($callback[0] instanceof CallableSubscriber) {
-				if (!is_callable($callback)) {
-					throw new InvalidListenerException(sprintf('Event listener "%s" is not callable.', $callback[0]));
-				}
+			if (!$subscriber instanceof \Closure) {
+				$callback = !is_array($subscriber) ? [$subscriber, $event] : $subscriber;
+				if ($callback[0] instanceof CallableSubscriber) {
+					if (!is_callable($callback)) {
+						throw new InvalidListenerException(sprintf('Event listener "%s" is not callable.', $callback[0]));
+					}
 
-			} elseif (!method_exists($callback[0], $callback[1])) {
-				throw new InvalidListenerException(sprintf('Event listener "%s" has no method "%s"', get_class($callback[0]), $callback[1]));
+				} elseif (!method_exists($callback[0], $callback[1])) {
+					throw new InvalidListenerException(sprintf('Event listener "%s" has no method "%s"', get_class($callback[0]), $callback[1]));
+				}
 			}
 
 			$this->listeners[$eventName][$priority][] = $subscriber;
@@ -202,12 +204,14 @@ class EventManager extends Doctrine\Common\EventManager
 	 * Removes an event listener from the specified events.
 	 *
 	 * @param string|array $unsubscribe
-	 * @param Doctrine\Common\EventSubscriber|array $subscriber
+	 * @param Doctrine\Common\EventSubscriber|array|callable $subscriber
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
 			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
+		} elseif ($unsubscribe instanceof \Closure) {
+			list($unsubscribe, $subscriber) = $this->extractCallable($unsubscribe);
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {
@@ -260,6 +264,29 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 
 		unset($this->subscribers[spl_object_hash($subscriber)]);
+
+		return [$unsubscribe, $subscriber];
+	}
+
+
+
+	/**
+	 * @param callable $subscriber
+	 * @return array
+	 */
+	protected function extractCallable(callable $subscriber)
+	{
+		$unsubscribe = [];
+
+		foreach ($this->listeners as $event => $prioritized) {
+			foreach ($prioritized as $listeners) {
+				foreach ($listeners as $listener) {
+					if ($listener === $subscriber) {
+						$unsubscribe[] = $event;
+					}
+				}
+			}
+		}
 
 		return [$unsubscribe, $subscriber];
 	}
