@@ -75,7 +75,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			if (in_array(php_sapi_name(), ['cli', 'phpdbg'], TRUE)) {
 				$config['debugger'] = FALSE; // disable by default in CLI
 
-			} elseif ($config['debugger']) {
+			} elseif (!$config['debugger']) {
 				$config['debugger'] = self::PANEL_COUNT_MODE;
 			}
 		}
