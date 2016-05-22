@@ -174,7 +174,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 		return '<span title="Kdyby/Events">'
 		. '<img width="16" height="16" src="data:image/png;base64,' . base64_encode(file_get_contents(__DIR__ . '/icon.png')) . '" />'
-		. count(Arrays::flatten($this->dispatchLog)) .  ' calls'
+		. '<span class="tracy-label">' . count(Arrays::flatten($this->dispatchLog)) .  ' calls</span>'
 		. '</span>';
 	}
 
