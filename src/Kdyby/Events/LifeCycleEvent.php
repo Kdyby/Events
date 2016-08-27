@@ -10,7 +10,7 @@
 
 namespace Kdyby\Events;
 
-
+use Nette;
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
