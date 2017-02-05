@@ -304,11 +304,11 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				continue; // alias
 			}
 
-			if (!class_exists($class = $builder->expand($def->getClass()))) {
+			if (!class_exists($class = Nette\DI\Helpers::expand($def->getClass(), $this->getContainerBuilder()->parameters))) {
 				if (!$def->getFactory()) {
 					continue;
 
-				} elseif (is_array($class = $builder->expand($def->getEntity()))) {
+				} elseif (is_array($class = Nette\DI\Helpers::expand($def->getEntity(), $this->getContainerBuilder()->parameters))) {
 					continue;
 
 				} elseif (!class_exists($class)) {
