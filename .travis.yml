@@ -20,11 +20,10 @@ matrix:
   include:
     - php: 7.1
       env: COMPOSER_EXTRA_ARGS="--prefer-stable" COVERAGE="--coverage ./coverage.xml --coverage-src ./src" TESTER_RUNTIME="phpdbg"
-  exclude:
-    - php: 7.1
-      env: COMPOSER_EXTRA_ARGS="--prefer-stable"
   allow_failures:
     - env:
+    - php: 7.1
+      env: COMPOSER_EXTRA_ARGS="--prefer-stable" COVERAGE="--coverage ./coverage.xml --coverage-src ./src" TESTER_RUNTIME="phpdbg"
 
 install:
   - travis_retry composer update --no-interaction --no-suggest --no-progress --prefer-dist $COMPOSER_EXTRA_ARGS
