@@ -67,10 +67,11 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		$this->listeners = [];
 		$this->allowedManagerSetup = [];
 
-		$builder = $this->getContainerBuilder();
-		$config = $this->getConfig($this->defaults);
-
 		$userConfig = $this->getConfig();
+
+		$builder = $this->getContainerBuilder();
+		$config = $this->validateConfig($this->defaults);
+
 		if (!array_key_exists('debugger', $userConfig)) {
 			if (in_array(php_sapi_name(), ['cli', 'phpdbg'], TRUE)) {
 				$config['debugger'] = FALSE; // disable by default in CLI
@@ -303,11 +304,11 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				continue; // alias
 			}
 
-			if (!class_exists($class = $builder->expand($def->getClass()))) {
+			if (!class_exists($class = Nette\DI\Helpers::expand($def->getClass(), $this->getContainerBuilder()->parameters))) {
 				if (!$def->getFactory()) {
 					continue;
 
-				} elseif (is_array($class = $builder->expand($def->getEntity()))) {
+				} elseif (is_array($class = Nette\DI\Helpers::expand($def->getEntity(), $this->getContainerBuilder()->parameters))) {
 					continue;
 
 				} elseif (!class_exists($class)) {
