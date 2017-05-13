@@ -7,47 +7,24 @@ cache:
         - $HOME/.composer/cache
 
 php:
-  - 5.5
   - 5.6
   - 7.0
+  - 7.1
 
 env:
-  matrix:
-    - SYMFONY=3.* NETTE=nette-2.4-dev
-    - SYMFONY=3.* NETTE=nette-2.4
-    - SYMFONY=2.* NETTE=nette-2.4
-    - SYMFONY=3.* NETTE=nette-2.3
-    - SYMFONY=2.* NETTE=nette-2.3
+  - # dev
+  - COMPOSER_EXTRA_ARGS="--prefer-stable"
+  - COMPOSER_EXTRA_ARGS="--prefer-lowest --prefer-stable"
 
 matrix:
   include:
-    - php: 5.6
-      env: SYMFONY=3.* NETTE=nette-2.4 COMPOSER_EXTRA_ARGS="--prefer-lowest --prefer-stable"
-    - php: 5.6
-      env: SYMFONY=3.* NETTE=nette-2.3 COMPOSER_EXTRA_ARGS="--prefer-lowest --prefer-stable"
-    - php: 5.4
-      env: SYMFONY=2.* NETTE=nette-2.3
-    - php: 5.5
-      env: SYMFONY=2.* NETTE=nette-2.3 COMPOSER_EXTRA_ARGS="--prefer-lowest --prefer-stable"
-    - php: 7.0
-      env: SYMFONY=3.* NETTE=nette-2.4 COVERAGE="--coverage ./coverage.xml --coverage-src ./src" TESTER_RUNTIME="phpdbg"
+    - php: 7.1
+      env: COMPOSER_EXTRA_ARGS="--prefer-stable" COVERAGE="--coverage ./coverage.xml --coverage-src ./src" TESTER_RUNTIME="phpdbg"
   exclude:
-    - php: 5.5
-      env: SYMFONY=3.* NETTE=nette-2.4-dev
-    - php: 5.5
-      env: SYMFONY=3.* NETTE=nette-2.4
-    - php: 5.5
-      env: SYMFONY=2.* NETTE=nette-2.4
+    - php: 7.1
+      env: COMPOSER_EXTRA_ARGS="--prefer-stable"
   allow_failures:
-    - php: 7.0
-      env: SYMFONY=3.* NETTE=nette-2.4 COVERAGE="--coverage ./coverage.xml --coverage-src ./src" TESTER_RUNTIME="phpdbg"
-
-before_install:
-  - if [[ $SYMFONY = '2.*' ]]; then composer require --no-update symfony/event-dispatcher:^2.8; fi
-  - if [[ $SYMFONY = '3.*' ]]; then composer require --no-update symfony/event-dispatcher:^3.0; fi
-  - travis_retry composer self-update
-  - wget -O /tmp/composer-nette https://raw.githubusercontent.com/Kdyby/TesterExtras/master/bin/composer-nette.php
-  - php /tmp/composer-nette
+    - env:
 
 install:
   - travis_retry composer update --no-interaction --no-suggest --no-progress --prefer-dist $COMPOSER_EXTRA_ARGS
