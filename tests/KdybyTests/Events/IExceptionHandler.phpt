@@ -65,4 +65,4 @@ class IExceptionHandlerTestCase extends Tester\TestCase
 
 }
 
-\run(new IExceptionHandlerTestCase());
+(new IExceptionHandlerTestCase())->run();

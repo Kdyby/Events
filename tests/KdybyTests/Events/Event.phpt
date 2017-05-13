@@ -237,4 +237,4 @@ class EventTest extends Tester\TestCase
 
 }
 
-\run(new EventTest());
+(new EventTest())->run();

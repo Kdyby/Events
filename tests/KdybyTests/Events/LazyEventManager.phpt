@@ -207,4 +207,4 @@ class ListenersContainer extends Container
 
 
 
-\run(new LazyEventManagerTest());
+(new LazyEventManagerTest())->run();

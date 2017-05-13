@@ -33,4 +33,4 @@ class EventArgsTest extends Tester\TestCase
 
 }
 
-\run(new EventArgsTest());
+(new EventArgsTest())->run();

@@ -108,4 +108,4 @@ class NamespacedEventManagerTest extends Tester\TestCase
 
 }
 
-\run(new NamespacedEventManagerTest());
+(new NamespacedEventManagerTest())->run();

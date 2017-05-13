@@ -485,4 +485,4 @@ class EventManagerTest extends Tester\TestCase
 
 }
 
-\run(new EventManagerTest());
+(new EventManagerTest())->run();
