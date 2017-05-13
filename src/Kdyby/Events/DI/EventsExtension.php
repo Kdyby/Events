@@ -43,6 +43,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		'debugger' => '%debugMode%',
 		'exceptionHandler' => NULL,
 		'globalDispatchFirst' => FALSE,
+		'symfonyProxy' => TRUE,
 	];
 
 	/**
@@ -114,7 +115,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			$def->addTag(self::SUBSCRIBER_TAG);
 		}
 
-		if (class_exists('Symfony\Component\EventDispatcher\Event')) {
+		if (class_exists('Symfony\Component\EventDispatcher\Event') && $config['symfonyProxy']) {
 			$builder->addDefinition($this->prefix('symfonyProxy'))
 				->setClass('Symfony\Component\EventDispatcher\EventDispatcherInterface')
 				->setFactory('Kdyby\Events\SymfonyDispatcher');

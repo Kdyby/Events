@@ -30,13 +30,15 @@ class ExtensionTest extends Tester\TestCase
 	 * @param string $configFile
 	 * @return \SystemContainer|\Nette\DI\Container
 	 */
-	public function createContainer($configFile)
+	public function createContainer($configFile = null)
 	{
 		$config = new Nette\Configurator();
 		$config->setTempDirectory(TEMP_DIR);
 		$config->addParameters(['container' => ['class' => 'SystemContainer_' . md5($configFile)]]);
 		Kdyby\Events\DI\EventsExtension::register($config);
-		$config->addConfig(__DIR__ . '/config/' . $configFile . '.neon');
+		if ($configFile) {
+			$config->addConfig(__DIR__ . '/config/' . $configFile . '.neon');
+		}
 		return $config->createContainer();
 	}
 
@@ -350,6 +352,26 @@ class ExtensionTest extends Tester\TestCase
 		Assert::true($mock->onGlobalDispatchFirst->globalDispatchFirst);
 		Assert::false($mock->onGlobalDispatchLast->globalDispatchFirst);
 		Assert::false($mock->onGlobalDispatchDefault->globalDispatchFirst);
+	}
+
+
+
+	public function testSymfonyProxy()
+	{
+		$container = $this->createContainer();
+
+		Assert::type('Kdyby\Events\SymfonyDispatcher', $container->getByType('Symfony\Component\EventDispatcher\EventDispatcherInterface'));
+	}
+
+
+
+	public function testNoSymfonyProxy()
+	{
+		$container = $this->createContainer('noSymfonyProxy');
+
+		Assert::exception(function () use ($container) {
+			$container->getByType('Symfony\Component\EventDispatcher\EventDispatcherInterface');
+		}, "Nette\\DI\\MissingServiceException", 'Service of type Symfony\Component\EventDispatcher\EventDispatcherInterface not found.');
 	}
 
 }
