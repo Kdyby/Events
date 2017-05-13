@@ -33,11 +33,11 @@
 		"nette/tester": "~1.7"
 	},
 	"autoload": {
-		"psr-0": {
-			"Kdyby\\Events\\": "src/"
+		"psr-4": {
+			"Kdyby\\Events\\": "src/Events"
 		},
 		"classmap": [
-			"src/Kdyby/Events/exceptions.php"
+			"src/Events/exceptions.php"
 		],
 		"files": [
 			"src/Doctrine/compatibility.php"
