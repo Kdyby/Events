@@ -216,6 +216,7 @@ class EventManager extends Doctrine\Common\EventManager
 		foreach ((array) $unsubscribe as $eventName) {
 			$eventName = ltrim($eventName, '\\');
 			foreach ($this->listeners[$eventName] as $priority => $listeners) {
+				$key = NULL;
 				foreach ($listeners as $k => $listener) {
 					if (!($listener == $subscriber || (is_array($listener) && $listener[0] == $subscriber))) {
 						continue;
@@ -224,7 +225,7 @@ class EventManager extends Doctrine\Common\EventManager
 					break;
 				}
 
-				if (!isset($key)) {
+				if ($key === null) {
 					continue;
 				}
 
@@ -240,8 +241,6 @@ class EventManager extends Doctrine\Common\EventManager
 					// otherwise it needs to be sorted again
 					unset($this->sorted[$eventName]);
 				}
-
-				unset($key);
 			}
 		}
 	}
