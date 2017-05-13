@@ -386,6 +386,36 @@ class MethodAliasListenerMock extends Nette\Object implements Kdyby\Events\Subsc
 
 
 
+class MultipleMethodAliasesListenerMock extends Nette\Object implements Kdyby\Events\Subscriber
+{
+
+	public $calls = array();
+
+	public function getSubscribedEvents()
+	{
+		return array(
+			'Article::onDiscard' => array(
+				'customMethodA',
+				'customMethodB',
+			),
+		);
+	}
+
+	public function customMethodA(EventArgsMock $args)
+	{
+		$args->calls[] = array(__METHOD__, func_get_args());
+		$this->calls[] = array(__METHOD__, func_get_args());
+	}
+
+	public function customMethodB(EventArgsMock $args)
+	{
+		$args->calls[] = array(__METHOD__, func_get_args());
+		$this->calls[] = array(__METHOD__, func_get_args());
+	}
+}
+
+
+
 /**
  * @author Filip Procházka <filip@prochazka.su>
  */
