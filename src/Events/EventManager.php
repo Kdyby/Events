@@ -37,16 +37,16 @@ class EventManager extends Doctrine\Common\EventManager
 	private $listeners = [];
 
 	/**
-	 * [Event => [Subscriber, Subscriber, [callable], ...]]
+	 * [Event => Subscriber|callable]
 	 *
-	 * @var array[]
+	 * @var Doctrine\Common\EventSubscriber[][]|callable[][]
 	 */
 	private $sorted = [];
 
 	/**
 	 * [SubscriberHash => Subscriber]
 	 *
-	 * @var array[]
+	 * @var Doctrine\Common\EventSubscriber[]
 	 */
 	private $subscribers = [];
 
@@ -130,7 +130,7 @@ class EventManager extends Doctrine\Common\EventManager
 	 * Gets the listeners of a specific event or all listeners.
 	 *
 	 * @param string $eventName
-	 * @return Doctrine\Common\EventSubscriber[]|callable[]
+	 * @return Doctrine\Common\EventSubscriber[]|callable[]|Doctrine\Common\EventSubscriber[][]|callable[][]
 	 */
 	public function getListeners($eventName = NULL)
 	{
@@ -202,8 +202,8 @@ class EventManager extends Doctrine\Common\EventManager
 	/**
 	 * Removes an event listener from the specified events.
 	 *
-	 * @param string|array $unsubscribe
-	 * @param Doctrine\Common\EventSubscriber|array|callable $subscriber
+	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $unsubscribe
+	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $subscriber
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
@@ -296,6 +296,9 @@ class EventManager extends Doctrine\Common\EventManager
 
 
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function addEventSubscriber(EventSubscriber $subscriber)
 	{
 		if (isset($this->subscribers[$hash = spl_object_hash($subscriber)])) {
@@ -325,6 +328,9 @@ class EventManager extends Doctrine\Common\EventManager
 
 
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function removeEventSubscriber(EventSubscriber $subscriber)
 	{
 		$this->removeEventListener($subscriber);

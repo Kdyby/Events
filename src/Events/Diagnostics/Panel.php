@@ -57,7 +57,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	/**
 	 * @var array|NULL
 	 */
-	private $dispatchTreePointer = NULL;
+	private $dispatchTreePointer;
 
 	/**
 	 * @var array
@@ -70,7 +70,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	private $inlineCallbacks = [];
 
 	/**
-	 * @var array
+	 * @var array|NULL
 	 */
 	private $registeredClasses;
 
@@ -164,7 +164,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	/**
 	 * Renders HTML code for custom tab.
 	 *
-	 * @return string
+	 * @return string|NULL
 	 */
 	public function getTab()
 	{
@@ -183,7 +183,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	/**
 	 * Renders HTML code for custom panel.
 	 *
-	 * @return string
+	 * @return string|NULL
 	 */
 	public function getPanel()
 	{
@@ -441,16 +441,12 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 			return $this->registeredClasses;
 		}
 
-		if (property_exists('Nette\DI\Container', 'classes')) {
-			return $this->registeredClasses = $this->sl->classes;
-		}
-
 		$refl = new Nette\Reflection\Property('Nette\DI\Container', 'meta');
 		$refl->setAccessible(TRUE);
 		$meta = $refl->getValue($this->sl);
 
 		$this->registeredClasses = [];
-		foreach ($meta['types'] as $type => $serviceIds) {
+		foreach ($meta[Nette\DI\Container::TYPES] as $type => $serviceIds) {
 			if (isset($this->registeredClasses[$type])) {
 				$this->registeredClasses[$type] = FALSE;
 				continue;
@@ -539,19 +535,9 @@ CSS;
 		/** @var Panel $panel */
 
 		$panel->setEventManager($eventManager);
-		static::getDebuggerBar()->addPanel($panel);
+		Debugger::getBar()->addPanel($panel);
 
 		return $panel;
-	}
-
-
-
-	/**
-	 * @return Bar
-	 */
-	private static function getDebuggerBar()
-	{
-		return method_exists('Tracy\Debugger', 'getBar') ? Debugger::getBar() : Debugger::$bar;
 	}
 
 }

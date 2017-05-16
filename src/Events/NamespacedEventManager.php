@@ -68,10 +68,10 @@ class NamespacedEventManager extends EventManager
 	{
 		if ($eventName === NULL) {
 			$listeners = [];
-			foreach ($this->evm->getListeners(NULL, TRUE) as $eventName => $subscribers) {
-				list($ns, $event) = Event::parseName($eventName);
+			foreach ($this->evm->getListeners(NULL) as $subscriberEventName => $subscribers) {
+				list($ns, $event) = Event::parseName($subscriberEventName);
 				if ($ns === NULL || stripos($this->namespace, $ns) !== FALSE) {
-					$listeners[$eventName] = $subscribers;
+					$listeners[$subscriberEventName] = $subscribers;
 				}
 			}
 

@@ -57,19 +57,17 @@ class LazyEventManager extends EventManager
 
 
 	/**
-	 * @param string $eventName
-	 * @return \Doctrine\Common\EventSubscriber[]
+	 * {@inheritdoc}
 	 */
 	public function getListeners($eventName = NULL)
 	{
-		if (!empty($this->listenerIds[$eventName])) {
-			$this->initializeListener($eventName);
-		}
-
 		if ($eventName === NULL) {
 			while (($type = key($this->listenerIds)) !== NULL) {
 				$this->initializeListener($type);
 			}
+
+		} elseif (!empty($this->listenerIds[$eventName])) {
+			$this->initializeListener($eventName);
 		}
 
 		return parent::getListeners($eventName);
@@ -78,8 +76,7 @@ class LazyEventManager extends EventManager
 
 
 	/**
-	 * @param array|string $unsubscribe
-	 * @param Doctrine\Common\EventSubscriber|array|callable $subscriber
+	 * {@inheritdoc}
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{

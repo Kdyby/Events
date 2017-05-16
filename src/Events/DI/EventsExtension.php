@@ -10,6 +10,7 @@
 
 namespace Kdyby\Events\DI;
 
+use Doctrine\Common\EventSubscriber;
 use Kdyby;
 use Nette;
 use Nette\PhpGenerator as Code;
@@ -243,7 +244,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			}
 
 			$eventNames = [];
-			$listenerInst = self::createInstanceWithoutConstructor($def->getClass());
+			$listenerInst = self::createEventSubscriberInstanceWithoutConstructor($def->getClass());
 			foreach ($listenerInst->getSubscribedEvents() as $eventName => $params) {
 				if (is_numeric($eventName) && is_string($params)) { // [EventName, ...]
 					list(, $method) = Kdyby\Events\Event::parseName($params);
@@ -413,19 +414,21 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 
 	/**
-	 * @param string $class
+	 * @param string|NULL $class
 	 * @return \Doctrine\Common\EventSubscriber
 	 */
-	private static function createInstanceWithoutConstructor($class)
+	private static function createEventSubscriberInstanceWithoutConstructor($class)
 	{
-		if (method_exists('ReflectionClass', 'newInstanceWithoutConstructor')) {
-			$listenerInst = Nette\Reflection\ClassType::from($class)->newInstanceWithoutConstructor();
-
-		} else {
-			$listenerInst = unserialize(sprintf('O:%d:"%s":0:{}', strlen($class), $class));
+		if ($class === NULL) {
+			throw new \InvalidArgumentException('Given class cannot be NULL');
 		}
 
-		return $listenerInst;
+		$instance = Nette\Reflection\ClassType::from($class)->newInstanceWithoutConstructor();
+		if (!$instance instanceof EventSubscriber) {
+			throw new Kdyby\Events\UnexpectedValueException(sprintf('The class %s does not implement \Doctrine\Common\EventSubscriber', $class));
+		}
+
+		return $instance;
 	}
 
 }

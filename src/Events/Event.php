@@ -52,7 +52,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	private $eventManager;
 
 	/**
-	 * @var string
+	 * @var string|NULL
 	 */
 	private $argsClass;
 

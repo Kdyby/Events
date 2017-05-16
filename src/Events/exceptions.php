@@ -77,3 +77,12 @@ class NotSupportedException extends \LogicException implements Exception
 {
 
 }
+
+
+/**
+ * @author Filip Procházka <filip@prochazka.su>
+ */
+class UnexpectedValueException extends \UnexpectedValueException implements Exception
+{
+
+}

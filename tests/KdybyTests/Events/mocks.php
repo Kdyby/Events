@@ -238,8 +238,14 @@ class EventListenerMock2 extends Nette\Object implements Kdyby\Events\Subscriber
 class EventListenerConstructorMock extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
+	/** @var RouterFactory */
+	private $routerFactory;
+
+
+
 	public function __construct(RouterFactory $routerFactory)
 	{
+		$this->routerFactory = $routerFactory;
 	}
 
 
@@ -258,7 +264,7 @@ class EventListenerConstructorMock extends Nette\Object implements Kdyby\Events\
 
 	public function onFoo(EventArgsMock $args)
 	{
-		// pass
+		$this->routerFactory->createRouter(); // pass
 	}
 
 }
@@ -271,8 +277,14 @@ class EventListenerConstructorMock extends Nette\Object implements Kdyby\Events\
 class EventListenerConstructorMock2 extends Nette\Object implements Kdyby\Events\Subscriber
 {
 
+	/** @var RouterFactory */
+	private $routerFactory;
+
+
+
 	public function __construct(RouterFactory  $routerFactory)
 	{
+		$this->routerFactory = $routerFactory;
 	}
 
 
@@ -291,7 +303,7 @@ class EventListenerConstructorMock2 extends Nette\Object implements Kdyby\Events
 
 	public function onFoo(EventArgsMock $args)
 	{
-		// pass
+		$this->routerFactory->createRouter(); // pass
 	}
 
 }
@@ -610,6 +622,9 @@ class SampleExceptionHandler implements Kdyby\Events\IExceptionHandler
 
 
 
+/**
+ * @method onCreate(string|NULL $arg)
+ */
 class ParentClass extends Nette\Object
 {
 	public $onCreate = [];
