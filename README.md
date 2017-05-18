@@ -6,18 +6,7 @@ Kdyby/Events
 [![Latest stable](https://img.shields.io/packagist/v/kdyby/events.svg)](https://packagist.org/packages/kdyby/events)
 [![Coverage Status](https://coveralls.io/repos/github/Kdyby/Events/badge.svg?branch=master)](https://coveralls.io/github/Kdyby/Events?branch=master)
 
-
-
-Requirements
-------------
-
-Kdyby/Events requires PHP 5.4 or higher.
-
-- [Nette Framework](https://github.com/nette/nette)
-
-
-Kdyby/Events are also compatible with events dispatcher in [doctrine/common](https://github.com/doctrine/common), so you can use them with Doctrine.
-
+Kdyby/Events are compatible with events dispatcher in [doctrine/common](https://github.com/doctrine/common), so you can use them with Doctrine.
 
 Installation
 ------------
@@ -28,12 +17,10 @@ The best way to install Kdyby/Events is using  [Composer](http://getcomposer.org
 $ composer require kdyby/events
 ```
 
-
 Documentation
 ------------
 
 Learn more in the [documentation](https://github.com/Kdyby/Events/blob/master/docs/en/index.md).
-
 
 -----
 
