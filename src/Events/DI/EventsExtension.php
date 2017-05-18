@@ -297,7 +297,6 @@ class EventsExtension extends Nette\DI\CompilerExtension
 	 */
 	private function autowireEvents(Nette\DI\ContainerBuilder $builder)
 	{
-		$newApi = defined('Nette\DI\ServiceDefinition::IMPLEMENT_MODE_GET'); //new in Nette 2.4
 		foreach ($builder->getDefinitions() as $def) {
 			/** @var Nette\DI\ServiceDefinition $def */
 			if ($this->isAlias($def)) {
@@ -315,7 +314,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 					continue;
 				}
 			}
-			if ($newApi ? $def->getImplementMode() === $def::IMPLEMENT_MODE_GET : $def->getImplementType() === 'get') {
+			if ($def->getImplementMode() === $def::IMPLEMENT_MODE_GET) {
 				continue;
 			}
 
