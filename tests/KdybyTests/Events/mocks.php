@@ -658,8 +658,8 @@ class InheritSubscriber implements Kdyby\Events\Subscriber
 	public function getSubscribedEvents()
 	{
 		return [
-			'KdybyTests\Events\LeafClass::onCreate',
-			'KdybyTests\Events\ParentClass::onCreate',
+			LeafClass::class . '::onCreate',
+			ParentClass::class . '::onCreate',
 		];
 	}
 
@@ -685,7 +685,7 @@ class SecondInheritSubscriber implements Kdyby\Events\Subscriber
 	public function getSubscribedEvents()
 	{
 		return [
-			'KdybyTests\Events\ParentClass::onCreate',
+			ParentClass::class . '::onCreate',
 		];
 	}
 
@@ -693,7 +693,7 @@ class SecondInheritSubscriber implements Kdyby\Events\Subscriber
 
 	public function onCreate()
 	{
-		if (!$event = Tracy\Helpers::findTrace(debug_backtrace(), 'Kdyby\Events\EventManager::dispatchEvent')) {
+		if (!$event = Tracy\Helpers::findTrace(debug_backtrace(), Kdyby\Events\EventManager::class . '::dispatchEvent')) {
 			$this->eventCalls['unknown'] += 1;
 		} else {
 			$eventName = $event['args'][0];
@@ -716,7 +716,7 @@ class ParentClassOnlyListener implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return ['KdybyTests\Events\ParentClass::onCreate'];
+		return [ParentClass::class . '::onCreate'];
 	}
 
 
@@ -741,7 +741,7 @@ class InheritClassOnlyListener implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return ['KdybyTests\Events\InheritedClass::onCreate'];
+		return [InheritedClass::class . '::onCreate'];
 	}
 
 
@@ -766,7 +766,7 @@ class LeafClassOnlyListener implements Kdyby\Events\Subscriber
 	 */
 	public function getSubscribedEvents()
 	{
-		return ['KdybyTests\Events\LeafClass::onCreate'];
+		return [LeafClass::class . '::onCreate'];
 	}
 
 

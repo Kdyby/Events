@@ -17,7 +17,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 
 
-if (!interface_exists('Symfony\Component\EventDispatcher\EventDispatcherInterface')) {
+if (!interface_exists(EventDispatcherInterface::class)) {
 	eval('namespace Symfony\Component\EventDispatcher {
 		interface EventDispatcherInterface {}
 	}');

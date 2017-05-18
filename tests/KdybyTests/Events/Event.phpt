@@ -16,7 +16,6 @@ use Tester;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
-require_once __DIR__ . '/mocks.php';
 
 
 
@@ -119,7 +118,7 @@ class EventTest extends Tester\TestCase
 		};
 
 		// event
-		$foo->onStartup = new Event('onStartup', [], __NAMESPACE__ . '\\StartupEventArgs');
+		$foo->onStartup = new Event('onStartup', [], StartupEventArgs::class);
 		$foo->onStartup->injectEventManager($evm);
 
 		// listener
@@ -143,7 +142,7 @@ class EventTest extends Tester\TestCase
 		Assert::same([$foo, 2], $calls[0][1]);
 
 		Assert::count(1, $listener->calls);
-		Assert::same('KdybyTests\Events\LoremListener::onMagic', $listener->calls[0][0]);
+		Assert::same(LoremListener::class . '::onMagic', $listener->calls[0][0]);
 		Assert::same([$foo, 2], $listener->calls[0][1]);
 	}
 
@@ -160,7 +159,7 @@ class EventTest extends Tester\TestCase
 		Assert::same([$foo, 3], $calls[0][1]);
 
 		Assert::count(1, $listener->calls);
-		Assert::same('KdybyTests\Events\LoremListener::onMagic', $listener->calls[0][0]);
+		Assert::same(LoremListener::class . '::onMagic', $listener->calls[0][0]);
 		Assert::same([$foo, 3], $listener->calls[0][1]);
 	}
 
@@ -178,7 +177,7 @@ class EventTest extends Tester\TestCase
 		Assert::same(1, count($listener->calls));
 
 		list($call) = $listener->calls;
-		Assert::same('KdybyTests\Events\LoremListener::onStartup', $call[0]);
+		Assert::same(LoremListener::class . '::onStartup', $call[0]);
 		list($args) = $call[1];
 		Assert::true($args instanceof StartupEventArgs);
 		Assert::same($foo, $args->foo);
@@ -205,7 +204,7 @@ class EventTest extends Tester\TestCase
 		$event->dispatch($args);
 
 		Assert::count(2, $listener->calls);
-		Assert::same('KdybyTests\Events\EventListenerMock::onFoo', $listener->calls[0][0]);
+		Assert::same(EventListenerMock::class . '::onFoo', $listener->calls[0][0]);
 		Assert::same([$args], $listener->calls[0][1]);
 		Assert::match('KdybyTests\Events\%A?%{closure}', $listener->calls[1]);
 	}
@@ -231,7 +230,7 @@ class EventTest extends Tester\TestCase
 
 		Assert::count(2, $listener->calls);
 		Assert::match('KdybyTests\Events\%A?%{closure}', $listener->calls[0]);
-		Assert::same('KdybyTests\Events\EventListenerMock::onFoo', $listener->calls[1][0]);
+		Assert::same(EventListenerMock::class . '::onFoo', $listener->calls[1][0]);
 		Assert::same([$args], $listener->calls[1][1]);
 	}
 

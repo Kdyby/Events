@@ -441,7 +441,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 			return $this->registeredClasses;
 		}
 
-		$refl = new Nette\Reflection\Property('Nette\DI\Container', 'meta');
+		$refl = new Nette\Reflection\Property(Nette\DI\Container::class, 'meta');
 		$refl->setAccessible(TRUE);
 		$meta = $refl->getValue($this->sl);
 

@@ -11,6 +11,9 @@
 namespace Kdyby\Events;
 
 use Nette;
+use Nette\Application\Application;
+
+
 
 /**
  * @author Filip Procházka <filip@prochazka.su>
@@ -21,31 +24,31 @@ final class LifeCycleEvent extends Nette\Object
 	/**
 	 * Occurs before the application loads presenter
 	 */
-	const onStartup = 'Nette\\Application\\Application::onStartup';
+	const onStartup = Application::class . '::onStartup';
 
 	/**
 	 * Occurs before the application shuts down
 	 */
-	const onShutdown = 'Nette\\Application\\Application::onShutdown';
+	const onShutdown = Application::class . '::onShutdown';
 
 	/**
 	 * Occurs when a new request is ready for dispatch;
 	 */
-	const onRequest = 'Nette\\Application\\Application::onRequest';
+	const onRequest = Application::class . '::onRequest';
 
 	/**
 	 * Occurs when a presenter is created
 	 */
-	const onPresenter = 'Nette\\Application\\Application::onPresenter';
+	const onPresenter = Application::class . '::onPresenter';
 
 	/**
 	 * Occurs when a new response is received
 	 */
-	const onResponse = 'Nette\\Application\\Application::onResponse';
+	const onResponse = Application::class . '::onResponse';
 
 	/**
 	 * Occurs when an unhandled exception occurs in the application
 	 */
-	const onError = 'Nette\\Application\\Application::onError';
+	const onError = Application::class . '::onError';
 
 }

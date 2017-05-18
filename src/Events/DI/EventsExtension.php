@@ -12,9 +12,11 @@ namespace Kdyby\Events\DI;
 
 use Doctrine\Common\EventSubscriber;
 use Kdyby;
+use Kdyby\Events\Diagnostics\Panel;
 use Nette;
 use Nette\PhpGenerator as Code;
 use Nette\Utils\AssertionException;
+use Symfony;
 
 
 
@@ -82,7 +84,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 
 		$evm = $builder->addDefinition($this->prefix('manager'))
-			->setClass('Kdyby\Events\EventManager');
+			->setClass(Kdyby\Events\EventManager::class);
 		if ($config['debugger']) {
 			$defaults = ['dispatchTree' => FALSE, 'dispatchLog' => TRUE, 'events' => TRUE, 'listeners' => FALSE];
 			if (is_array($config['debugger'])) {
@@ -91,7 +93,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				$config['debugger'] = $config['debugger'] !== self::PANEL_COUNT_MODE;
 			}
 
-			$evm->addSetup('Kdyby\Events\Diagnostics\Panel::register(?, ?)->renderPanel = ?', ['@self', '@container', $config['debugger']]);
+			$evm->addSetup('?::register(?, ?)->renderPanel = ?', [new Code\PhpLiteral(Panel::class), '@self', '@container', $config['debugger']]);
 		}
 
 		if ($config['exceptionHandler'] !== NULL) {
@@ -115,10 +117,10 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			$def->addTag(self::SUBSCRIBER_TAG);
 		}
 
-		if (class_exists('Symfony\Component\EventDispatcher\Event')) {
+		if (class_exists(Symfony\Component\EventDispatcher\Event::class)) {
 			$builder->addDefinition($this->prefix('symfonyProxy'))
-				->setClass('Symfony\Component\EventDispatcher\EventDispatcherInterface')
-				->setFactory('Kdyby\Events\SymfonyDispatcher');
+				->setClass(Symfony\Component\EventDispatcher\EventDispatcherInterface::class)
+				->setFactory(Kdyby\Events\SymfonyDispatcher::class);
 		}
 
 		$this->loadedConfig = $config;
@@ -174,7 +176,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				$init->addBody(Code\Helpers::format(
 					'$this->getService(?)->createEvent(?)->dispatch($this);',
 					$this->prefix('manager'),
-					['Nette\\DI\\Container', 'onInitialize']
+					[Nette\DI\Container::class, 'onInitialize']
 				));
 
 				$foundNetteInitEnd = TRUE;
@@ -193,7 +195,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			$init->addBody(Code\Helpers::format(
 				'$this->getService(?)->createEvent(?)->dispatch($this);',
 				$this->prefix('manager'),
-				['Nette\\DI\\Container', 'onInitialize']
+				[Nette\DI\Container::class, 'onInitialize']
 			));
 		}
 	}
@@ -238,9 +240,9 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				);
 			}
 
-			if (!in_array('Doctrine\Common\EventSubscriber' , class_implements($def->getClass()))) {
+			if (!in_array(EventSubscriber::class , class_implements($def->getClass()))) {
 				// the minimum is Doctrine EventSubscriber, but recommend is Kdyby Subscriber
-				throw new AssertionException("Subscriber '$serviceName' doesn't implement Kdyby\\Events\\Subscriber.");
+				throw new AssertionException(sprintf("Subscriber '%s' doesn't implement %s.", $serviceName, Kdyby\Events\Subscriber::class));
 			}
 
 			$eventNames = [];
@@ -383,7 +385,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 
 		$builder->getDefinition($this->prefix('manager'))
-			->setClass('Kdyby\Events\LazyEventManager', [$listeners])
+			->setClass(Kdyby\Events\LazyEventManager::class, [$listeners])
 			->setSetup($this->allowedManagerSetup);
 	}
 
@@ -424,7 +426,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 		$instance = Nette\Reflection\ClassType::from($class)->newInstanceWithoutConstructor();
 		if (!$instance instanceof EventSubscriber) {
-			throw new Kdyby\Events\UnexpectedValueException(sprintf('The class %s does not implement \Doctrine\Common\EventSubscriber', $class));
+			throw new Kdyby\Events\UnexpectedValueException(sprintf('The class %s does not implement %s', $class, EventSubscriber::class));
 		}
 
 		return $instance;

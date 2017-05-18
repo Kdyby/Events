@@ -15,7 +15,6 @@ use Tester;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
-require_once __DIR__ . '/mocks.php';
 
 
 
@@ -43,7 +42,7 @@ class IExceptionHandlerTestCase extends Tester\TestCase
 		$evm = $this->evm;
 		Assert::exception(function() use ($evm) {
 			$evm->dispatchEvent('testEvent');
-		}, 'Exception');
+		}, \Exception::class);
 	}
 
 

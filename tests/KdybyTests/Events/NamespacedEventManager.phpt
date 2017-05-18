@@ -16,7 +16,6 @@ use Tester;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
-require_once __DIR__ . '/mocks.php';
 
 
 
@@ -71,11 +70,11 @@ class NamespacedEventManagerTest extends Tester\TestCase
 		Assert::same([], $first->calls);
 
 		Assert::same([
-			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
+			[NamespacedEventListenerMock::class . '::onFoo', [$args]],
 		], $second->calls);
 
 		Assert::same([
-			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
+			[NamespacedEventListenerMock::class . '::onFoo', [$args]],
 		], $args->calls);
 	}
 
@@ -93,16 +92,16 @@ class NamespacedEventManagerTest extends Tester\TestCase
 		$ns->dispatchEvent('onFoo', new Kdyby\Events\EventArgsList([$args = new EventArgsMock()]));
 
 		Assert::same([
-			['KdybyTests\\Events\\EventListenerMock::onFoo', [$args]],
+			[EventListenerMock::class . '::onFoo', [$args]],
 		], $first->calls);
 
 		Assert::same([
-			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
+			[NamespacedEventListenerMock::class . '::onFoo', [$args]],
 		], $second->calls);
 
 		Assert::same([
-			['KdybyTests\\Events\\NamespacedEventListenerMock::onFoo', [$args]],
-			['KdybyTests\\Events\\EventListenerMock::onFoo', [$args]],
+			[NamespacedEventListenerMock::class . '::onFoo', [$args]],
+			[EventListenerMock::class . '::onFoo', [$args]],
 		], $args->calls);
 	}
 

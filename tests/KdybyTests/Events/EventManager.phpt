@@ -10,12 +10,12 @@
 
 namespace KdybyTests\Events;
 
+use Kdyby;
 use Kdyby\Events\EventManager;
 use Tester;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
-require_once __DIR__ . '/mocks.php';
 
 
 
@@ -51,7 +51,7 @@ class EventManagerTest extends Tester\TestCase
 	{
 		Assert::exception(function () {
 			$this->manager->addEventListener('onStartup', new EventListenerMock());
-		}, 'Kdyby\Events\InvalidListenerException', 'Event listener "KdybyTests\Events\EventListenerMock" has no method "onStartup"');
+		}, Kdyby\Events\InvalidListenerException::class, 'Event listener "KdybyTests\Events\EventListenerMock" has no method "onStartup"');
 	}
 
 
@@ -183,7 +183,7 @@ class EventManagerTest extends Tester\TestCase
 
 		Assert::exception(function () use ($evm, $listener) {
 			$evm->addEventListener('onNonexisting', $listener);
-		}, 'Kdyby\Events\InvalidListenerException');
+		}, Kdyby\Events\InvalidListenerException::class);
 
 	}
 
@@ -217,7 +217,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('onFoo', $eventArgs);
 
 		Assert::same([
-			['KdybyTests\Events\EventListenerMock::onFoo', [$eventArgs]]
+			[EventListenerMock::class . '::onFoo', [$eventArgs]]
 		], $listener->calls);
 	}
 
@@ -261,7 +261,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('onQuux', $eventArgs);
 
 		Assert::same([
-			['KdybyTests\Events\MagicEventListenerMock::onQuux', [$eventArgs]]
+			[MagicEventListenerMock::class . '::onQuux', [$eventArgs]]
 		], $listener->calls);
 	}
 
@@ -296,10 +296,10 @@ class EventManagerTest extends Tester\TestCase
 
 		$expected = [];
 		if (in_array('App::onFoo', $called)) {
-			$expected[] = [__NAMESPACE__ . '\\NamespacedEventListenerMock::onFoo', [$args]];
+			$expected[] = [NamespacedEventListenerMock::class . '::onFoo', [$args]];
 		}
 		if (in_array('onFoo', $called)) {
-			$expected[] = [__NAMESPACE__ . '\\EventListenerMock::onFoo', [$args]];
+			$expected[] = [EventListenerMock::class . '::onFoo', [$args]];
 		}
 
 		Assert::same($expected, array_merge($ns->calls, $plain->calls));
@@ -315,7 +315,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('domain.users.updated', $second = new EventArgsMock());
 
 		Assert::same([
-			[__NAMESPACE__ . '\\CustomNamespacedEventListenerMock::updated', [$second]],
+			[CustomNamespacedEventListenerMock::class . '::updated', [$second]],
 		], $listener->calls);
 	}
 
@@ -328,7 +328,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
 
 		Assert::same([
-			[__NAMESPACE__ . '\\MethodAliasListenerMock::customMethod', [$args]],
+			[MethodAliasListenerMock::class . '::customMethod', [$args]],
 		], $listener->calls);
 	}
 
@@ -342,8 +342,8 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
 
 		Assert::same([
-			[__NAMESPACE__ . '\\HigherPriorityMethodAliasListenerMock::customMethod', [$args]],
-			[__NAMESPACE__ . '\\PriorityMethodAliasListenerMock::customMethod', [$args]],
+			[HigherPriorityMethodAliasListenerMock::class . '::customMethod', [$args]],
+			[PriorityMethodAliasListenerMock::class . '::customMethod', [$args]],
 		], $args->calls);
 	}
 
@@ -356,8 +356,8 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
 
 		Assert::same([
-			[__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::firstMethod', [$args]],
-			[__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::secondMethod', [$args]],
+			[MultipleEventMethodsListenerMock::class . '::firstMethod', [$args]],
+			[MultipleEventMethodsListenerMock::class . '::secondMethod', [$args]],
 		], $listener->calls);
 	}
 
@@ -370,8 +370,8 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('Article::onDiscard', $args = new EventArgsMock());
 
 		Assert::same([
-			[__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::firstMethod', [$args]],
-			[__NAMESPACE__ . '\\MultipleEventMethodsListenerMock::secondMethod', [$args]],
+			[MultipleEventMethodsListenerMock::class . '::firstMethod', [$args]],
+			[MultipleEventMethodsListenerMock::class . '::secondMethod', [$args]],
 		], $listener->calls);
 	}
 
@@ -384,7 +384,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->dispatchEvent('onClear', $args = new EventArgsMock());
 
 		Assert::same([
-			[__NAMESPACE__ . '\\ListenerWithoutInterface::onClear', [$args]],
+			[ListenerWithoutInterface::class . '::onClear', [$args]],
 		], $listener->calls);
 	}
 
@@ -393,19 +393,19 @@ class EventManagerTest extends Tester\TestCase
 	public function testEventDispatching_Inheritance_hasListeners()
 	{
 		$this->manager->addEventSubscriber($parentClassOnly = new ParentClassOnlyListener());
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\ParentClass::onCreate'));
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\InheritedClass::onCreate'));
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\LeafClass::onCreate'));
+		Assert::true($this->manager->hasListeners(ParentClass::class . '::onCreate'));
+		Assert::true($this->manager->hasListeners(InheritedClass::class . '::onCreate'));
+		Assert::true($this->manager->hasListeners(LeafClass::class . '::onCreate'));
 
 		$this->manager->addEventSubscriber($inheritClassOnly = new InheritClassOnlyListener());
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\ParentClass::onCreate'));
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\InheritedClass::onCreate'));
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\LeafClass::onCreate'));
+		Assert::true($this->manager->hasListeners(ParentClass::class . '::onCreate'));
+		Assert::true($this->manager->hasListeners(InheritedClass::class . '::onCreate'));
+		Assert::true($this->manager->hasListeners(LeafClass::class . '::onCreate'));
 
 		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\ParentClass::onCreate'));
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\InheritedClass::onCreate'));
-		Assert::true($this->manager->hasListeners('KdybyTests\Events\LeafClass::onCreate'));
+		Assert::true($this->manager->hasListeners(ParentClass::class . '::onCreate'));
+		Assert::true($this->manager->hasListeners(InheritedClass::class . '::onCreate'));
+		Assert::true($this->manager->hasListeners(LeafClass::class . '::onCreate'));
 	}
 
 
@@ -418,18 +418,18 @@ class EventManagerTest extends Tester\TestCase
 
 		Assert::same([
 			$parentClassOnly,
-		], $this->manager->getListeners('KdybyTests\Events\ParentClass::onCreate'));
+		], $this->manager->getListeners(ParentClass::class . '::onCreate'));
 
 		Assert::same([
 			$inheritClassOnly,
 			$parentClassOnly,
-		], $this->manager->getListeners('KdybyTests\Events\InheritedClass::onCreate'));
+		], $this->manager->getListeners(InheritedClass::class . '::onCreate'));
 
 		Assert::same([
 			$leafClassOnly,
 			$inheritClassOnly,
 			$parentClassOnly,
-		], $this->manager->getListeners('KdybyTests\Events\LeafClass::onCreate'));
+		], $this->manager->getListeners(LeafClass::class . '::onCreate'));
 	}
 
 
@@ -441,7 +441,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
 
 		$parentClass = new ParentClass();
-		$parentClass->onCreate = $this->manager->createEvent('KdybyTests\Events\ParentClass::onCreate');
+		$parentClass->onCreate = $this->manager->createEvent(ParentClass::class . '::onCreate');
 		$parentClass->create(1);
 
 		Assert::same([[1]], $parentClassOnly->eventCalls);
@@ -458,7 +458,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
 
 		$inheritedClass = new InheritedClass();
-		$inheritedClass->onCreate = $this->manager->createEvent('KdybyTests\Events\InheritedClass::onCreate');
+		$inheritedClass->onCreate = $this->manager->createEvent(InheritedClass::class . '::onCreate');
 		$inheritedClass->create(1);
 
 		Assert::same([[1]], $parentClassOnly->eventCalls);
@@ -475,7 +475,7 @@ class EventManagerTest extends Tester\TestCase
 		$this->manager->addEventSubscriber($leafClassOnly = new LeafClassOnlyListener());
 
 		$leafClass = new LeafClass();
-		$leafClass->onCreate = $this->manager->createEvent('KdybyTests\Events\LeafClass::onCreate');
+		$leafClass->onCreate = $this->manager->createEvent(LeafClass::class . '::onCreate');
 		$leafClass->create(1);
 
 		Assert::same([[1]], $parentClassOnly->eventCalls);
