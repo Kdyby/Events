@@ -250,7 +250,7 @@ class EventsExtension extends Nette\DI\CompilerExtension
 					list(, $method) = Kdyby\Events\Event::parseName($params);
 					$eventNames[] = ltrim($params, '\\');
 					if (!method_exists($listenerInst, $method)) {
-						throw new AssertionException("Event listener " . $def->getClass() . "::{$method}() is not implemented.");
+						throw new AssertionException('Event listener ' . $def->getClass() . "::{$method}() is not implemented.");
 					}
 
 				} elseif (is_string($eventName)) { // [EventName => ???, ...]
@@ -258,18 +258,18 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 					if (is_string($params)) { // [EventName => method, ...]
 						if (!method_exists($listenerInst, $params)) {
-							throw new AssertionException("Event listener " . $def->getClass() . "::{$params}() is not implemented.");
+							throw new AssertionException('Event listener ' . $def->getClass() . "::{$params}() is not implemented.");
 						}
 
 					} elseif (is_string($params[0])) { // [EventName => [method, priority], ...]
 						if (!method_exists($listenerInst, $params[0])) {
-							throw new AssertionException("Event listener " . $def->getClass() . "::{$params[0]}() is not implemented.");
+							throw new AssertionException('Event listener ' . $def->getClass() . "::{$params[0]}() is not implemented.");
 						}
 
 					} else {
 						foreach ($params as $listener) { // [EventName => [[method, priority], ...], ...]
 							if (!method_exists($listenerInst, $listener[0])) {
-								throw new AssertionException("Event listener " . $def->getClass() . "::{$listener[0]}() is not implemented.");
+								throw new AssertionException('Event listener ' . $def->getClass() . "::{$listener[0]}() is not implemented.");
 							}
 						}
 					}
