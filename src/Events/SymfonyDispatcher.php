@@ -10,83 +10,60 @@
 
 namespace Kdyby\Events;
 
-use Nette;
 use Symfony\Component\EventDispatcher\Event as SymfonyEvent;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class SymfonyDispatcher extends Nette\Object implements EventDispatcherInterface
+class SymfonyDispatcher implements \Symfony\Component\EventDispatcher\EventDispatcherInterface
 {
 
+	use \Kdyby\StrictObjects\Scream;
+
 	/**
-	 * @var EventManager
+	 * @var \Kdyby\Events\EventManager
 	 */
 	private $evm;
-
-
 
 	public function __construct(EventManager $eventManager)
 	{
 		$this->evm = $eventManager;
 	}
 
-
-
-	public function dispatch($eventName, SymfonyEvent $event = null)
+	public function dispatch($eventName, SymfonyEvent $event = NULL)
 	{
 		$this->evm->dispatchEvent($eventName, new EventArgsList([$event]));
 	}
 
-
-
 	public function addListener($eventName, $listener, $priority = 0)
 	{
-		throw new NotSupportedException();
+		throw new \Kdyby\Events\NotSupportedException();
 	}
-
-
 
 	public function addSubscriber(EventSubscriberInterface $subscriber)
 	{
-		throw new NotSupportedException();
+		throw new \Kdyby\Events\NotSupportedException();
 	}
-
-
 
 	public function removeListener($eventName, $listener)
 	{
-		throw new NotSupportedException();
+		throw new \Kdyby\Events\NotSupportedException();
 	}
-
-
 
 	public function removeSubscriber(EventSubscriberInterface $subscriber)
 	{
-		throw new NotSupportedException();
+		throw new \Kdyby\Events\NotSupportedException();
 	}
-
-
 
 	public function getListenerPriority($eventName, $listener)
 	{
-		throw new NotSupportedException();
+		throw new \Kdyby\Events\NotSupportedException();
 	}
 
-
-
-	public function getListeners($eventName = null)
+	public function getListeners($eventName = NULL)
 	{
 		return $this->getListeners($eventName);
 	}
 
-
-
-	public function hasListeners($eventName = null)
+	public function hasListeners($eventName = NULL)
 	{
 		return $this->evm->hasListeners($eventName);
 	}

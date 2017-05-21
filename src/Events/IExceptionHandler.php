@@ -10,12 +10,8 @@
 
 namespace Kdyby\Events;
 
-
-
 /**
  * Optional way to handle exceptions which happen in events
- *
- * @author Jan Dolecek <juzna.cz@gmail.com>
  */
 interface IExceptionHandler
 {
@@ -26,6 +22,6 @@ interface IExceptionHandler
 	 * @param \Exception $exception
 	 * @return void
 	 */
-	function handleException(\Exception $exception);
+	public function handleException(\Exception $exception);
 
 }

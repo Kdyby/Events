@@ -10,14 +10,7 @@
 
 namespace Kdyby\Events;
 
-use Doctrine;
-
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-abstract class EventArgs extends Doctrine\Common\EventArgs
+abstract class EventArgs extends \Doctrine\Common\EventArgs
 {
 
 }

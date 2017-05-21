@@ -3,28 +3,19 @@
 /**
  * Test: Kdyby\Events\LazyEventManager.
  *
- * @testCase KdybyTests\Events\LazyEventManagerTest
- * @author Filip Procházka <filip@prochazka.su>
- * @package Kdyby\Events
+ * @testCase
  */
 
 namespace KdybyTests\Events;
 
 use Kdyby\Events\LazyEventManager;
 use Nette\DI\Container;
-use Tester;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class LazyEventManagerTest extends Tester\TestCase
+class LazyEventManagerTest extends \Tester\TestCase
 {
-
 
 	public function dateGetListeners()
 	{
@@ -54,12 +45,10 @@ class LazyEventManagerTest extends Tester\TestCase
 		return [[$sl, $lazy]];
 	}
 
-
-
 	/**
 	 * @dataProvider dateGetListeners
 	 */
-	public function testGetListeners_single(Container $sl, LazyEventManager $lazy)
+	public function testGetListenersSingle(Container $sl, LazyEventManager $lazy)
 	{
 		Assert::false($sl->isCreated('first'));
 		Assert::false($sl->isCreated('second'));
@@ -80,12 +69,10 @@ class LazyEventManagerTest extends Tester\TestCase
 		Assert::same([$sl->getService('fifth')], $quuxListener);
 	}
 
-
-
 	/**
 	 * @dataProvider dateGetListeners
 	 */
-	public function testGetListeners_all(Container $sl, LazyEventManager $lazy)
+	public function testGetListenersAll(Container $sl, LazyEventManager $lazy)
 	{
 		Assert::false($sl->isCreated('first'));
 		Assert::false($sl->isCreated('second'));
@@ -114,8 +101,8 @@ class LazyEventManagerTest extends Tester\TestCase
 			'Article::onDiscard' => [
 				[
 					$sl->getService('third'),
-					'customMethod'
-				]
+					'customMethod',
+				],
 			],
 			'onBaz' => [
 				$sl->getService('fourth'),
@@ -128,8 +115,6 @@ class LazyEventManagerTest extends Tester\TestCase
 			],
 		], $all);
 	}
-
-
 
 	/**
 	 * @dataProvider dateGetListeners
@@ -163,47 +148,5 @@ class LazyEventManagerTest extends Tester\TestCase
 	}
 
 }
-
-
-
-class ListenersContainer extends Container
-{
-
-	protected function createServiceFirst()
-	{
-		return new NamespacedEventListenerMock();
-	}
-
-
-
-	protected function createServiceSecond()
-	{
-		return new EventListenerMock();
-	}
-
-
-
-	protected function createServiceThird()
-	{
-		return new MethodAliasListenerMock();
-	}
-
-
-
-	protected function createServiceFourth()
-	{
-		return function () {};
-	}
-
-
-
-	protected function createServiceFifth()
-	{
-		return new MagicEventListenerMock();
-	}
-
-}
-
-
 
 (new LazyEventManagerTest())->run();

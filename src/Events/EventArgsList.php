@@ -10,20 +10,13 @@
 
 namespace Kdyby\Events;
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class EventArgsList extends EventArgs
+class EventArgsList extends \Kdyby\Events\EventArgs
 {
 
 	/**
 	 * @var array
 	 */
 	private $args;
-
-
 
 	/**
 	 * @param array $args
@@ -32,8 +25,6 @@ class EventArgsList extends EventArgs
 	{
 		$this->args = $args;
 	}
-
-
 
 	/**
 	 * @return array

@@ -3,23 +3,19 @@
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
- * Copyright (c) 2008, 2012 Filip Procházka (filip@prochazka.su)
+ * Copyright (c) 2008 Filip Procházka (filip@prochazka.su)
  *
- * @license http://www.kdyby.org/license
+ * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
 namespace Kdyby\Events;
 
-use Nette;
 use Nette\Application\Application;
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-final class LifeCycleEvent extends Nette\Object
+final class LifeCycleEvent
 {
+
+	use \Kdyby\StrictObjects\Scream;
 
 	/**
 	 * Occurs before the application loads presenter

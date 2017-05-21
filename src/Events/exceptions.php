@@ -10,79 +10,42 @@
 
 namespace Kdyby\Events;
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
 interface Exception
 {
 
 }
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class InvalidListenerException extends \RuntimeException implements Exception
+class InvalidListenerException extends \RuntimeException implements \Kdyby\Events\Exception
 {
 
 }
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class InvalidStateException extends \RuntimeException implements Exception
+class InvalidStateException extends \RuntimeException implements \Kdyby\Events\Exception
 {
 
 }
 
-
-
-class InvalidArgumentException extends \InvalidArgumentException implements Exception
+class InvalidArgumentException extends \InvalidArgumentException implements \Kdyby\Events\Exception
 {
 
 }
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class OutOfRangeException extends \OutOfRangeException implements Exception
+class OutOfRangeException extends \OutOfRangeException implements \Kdyby\Events\Exception
 {
 
 }
 
-
-
-/**
- * The exception that is thrown when accessing a class member (property or method) fails.
- *
- * @author Filip Procházka <filip@prochazka.su>
- */
-class MemberAccessException extends \LogicException implements Exception
+class MemberAccessException extends \LogicException implements \Kdyby\Events\Exception
 {
 
 }
 
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class NotSupportedException extends \LogicException implements Exception
+class NotSupportedException extends \LogicException implements \Kdyby\Events\Exception
 {
 
 }
 
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class UnexpectedValueException extends \UnexpectedValueException implements Exception
+class UnexpectedValueException extends \UnexpectedValueException implements \Kdyby\Events\Exception
 {
 
 }

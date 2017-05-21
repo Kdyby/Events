@@ -3,26 +3,24 @@
 /**
  * Test: Kdyby\Events\Extension.
  *
- * @testCase Kdyby\Events\ExtensionTest
- * @author Filip Procházka <filip@prochazka.su>
- * @package Kdyby\Events
+ * @testCase
  */
 
 namespace KdybyTests\Events;
 
-use Kdyby;
-use Nette;
-use Tester;
+use Kdyby\Events\DI\EventsExtension;
+use Kdyby\Events\Event;
+use Kdyby\Events\EventManager;
+use Kdyby\Events\IExceptionHandler;
+use Nette\Application\Application;
+use Nette\Configurator;
+use Nette\Security\User;
+use ReflectionProperty;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class ExtensionTest extends Tester\TestCase
+class ExtensionTest extends \Tester\TestCase
 {
 
 	/**
@@ -31,64 +29,59 @@ class ExtensionTest extends Tester\TestCase
 	 */
 	public function createContainer($configFile)
 	{
-		$config = new Nette\Configurator();
+		$config = new Configurator();
 		$config->setTempDirectory(TEMP_DIR);
 		$config->addParameters(['container' => ['class' => 'SystemContainer_' . md5($configFile)]]);
-		Kdyby\Events\DI\EventsExtension::register($config);
+		EventsExtension::register($config);
 		$config->addConfig(__DIR__ . '/../nette-reset.neon');
 		$config->addConfig(__DIR__ . '/config/' . $configFile . '.neon');
 		return $config->createContainer();
 	}
 
-
-
 	public function testRegisterListeners()
 	{
 		$container = $this->createContainer('subscribers');
 		$manager = $container->getService('events.manager');
-		/** @var Kdyby\Events\EventManager $manager */
-		Assert::true($manager instanceof Kdyby\Events\EventManager);
+		/** @var \Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof EventManager);
 		Assert::equal(2, count($manager->getListeners()));
 	}
-
-
 
 	public function testRegisterListenersWithSameArguments()
 	{
 		$container = $this->createContainer('subscribersWithSameArgument');
 		$manager = $container->getService('events.manager');
 
-		/** @var Kdyby\Events\EventManager $manager */
-		Assert::true($manager instanceof Kdyby\Events\EventManager);
+		/** @var \Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof EventManager);
 		Assert::same(['onFoo'], array_keys($manager->getListeners()));
 		Assert::count(2, $manager->getListeners('onFoo'));
 	}
 
-
-
-	public function testValidate_direct()
+	public function testValidateDirect()
 	{
 		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.direct');
-		}, Nette\Utils\AssertionException::class, 'Please, do not register listeners directly to service \'events.manager\'. %a%');
+		}, \Nette\Utils\AssertionException::class, 'Please, do not register listeners directly to service @events.manager. %a%');
 	}
 
-
-
-	public function testValidate_missing()
+	public function testValidateMissing()
 	{
 		$me = $this;
 
 		try {
 			$me->createContainer('validate.missing');
-			Assert::fail("Expected exception");
+			Assert::fail('Expected exception');
 
-		} catch (Nette\Utils\AssertionException $e) {
-			Assert::match('Please, specify existing class for service \'events.subscriber.%a%\' explicitly, and make sure, that the class exists and can be autoloaded.', $e->getMessage());
+		} catch (\Nette\Utils\AssertionException $e) {
+			Assert::match(
+				'Please, specify existing class for service \'events.subscriber.%a%\' explicitly, and make sure, that the class exists and can be autoloaded.',
+				$e->getMessage()
+			);
 
-		} catch (Nette\DI\ServiceCreationException $e) {
+		} catch (\Nette\DI\ServiceCreationException $e) {
 			Assert::match("Class NonExistingClass_%a% used in service 'events.subscriber.%a%' not found%a?%.", $e->getMessage());
 
 		} catch (\Exception $e) {
@@ -96,93 +89,83 @@ class ExtensionTest extends Tester\TestCase
 		}
 	}
 
-
-
-	public function testValidate_fake()
+	public function testValidateFake()
 	{
 		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.fake');
-		}, Nette\Utils\AssertionException::class, 'Subscriber \'events.subscriber.%a%\' doesn\'t implement Kdyby\Events\Subscriber.');
+		}, \Nette\Utils\AssertionException::class, 'Subscriber @events.subscriber.%a% doesn\'t implement Kdyby\Events\Subscriber.');
 	}
 
-
-
-	public function testValidate_invalid()
+	public function testValidateInvalid()
 	{
 		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.invalid');
-		}, Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\FirstInvalidListenerMock::onFoo() is not implemented.');
+		}, \Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\FirstInvalidListenerMock::onFoo() is not implemented.');
 	}
 
-
-
-	public function testValidate_invalid2()
+	public function testValidateInvalid2()
 	{
 		$me = $this;
 
 		Assert::exception(function () use ($me) {
 			$me->createContainer('validate.invalid2');
-		}, Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\SecondInvalidListenerMock::onBar() is not implemented.');
+		}, \Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\SecondInvalidListenerMock::onBar() is not implemented.');
 	}
-
-
 
 	public function testAutowire()
 	{
 		$container = $this->createContainer('autowire');
 
 		$app = $container->getService('application');
-		/** @var Nette\Application\Application $app */
-		Assert::true($app->onStartup instanceof Kdyby\Events\Event);
-		Assert::same(Nette\Application\Application::class . '::onStartup', $app->onStartup->getName());
+		/** @var \Nette\Application\Application $app */
+		Assert::true($app->onStartup instanceof Event);
+		Assert::same(Application::class . '::onStartup', $app->onStartup->getName());
 
-		Assert::true($app->onRequest instanceof Kdyby\Events\Event);
-		Assert::same(Nette\Application\Application::class . '::onRequest', $app->onRequest->getName());
+		Assert::true($app->onRequest instanceof Event);
+		Assert::same(Application::class . '::onRequest', $app->onRequest->getName());
 
-		Assert::true($app->onResponse instanceof Kdyby\Events\Event);
-		Assert::same(Nette\Application\Application::class . '::onResponse', $app->onResponse->getName());
+		Assert::true($app->onResponse instanceof Event);
+		Assert::same(Application::class . '::onResponse', $app->onResponse->getName());
 
-		Assert::true($app->onError instanceof Kdyby\Events\Event);
-		Assert::same(Nette\Application\Application::class . '::onError', $app->onError->getName());
+		Assert::true($app->onError instanceof Event);
+		Assert::same(Application::class . '::onError', $app->onError->getName());
 
-		Assert::true($app->onShutdown instanceof Kdyby\Events\Event);
-		Assert::same(Nette\Application\Application::class . '::onShutdown', $app->onShutdown->getName());
+		Assert::true($app->onShutdown instanceof Event);
+		Assert::same(Application::class . '::onShutdown', $app->onShutdown->getName());
 
 		// not all properties are affected
 		Assert::true(is_bool($app->catchExceptions));
 		Assert::true(!is_object($app->errorPresenter));
 
 		$user = $container->getService('user');
-		/** @var Nette\Security\User $user */
-		Assert::true($user->onLoggedIn instanceof Kdyby\Events\Event);
-		Assert::same(Nette\Security\User::class . '::onLoggedIn', $user->onLoggedIn->getName());
+		/** @var \Nette\Security\User $user */
+		Assert::true($user->onLoggedIn instanceof Event);
+		Assert::same(User::class . '::onLoggedIn', $user->onLoggedIn->getName());
 
-		Assert::true($user->onLoggedOut instanceof Kdyby\Events\Event);
-		Assert::same(Nette\Security\User::class . '::onLoggedOut', $user->onLoggedOut->getName());
+		Assert::true($user->onLoggedOut instanceof Event);
+		Assert::same(User::class . '::onLoggedOut', $user->onLoggedOut->getName());
 	}
-
-
 
 	public function testInherited()
 	{
 		$container = $this->createContainer('inherited');
 
-		/** @var LeafClass $leafObject */
+		/** @var \KdybyTests\Events\LeafClass $leafObject */
 		$leafObject = $container->getService('leaf');
 
-		Assert::true($leafObject->onCreate instanceof Kdyby\Events\Event);
+		Assert::true($leafObject->onCreate instanceof Event);
 		Assert::same(LeafClass::class . '::onCreate', $leafObject->onCreate->getName());
 
 		$leafObject->create();
 
-		/** @var InheritSubscriber $subscriber */
+		/** @var \KdybyTests\Events\InheritSubscriber $subscriber */
 		$subscriber = $container->getService('subscriber');
 
-		/** @var SecondInheritSubscriber $subscriber */
+		/** @var \KdybyTests\Events\SecondInheritSubscriber $subscriber */
 		$subscriber2 = $container->getService('subscriber2');
 
 		Assert::same([
@@ -196,34 +179,34 @@ class ExtensionTest extends Tester\TestCase
 		], $subscriber2->eventCalls);
 	}
 
-
-
 	public function testOptimize()
 	{
 		$container = $this->createContainer('optimize');
 		$manager = $container->getService('events.manager');
-		/** @var Kdyby\Events\EventManager $manager */
-		Assert::true($manager instanceof Kdyby\Events\EventManager);
+		/** @var \Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof EventManager);
 
 		Assert::false($container->isCreated('foo'));
 		Assert::false($container->isCreated('bar'));
 		Assert::false($container->isCreated('baz'));
-		$manager->dispatchEvent('onFoo', $bazArgs = new EventArgsMock());
+		$bazArgs = new EventArgsMock();
+		$manager->dispatchEvent('onFoo', $bazArgs);
 		Assert::false($container->isCreated('foo'));
 		Assert::true($container->isCreated('bar'));
 		Assert::false($container->isCreated('baz'));
 		Assert::same(1, count($manager->getListeners('onFoo')));
 
-		$manager->dispatchEvent('App::onFoo', $bazArgsSecond = new EventArgsMock());
+		$bazArgsSecond = new EventArgsMock();
+		$manager->dispatchEvent('App::onFoo', $bazArgsSecond);
 		Assert::same(1, count($manager->getListeners('App::onFoo')));
 
 		$baz = $container->getService('baz');
-		/** @var NamespacedEventListenerMock $baz */
+		/** @var \KdybyTests\Events\NamespacedEventListenerMock $baz */
 		$bar = $container->getService('bar');
-		/** @var EventListenerMock $bar */
+		/** @var \KdybyTests\Events\EventListenerMock $bar */
 
 		Assert::same([
-			[EventListenerMock::class . '::onFoo', [$bazArgs]]
+			[EventListenerMock::class . '::onFoo', [$bazArgs]],
 		], $bar->calls);
 
 		Assert::same([
@@ -231,59 +214,56 @@ class ExtensionTest extends Tester\TestCase
 		], $baz->calls);
 	}
 
-
-
-	public function testOptimize_dispatchNamespaceFirst()
+	public function testOptimizeDispatchNamespaceFirst()
 	{
 		$container = $this->createContainer('optimize');
 		$manager = $container->getService('events.manager');
-		/** @var Kdyby\Events\EventManager $manager */
-		Assert::true($manager instanceof Kdyby\Events\EventManager);
+		/** @var \Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof EventManager);
 
 		Assert::false($container->isCreated('foo'));
 		Assert::false($container->isCreated('bar'));
 		Assert::false($container->isCreated('baz'));
-		$manager->dispatchEvent('App::onFoo', $bazArgs = new EventArgsMock());
+		$bazArgs = new EventArgsMock();
+		$manager->dispatchEvent('App::onFoo', $bazArgs);
 		Assert::false($container->isCreated('foo'));
 		Assert::false($container->isCreated('bar'));
 		Assert::true($container->isCreated('baz'));
 		Assert::same(1, count($manager->getListeners('App::onFoo')));
 
 		$baz = $container->getService('baz');
-		/** @var NamespacedEventListenerMock $baz */
+		/** @var \KdybyTests\Events\NamespacedEventListenerMock $baz */
 
 		Assert::same([
-			[NamespacedEventListenerMock::class . '::onFoo', [$bazArgs]]
+			[NamespacedEventListenerMock::class . '::onFoo', [$bazArgs]],
 		], $baz->calls);
 	}
 
-
-
-	public function testOptimize_standalone()
+	public function testOptimizeStandalone()
 	{
 		$container = $this->createContainer('optimize');
 		$manager = $container->getService('events.manager');
-		/** @var Kdyby\Events\EventManager $manager */
-		Assert::true($manager instanceof Kdyby\Events\EventManager);
+		/** @var \Kdyby\Events\EventManager $manager */
+		Assert::true($manager instanceof EventManager);
 
 		Assert::false($container->isCreated('foo'));
 		Assert::false($container->isCreated('bar'));
 		Assert::false($container->isCreated('baz'));
-		$manager->dispatchEvent('onStartup', $bazArgs = new StartupEventArgs($foo = new FooMock(), $num = 123));
+		$foo = new FooMock();
+		$bazArgs = new StartupEventArgs($foo, 123);
+		$manager->dispatchEvent('onStartup', $bazArgs);
 		Assert::true($container->isCreated('foo'));
 		Assert::false($container->isCreated('bar'));
 		Assert::false($container->isCreated('baz'));
 		Assert::same(1, count($manager->getListeners('onStartup')));
 
 		$baz = $container->getService('foo');
-		/** @var NamespacedEventListenerMock $baz */
+		/** @var \KdybyTests\Events\NamespacedEventListenerMock $baz */
 
 		Assert::same([
-			[LoremListener::class . '::onStartup', [$bazArgs]]
+			[LoremListener::class . '::onStartup', [$bazArgs]],
 		], $baz->calls);
 	}
-
-
 
 	public function testExceptionHandler()
 	{
@@ -291,14 +271,12 @@ class ExtensionTest extends Tester\TestCase
 		$manager = $container->getService('events.manager');
 
 		// getter not needed, so hack it via reflection
-		$rp = new \ReflectionProperty(Kdyby\Events\EventManager::class, 'exceptionHandler');
+		$rp = new ReflectionProperty(EventManager::class, 'exceptionHandler');
 		$rp->setAccessible(TRUE);
 		$handler = $rp->getValue($manager);
 
-		Assert::true($handler instanceof Kdyby\Events\IExceptionHandler);
+		Assert::true($handler instanceof IExceptionHandler);
 	}
-
-
 
 	public function testAutowireAlias()
 	{
@@ -306,13 +284,12 @@ class ExtensionTest extends Tester\TestCase
 		Assert::same($container->getService('alias'), $container->getService('application'));
 	}
 
-
 	public function testFactoryAndAccessor()
 	{
 		$container = $this->createContainer('factory.accessor');
 
 		$foo = $container->getService('foo');
-		Assert::type(Kdyby\Events\Event::class, $foo->onBar);
+		Assert::type(Event::class, $foo->onBar);
 
 		$fooAccessor = $container->getService('fooAccessor');
 		$foo2 = $fooAccessor->get();
@@ -320,17 +297,15 @@ class ExtensionTest extends Tester\TestCase
 
 		$fooFactory = $container->getService('fooFactory');
 		$foo3 = $fooFactory->create();
-		Assert::type(Kdyby\Events\Event::class, $foo3->onBar);
+		Assert::type(Event::class, $foo3->onBar);
 		Assert::notSame($foo, $foo3);
 	}
-
-
 
 	public function testGlobalDispatchFirst()
 	{
 		$container = $this->createContainer('globalDispatchFirst');
 		$manager = $container->getService('events.manager');
-		/** @var Kdyby\Events\EventManager $manager */
+		/** @var \Kdyby\Events\EventManager $manager */
 
 		$mock = $container->getService('dispatchOrderMock');
 		Assert::true($mock->onGlobalDispatchFirst->globalDispatchFirst);
@@ -338,13 +313,11 @@ class ExtensionTest extends Tester\TestCase
 		Assert::true($mock->onGlobalDispatchDefault->globalDispatchFirst);
 	}
 
-
-
 	public function testGlobalDispatchLast()
 	{
 		$container = $this->createContainer('globalDispatchLast');
 		$manager = $container->getService('events.manager');
-		/** @var Kdyby\Events\EventManager $manager */
+		/** @var \Kdyby\Events\EventManager $manager */
 
 		$mock = $container->getService('dispatchOrderMock');
 		Assert::true($mock->onGlobalDispatchFirst->globalDispatchFirst);

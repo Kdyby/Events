@@ -10,19 +10,13 @@
 
 namespace Kdyby\Events;
 
-use Doctrine;
-
-
-
 /**
  * An EventSubscriber knows himself what events he is interested in.
  * If an EventSubscriber is added to an EventManager, the manager invokes
  * {@link getSubscribedEvents} and registers the subscriber as a listener for all
  * returned events.
- *
- * @author Filip Procházka <filip@prochazka.su>
  */
-interface Subscriber extends Doctrine\Common\EventSubscriber
+interface Subscriber extends \Doctrine\Common\EventSubscriber
 {
 
 }

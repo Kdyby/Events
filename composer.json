@@ -20,7 +20,8 @@
 		"php": "^5.6 || ^7.0",
 		"nette/di": "^2.4@dev",
 		"nette/utils": "^2.4@dev",
-		"nette/reflection": "^2.4@dev"
+		"nette/reflection": "^2.4@dev",
+		"kdyby/strict-objects": "^1.0"
 	},
 	"require-dev": {
 		"nette/application": "^2.4@dev",
@@ -47,6 +48,9 @@
 		]
 	},
 	"autoload-dev": {
+		"psr-4": {
+			"KdybyTests\\": "tests/KdybyTests/"
+		},
 		"classmap": [
 			"tests/KdybyTests"
 		]

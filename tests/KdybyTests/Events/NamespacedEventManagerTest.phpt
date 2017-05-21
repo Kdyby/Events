@@ -3,32 +3,26 @@
 /**
  * Test: Kdyby\Events\NamespacedEventManager.
  *
- * @testCase KdybyTests\Events\NamespacedEventManagerTest
- * @author Filip Procházka <filip@prochazka.su>
- * @package Kdyby\Events
+ * @testCase
  */
 
 namespace KdybyTests\Events;
 
-use Kdyby;
+use Kdyby\Events\EventArgsList;
+use Kdyby\Events\EventManager;
 use Kdyby\Events\NamespacedEventManager;
-use Tester;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class NamespacedEventManagerTest extends Tester\TestCase
+class NamespacedEventManagerTest extends \Tester\TestCase
 {
 
 	public function testHasListeners()
 	{
-		$evm = new Kdyby\Events\EventManager();
-		$evm->addEventSubscriber($first = new EventListenerMock());
+		$evm = new EventManager();
+		$first = new EventListenerMock();
+		$evm->addEventSubscriber($first);
 
 		Assert::true($evm->hasListeners('onFoo'));
 		Assert::false($evm->hasListeners('App::onFoo'));
@@ -39,12 +33,11 @@ class NamespacedEventManagerTest extends Tester\TestCase
 		Assert::true($ns->hasListeners('App::onFoo'));
 	}
 
-
-
-	public function testHasListeners_withNamespace()
+	public function testHasListenersWithNamespace()
 	{
-		$evm = new Kdyby\Events\EventManager();
-		$evm->addEventSubscriber($second = new NamespacedEventListenerMock());
+		$evm = new EventManager();
+		$second = new NamespacedEventListenerMock();
+		$evm->addEventSubscriber($second);
 
 		Assert::false($evm->hasListeners('onFoo'));
 		Assert::true($evm->hasListeners('App::onFoo'));
@@ -55,17 +48,18 @@ class NamespacedEventManagerTest extends Tester\TestCase
 		Assert::true($ns->hasListeners('App::onFoo'));
 	}
 
-
-
 	public function testDispatch()
 	{
-		$evm = new Kdyby\Events\EventManager();
-		$evm->addEventSubscriber($first = new EventListenerMock());
-		$evm->addEventSubscriber($second = new NamespacedEventListenerMock());
+		$evm = new EventManager();
+		$first = new EventListenerMock();
+		$evm->addEventSubscriber($first);
+		$second = new NamespacedEventListenerMock();
+		$evm->addEventSubscriber($second);
 
 		$ns = new NamespacedEventManager('App::', $evm);
 
-		$ns->dispatchEvent('onFoo', new Kdyby\Events\EventArgsList([$args = new EventArgsMock()]));
+		$args = new EventArgsMock();
+		$ns->dispatchEvent('onFoo', new EventArgsList([$args]));
 
 		Assert::same([], $first->calls);
 
@@ -78,18 +72,19 @@ class NamespacedEventManagerTest extends Tester\TestCase
 		], $args->calls);
 	}
 
-
-
-	public function testDispatch_global()
+	public function testDispatchGlobal()
 	{
-		$evm = new Kdyby\Events\EventManager();
-		$evm->addEventSubscriber($first = new EventListenerMock());
-		$evm->addEventSubscriber($second = new NamespacedEventListenerMock());
+		$evm = new EventManager();
+		$first = new EventListenerMock();
+		$evm->addEventSubscriber($first);
+		$second = new NamespacedEventListenerMock();
+		$evm->addEventSubscriber($second);
 
 		$ns = new NamespacedEventManager('App::', $evm);
 		$ns->dispatchGlobalEvents = TRUE;
 
-		$ns->dispatchEvent('onFoo', new Kdyby\Events\EventArgsList([$args = new EventArgsMock()]));
+		$args = new EventArgsMock();
+		$ns->dispatchEvent('onFoo', new EventArgsList([$args]));
 
 		Assert::same([
 			[EventListenerMock::class . '::onFoo', [$args]],

@@ -10,14 +10,10 @@
 
 namespace Kdyby\Events;
 
-
-
 /**
  * Bypasses the method_exists() check and expects you to either implement the method, or handle the event in magic __call().
- *
- * @author Filip Procházka <filip@prochazka.su>
  */
-interface CallableSubscriber extends Subscriber
+interface CallableSubscriber extends \Kdyby\Events\Subscriber
 {
 
 }

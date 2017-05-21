@@ -5,23 +5,20 @@
  *
  * Copyright (c) 2008 Filip Procházka (filip@prochazka.su)
  *
- * @license http://www.kdyby.org/license
+ * For the full copyright and license information, please view the file license.md that was distributed with this source code.
  */
 
 namespace Kdyby\Events;
 
-use Doctrine;
+use Closure;
 use Doctrine\Common\EventSubscriber;
-use Nette;
-
-
+use Kdyby\Events\Diagnostics\Panel;
+use Nette\DI\Container as DIContainer;
 
 /**
  * Is aware of DI Container and accepts map of listener service ids which then loads when needed.
- *
- * @author Filip Procházka <filip@prochazka.su>
  */
-class LazyEventManager extends EventManager
+class LazyEventManager extends \Kdyby\Events\EventManager
 {
 
 	/**
@@ -34,27 +31,21 @@ class LazyEventManager extends EventManager
 	 */
 	private $container;
 
-
-
 	/**
 	 * @param array $listenerIds
 	 * @param \Nette\DI\Container $container
 	 */
-	public function __construct(array $listenerIds, Nette\DI\Container $container)
+	public function __construct(array $listenerIds, DIContainer $container)
 	{
 		$this->listenerIds = $listenerIds;
 		$this->container = $container;
 	}
 
-
-
-	public function setPanel(Diagnostics\Panel $panel)
+	public function setPanel(Panel $panel)
 	{
 		parent::setPanel($panel);
 		$panel->setServiceIds($this->listenerIds);
 	}
-
-
 
 	/**
 	 * {@inheritdoc}
@@ -73,8 +64,6 @@ class LazyEventManager extends EventManager
 		return parent::getListeners($eventName);
 	}
 
-
-
 	/**
 	 * {@inheritdoc}
 	 */
@@ -82,7 +71,7 @@ class LazyEventManager extends EventManager
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
 			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
-		} elseif ($unsubscribe instanceof \Closure) {
+		} elseif ($unsubscribe instanceof Closure) {
 			list($unsubscribe, $subscriber) = $this->extractCallable($unsubscribe);
 		}
 
@@ -95,8 +84,6 @@ class LazyEventManager extends EventManager
 		parent::removeEventListener($unsubscribe, $subscriber);
 	}
 
-
-
 	/**
 	 * @param string $eventName
 	 */
@@ -104,7 +91,7 @@ class LazyEventManager extends EventManager
 	{
 		foreach ($this->listenerIds[$eventName] as $serviceName) {
 			$listener = $this->container->getService($serviceName);
-			if ($listener instanceof \Closure) {
+			if ($listener instanceof Closure) {
 				$this->addEventListener($eventName, $listener);
 			} elseif ($listener instanceof EventSubscriber) {
 				$this->addEventSubscriber($listener);

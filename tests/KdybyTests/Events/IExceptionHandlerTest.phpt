@@ -3,48 +3,35 @@
 /**
  * Test: Kdyby\Events\IExceptionHandler.
  *
- * @testCase Kdyby\Events\IExceptionHandlerTestCase
- * @author Jan Dolecek <juzna.cz@gmail.com>
- * @package Kdyby\Events
+ * @testCase
  */
 
 namespace KdybyTests\Events;
 
-use Kdyby;
-use Tester;
+use Kdyby\Events\EventManager;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-
-
-/**
- * @author Jan Dolecek <juzna.cz@gmail.com>
- */
-class IExceptionHandlerTestCase extends Tester\TestCase
+class IExceptionHandlerTest extends \Tester\TestCase
 {
 
-	/** @var Kdyby\Events\EventManager */
+	/** @var \Kdyby\Events\EventManager */
 	private $evm;
-
-
 
 	protected function setUp()
 	{
-		$this->evm = new Kdyby\Events\EventManager();
+		$this->evm = new EventManager();
 		$this->evm->addEventListener('testEvent', [$this, 'eventHandler']);
 	}
-
-
 
 	public function testNotCaught()
 	{
 		$evm = $this->evm;
-		Assert::exception(function() use ($evm) {
+		Assert::exception(function () use ($evm) {
 			$evm->dispatchEvent('testEvent');
 		}, \Exception::class);
 	}
-
 
 	public function testCaught()
 	{
@@ -55,13 +42,11 @@ class IExceptionHandlerTestCase extends Tester\TestCase
 		Assert::true($handler->exceptions[0] instanceof \Exception);
 	}
 
-
-
 	public function eventHandler()
 	{
-		throw new \Exception("dummy");
+		throw new \Exception('dummy');
 	}
 
 }
 
-(new IExceptionHandlerTestCase())->run();
+(new IExceptionHandlerTest())->run();

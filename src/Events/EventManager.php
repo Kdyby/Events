@@ -10,24 +10,18 @@
 
 namespace Kdyby\Events;
 
-use Doctrine;
+use Closure;
+use Doctrine\Common\EventArgs as DoctrineEventArgs;
 use Doctrine\Common\EventSubscriber;
-use Nette;
-use Nette\Utils\ObjectMixin;
-
-
-
-if (!class_exists('Nette\Utils\ObjectMixin')) {
-	class_alias('Nette\ObjectMixin', 'Nette\Utils\ObjectMixin');
-}
+use Kdyby\Events\Diagnostics\Panel;
 
 /**
  * Registry of system-wide listeners that get's invoked, when the event, that they are listening to, is dispatched.
- *
- * @author Filip Procházka <filip@prochazka.su>
  */
-class EventManager extends Doctrine\Common\EventManager
+class EventManager extends \Doctrine\Common\EventManager
 {
+
+	use \Kdyby\StrictObjects\Scream;
 
 	/**
 	 * [Event => [Priority => [[Listener, method], Subscriber, Subscriber, ...]]]
@@ -39,57 +33,51 @@ class EventManager extends Doctrine\Common\EventManager
 	/**
 	 * [Event => Subscriber|callable]
 	 *
-	 * @var Doctrine\Common\EventSubscriber[][]|callable[][]
+	 * @var \Doctrine\Common\EventSubscriber[][]|callable[][]
 	 */
 	private $sorted = [];
 
 	/**
 	 * [SubscriberHash => Subscriber]
 	 *
-	 * @var Doctrine\Common\EventSubscriber[]
+	 * @var \Doctrine\Common\EventSubscriber[]
 	 */
 	private $subscribers = [];
 
 	/**
-	 * @var Diagnostics\Panel
+	 * @var \Kdyby\Events\Diagnostics\Panel
 	 */
 	private $panel;
 
 	/**
-	 * @var IExceptionHandler
+	 * @var \Kdyby\Events\IExceptionHandler
 	 */
 	private $exceptionHandler;
 
-
-
 	/**
 	 * @internal
-	 * @param Diagnostics\Panel $panel
+	 * @param \Kdyby\Events\Diagnostics\Panel $panel
 	 */
-	public function setPanel(Diagnostics\Panel $panel)
+	public function setPanel(Panel $panel)
 	{
 		$this->panel = $panel;
 	}
 
-
-
 	/**
-	 * @param IExceptionHandler $exceptionHandler
+	 * @param \Kdyby\Events\IExceptionHandler $exceptionHandler
 	 */
 	public function setExceptionHandler(IExceptionHandler $exceptionHandler)
 	{
 		$this->exceptionHandler = $exceptionHandler;
 	}
 
-
-
 	/**
 	 * Dispatches an event to all registered listeners.
 	 *
 	 * @param string $eventName The name of the event to dispatch. The name of the event is the name of the method that is invoked on listeners.
-	 * @param Doctrine\Common\EventArgs $eventArgs The event arguments to pass to the event handlers/listeners. If not supplied, the single empty EventArgs instance is used
+	 * @param \Doctrine\Common\EventArgs $eventArgs The event arguments to pass to the event handlers/listeners. If not supplied, the single empty EventArgs instance is used
 	 */
-	public function dispatchEvent($eventName, Doctrine\Common\EventArgs $eventArgs = NULL)
+	public function dispatchEvent($eventName, DoctrineEventArgs $eventArgs = NULL)
 	{
 		if ($this->panel) {
 			$this->panel->eventDispatch($eventName, $eventArgs);
@@ -103,7 +91,7 @@ class EventManager extends Doctrine\Common\EventManager
 				}
 
 				if ($eventArgs instanceof EventArgsList) {
-					/** @var EventArgsList $eventArgs */
+					/** @var \Kdyby\Events\EventArgsList $eventArgs */
 					call_user_func_array($listener, $eventArgs->getArgs());
 
 				} else {
@@ -124,13 +112,11 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 	}
 
-
-
 	/**
 	 * Gets the listeners of a specific event or all listeners.
 	 *
 	 * @param string $eventName
-	 * @return Doctrine\Common\EventSubscriber[]|callable[]|Doctrine\Common\EventSubscriber[][]|callable[][]
+	 * @return \Doctrine\Common\EventSubscriber[]|callable[]|\Doctrine\Common\EventSubscriber[][]|callable[][]
 	 */
 	public function getListeners($eventName = NULL)
 	{
@@ -151,44 +137,40 @@ class EventManager extends Doctrine\Common\EventManager
 		return array_filter($this->sorted);
 	}
 
-
-
 	/**
 	 * Checks whether an event has any registered listeners.
 	 *
 	 * @param string $eventName
-	 * @return boolean TRUE if the specified event has any listeners, FALSE otherwise.
+	 * @return bool TRUE if the specified event has any listeners, FALSE otherwise.
 	 */
 	public function hasListeners($eventName)
 	{
 		return (bool) count($this->getListeners($eventName));
 	}
 
-
-
 	/**
 	 * Adds an event listener that listens on the specified events.
 	 *
 	 * @param string|array $events The event(s) to listen on.
-	 * @param Doctrine\Common\EventSubscriber|\Closure|array $subscriber The listener object.
+	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $subscriber The listener object.
 	 * @param int $priority
 	 *
-	 * @throws InvalidListenerException
+	 * @throws \Kdyby\Events\InvalidListenerException
 	 */
 	public function addEventListener($events, $subscriber, $priority = 0)
 	{
 		foreach ((array) $events as $eventName) {
 			list($namespace, $event) = Event::parseName($eventName);
 
-			if (!$subscriber instanceof \Closure) {
+			if (!$subscriber instanceof Closure) {
 				$callback = !is_array($subscriber) ? [$subscriber, $event] : $subscriber;
 				if ($callback[0] instanceof CallableSubscriber) {
 					if (!is_callable($callback)) {
-						throw new InvalidListenerException(sprintf('Event listener "%s" is not callable.', $callback[0]));
+						throw new \Kdyby\Events\InvalidListenerException(sprintf('Event listener "%s" is not callable.', $callback[0]));
 					}
 
 				} elseif (!method_exists($callback[0], $callback[1])) {
-					throw new InvalidListenerException(sprintf('Event listener "%s" has no method "%s"', get_class($callback[0]), $callback[1]));
+					throw new \Kdyby\Events\InvalidListenerException(sprintf('Event listener "%s" has no method "%s"', get_class($callback[0]), $callback[1]));
 				}
 			}
 
@@ -197,19 +179,17 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 	}
 
-
-
 	/**
 	 * Removes an event listener from the specified events.
 	 *
-	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $unsubscribe
+	 * @param \Doctrine\Common\EventSubscriber|\Closure|array|string $unsubscribe
 	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $subscriber
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
 			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
-		} elseif ($unsubscribe instanceof \Closure) {
+		} elseif ($unsubscribe instanceof Closure) {
 			list($unsubscribe, $subscriber) = $this->extractCallable($unsubscribe);
 		}
 
@@ -218,14 +198,14 @@ class EventManager extends Doctrine\Common\EventManager
 			foreach ($this->listeners[$eventName] as $priority => $listeners) {
 				$key = NULL;
 				foreach ($listeners as $k => $listener) {
-					if (!($listener == $subscriber || (is_array($listener) && $listener[0] == $subscriber))) {
+					if (!($listener === $subscriber || (is_array($listener) && $listener[0] === $subscriber))) {
 						continue;
 					}
 					$key = $k;
 					break;
 				}
 
-				if ($key === null) {
+				if ($key === NULL) {
 					continue;
 				}
 
@@ -245,10 +225,8 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 	}
 
-
-
 	/**
-	 * @param EventSubscriber $subscriber
+	 * @param \Doctrine\Common\EventSubscriber $subscriber
 	 * @return array
 	 */
 	protected function extractSubscriber(EventSubscriber $subscriber)
@@ -271,8 +249,6 @@ class EventManager extends Doctrine\Common\EventManager
 		return [$unsubscribe, $subscriber];
 	}
 
-
-
 	/**
 	 * @param callable $subscriber
 	 * @return array
@@ -294,14 +270,13 @@ class EventManager extends Doctrine\Common\EventManager
 		return [$unsubscribe, $subscriber];
 	}
 
-
-
 	/**
 	 * {@inheritdoc}
 	 */
 	public function addEventSubscriber(EventSubscriber $subscriber)
 	{
-		if (isset($this->subscribers[$hash = spl_object_hash($subscriber)])) {
+		$hash = spl_object_hash($subscriber);
+		if (isset($this->subscribers[$hash])) {
 			return;
 		}
 		$this->subscribers[$hash] = $subscriber;
@@ -326,8 +301,6 @@ class EventManager extends Doctrine\Common\EventManager
 		}
 	}
 
-
-
 	/**
 	 * {@inheritdoc}
 	 */
@@ -336,14 +309,12 @@ class EventManager extends Doctrine\Common\EventManager
 		$this->removeEventListener($subscriber);
 	}
 
-
-
 	/**
 	 * @param string|array $name
 	 * @param array $defaults
 	 * @param string $argsClass
 	 * @param bool $globalDispatchFirst
-	 * @return Event
+	 * @return \Kdyby\Events\Event
 	 */
 	public function createEvent($name, $defaults = [], $argsClass = NULL, $globalDispatchFirst = FALSE)
 	{
@@ -358,8 +329,6 @@ class EventManager extends Doctrine\Common\EventManager
 		return $event;
 	}
 
-
-
 	private function sortListeners($eventName)
 	{
 		$this->sorted[$eventName] = [];
@@ -368,7 +337,8 @@ class EventManager extends Doctrine\Common\EventManager
 		list($namespace, $event, $separator) = Event::parseName($eventName);
 		$className = $namespace;
 		do {
-			if (empty($this->listeners[$key = ($className ? $className . $separator : '') . $event])) {
+			$key = ($className ? $className . $separator : '') . $event;
+			if (empty($this->listeners[$key])) {
 				continue;
 			}
 
@@ -403,138 +373,6 @@ class EventManager extends Doctrine\Common\EventManager
 
 			return $callable;
 		}, $sorted); // [callback, ...]
-	}
-
-
-
-	/*************************** Nette\Object ***************************/
-
-
-
-	/**
-	 * Access to reflection.
-	 * @return \Nette\Reflection\ClassType
-	 */
-	public static function getReflection()
-	{
-		return new Nette\Reflection\ClassType(get_called_class());
-	}
-
-
-
-	/**
-	 * Call to undefined method.
-	 *
-	 * @param string $name
-	 * @param array $args
-	 *
-	 * @throws \Nette\MemberAccessException
-	 * @return mixed
-	 */
-	public function __call($name, $args)
-	{
-		return ObjectMixin::call($this, $name, $args);
-	}
-
-
-
-	/**
-	 * Call to undefined static method.
-	 *
-	 * @param string $name
-	 * @param array $args
-	 *
-	 * @throws \Nette\MemberAccessException
-	 * @return mixed
-	 */
-	public static function __callStatic($name, $args)
-	{
-		ObjectMixin::callStatic(get_called_class(), $name, $args);
-	}
-
-
-
-	/**
-	 * Adding method to class.
-	 *
-	 * @param $name
-	 * @param null $callback
-	 *
-	 * @throws \Nette\MemberAccessException
-	 * @return callable|null
-	 */
-	public static function extensionMethod($name, $callback = NULL)
-	{
-		if (strpos($name, '::') === FALSE) {
-			$class = get_called_class();
-		} else {
-			list($class, $name) = explode('::', $name);
-		}
-		if ($callback === NULL) {
-			return ObjectMixin::getExtensionMethod($class, $name);
-		} else {
-			ObjectMixin::setExtensionMethod($class, $name, $callback);
-		}
-	}
-
-
-
-	/**
-	 * Returns property value. Do not call directly.
-	 *
-	 * @param string $name
-	 *
-	 * @throws \Nette\MemberAccessException
-	 * @return mixed
-	 */
-	public function &__get($name)
-	{
-		return ObjectMixin::get($this, $name);
-	}
-
-
-
-	/**
-	 * Sets value of a property. Do not call directly.
-	 *
-	 * @param string $name
-	 * @param mixed $value
-	 *
-	 * @throws \Nette\MemberAccessException
-	 * @return void
-	 */
-	public function __set($name, $value)
-	{
-		ObjectMixin::set($this, $name, $value);
-	}
-
-
-
-	/**
-	 * Is property defined?
-	 *
-	 * @param string $name
-	 *
-	 * @return bool
-	 */
-	public function __isset($name)
-	{
-		return ObjectMixin::has($this, $name);
-	}
-
-
-
-	/**
-	 * Access to undeclared property.
-	 *
-	 * @param string $name
-	 *
-	 * @throws \Nette\MemberAccessException
-	 * @return void
-	 */
-	public function __unset($name)
-	{
-		ObjectMixin::remove($this, $name);
 	}
 
 }

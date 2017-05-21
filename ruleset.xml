@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<ruleset name="Kdyby/Events">
+	<rule ref="vendor/kdyby/coding-standard/KdybyCodingStandard/ruleset-5.6.xml"/>
+
+	<rule ref="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase">
+		<!-- BC -->
+		<exclude-pattern>src/Events/LifeCycleEvent.php</exclude-pattern>
+	</rule>
+
+	<rule ref="SlevomatCodingStandard.ControlStructures.AssignmentInCondition.AssignmentInCondition">
+		<!-- the condition is more readable and the cycle is simpler this way, fuck you -->
+		<exclude-pattern>src/Events/EventManager.php</exclude-pattern>
+	</rule>
+
+	<!-- compatibility classes, they're a mess, just ignore them -->
+	<exclude-pattern>src/Doctrine/*</exclude-pattern>
+	<exclude-pattern>src/Symfony/*</exclude-pattern>
+</ruleset>

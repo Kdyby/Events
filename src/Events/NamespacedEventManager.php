@@ -10,14 +10,10 @@
 
 namespace Kdyby\Events;
 
-use Doctrine;
+use Doctrine\Common\EventArgs as DoctrineEventArgs;
+use Doctrine\Common\EventSubscriber;
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class NamespacedEventManager extends EventManager
+class NamespacedEventManager extends \Kdyby\Events\EventManager
 {
 
 	/**
@@ -26,7 +22,7 @@ class NamespacedEventManager extends EventManager
 	public $dispatchGlobalEvents = FALSE;
 
 	/**
-	 * @var EventManager
+	 * @var \Kdyby\Events\EventManager
 	 */
 	private $evm;
 
@@ -35,20 +31,16 @@ class NamespacedEventManager extends EventManager
 	 */
 	private $namespace;
 
-
-
 	public function __construct($namespace, EventManager $eventManager)
 	{
 		$this->namespace = $namespace;
 		$this->evm = $eventManager;
 	}
 
-
-
 	/**
 	 * {@inheritDoc}
 	 */
-	public function dispatchEvent($eventName, Doctrine\Common\EventArgs $eventArgs = null)
+	public function dispatchEvent($eventName, DoctrineEventArgs $eventArgs = NULL)
 	{
 		list($ns, $event) = Event::parseName($eventName);
 
@@ -59,12 +51,10 @@ class NamespacedEventManager extends EventManager
 		}
 	}
 
-
-
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getListeners($eventName = null)
+	public function getListeners($eventName = NULL)
 	{
 		if ($eventName === NULL) {
 			$listeners = [];
@@ -81,7 +71,7 @@ class NamespacedEventManager extends EventManager
 		list($ns, $event) = Event::parseName($eventName);
 
 		if ($ns !== NULL) {
-			throw new InvalidArgumentException("Unexpected event with namespace.");
+			throw new \Kdyby\Events\InvalidArgumentException('Unexpected event with namespace.');
 		}
 
 		return array_merge(
@@ -89,8 +79,6 @@ class NamespacedEventManager extends EventManager
 			$this->evm->getListeners($this->namespace . $event)
 		);
 	}
-
-
 
 	/**
 	 * {@inheritDoc}
@@ -106,8 +94,6 @@ class NamespacedEventManager extends EventManager
 		return $this->evm->hasListeners($this->namespace . $eventName) || $this->evm->hasListeners($eventName);
 	}
 
-
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -119,14 +105,12 @@ class NamespacedEventManager extends EventManager
 		}
 	}
 
-
-
 	/**
 	 * {@inheritDoc}
 	 */
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
-		if ($unsubscribe instanceof Doctrine\Common\EventSubscriber) {
+		if ($unsubscribe instanceof EventSubscriber) {
 			$subscriber = $unsubscribe;
 			$unsubscribe = [];
 
@@ -151,17 +135,13 @@ class NamespacedEventManager extends EventManager
 		$this->evm->removeEventListener($unsubscribe, $subscriber);
 	}
 
-
-
 	/**
 	 * {@inheritDoc}
 	 */
 	public function setExceptionHandler(IExceptionHandler $exceptionHandler)
 	{
-		throw new NotSupportedException;
+		throw new \Kdyby\Events\NotSupportedException();
 	}
-
-
 
 	/**
 	 * {@inheritDoc}

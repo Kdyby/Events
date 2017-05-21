@@ -10,17 +10,16 @@
 
 namespace Kdyby\Events;
 
-use Doctrine;
-use Nette;
+use ArrayIterator;
+use Kdyby\Events\Diagnostics\Panel;
+use Nette\Reflection\ClassType as ClassTypeReflection;
 use Nette\Utils\Callback;
+use Traversable;
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
 class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 {
+
+	use \Kdyby\StrictObjects\Scream;
 
 	/**
 	 * Changes the order of listeners being invoked,
@@ -47,7 +46,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	private $namespace;
 
 	/**
-	 * @var EventManager
+	 * @var \Kdyby\Events\EventManager
 	 */
 	private $eventManager;
 
@@ -57,11 +56,9 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	private $argsClass;
 
 	/**
-	 * @var Diagnostics\Panel
+	 * @var \Kdyby\Events\Diagnostics\Panel
 	 */
 	private $panel;
-
-
 
 	/**
 	 * @param string|array $name
@@ -73,25 +70,21 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		list($this->namespace, $this->name) = self::parseName($name);
 		$this->argsClass = $argsClass;
 
-		if (is_array($defaults) || $defaults instanceof \Traversable) {
+		if (is_array($defaults) || $defaults instanceof Traversable) {
 			foreach ($defaults as $listener) {
 				$this->append($listener);
 			}
 		}
 	}
 
-
-
 	/**
 	 * @internal
-	 * @param Diagnostics\Panel $panel
+	 * @param \Kdyby\Events\Diagnostics\Panel $panel
 	 */
-	public function setPanel(Diagnostics\Panel $panel)
+	public function setPanel(Panel $panel)
 	{
 		$this->panel = $panel;
 	}
-
-
 
 	/**
 	 * @return string
@@ -101,19 +94,15 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return ($this->namespace ? $this->namespace . '::' : '') . $this->name;
 	}
 
-
-
 	/**
-	 * @param EventManager $eventManager
-	 * @return Event
+	 * @param \Kdyby\Events\EventManager $eventManager
+	 * @return static
 	 */
 	public function injectEventManager(EventManager $eventManager)
 	{
 		$this->eventManager = $eventManager;
 		return $this;
 	}
-
-
 
 	/**
 	 * Invokes the event.
@@ -135,11 +124,9 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		}
 	}
 
-
-
 	/**
 	 * @param callable $listener
-	 * @return Event
+	 * @return static
 	 */
 	public function append($listener)
 	{
@@ -148,11 +135,9 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return $this;
 	}
 
-
-
 	/**
 	 * @param callable $listener
-	 * @return Event
+	 * @return static
 	 */
 	public function prepend($listener)
 	{
@@ -160,8 +145,6 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		array_unshift($this->listeners, $listener);
 		return $this;
 	}
-
-
 
 	/**
 	 * @return array|callable[]
@@ -185,7 +168,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 				$args = new EventArgsList(func_get_args());
 
 			} else {
-				$args = Nette\Reflection\ClassType::from($argsClass)->newInstanceArgs(func_get_args());
+				$args = ClassTypeReflection::from($argsClass)->newInstanceArgs(func_get_args());
 			}
 
 			$evm->dispatchEvent($name, $args);
@@ -201,8 +184,6 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return $listeners;
 	}
 
-
-
 	/**
 	 * Invokes the event.
 	 */
@@ -210,8 +191,6 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	{
 		$this->dispatch(func_get_args());
 	}
-
-
 
 	/**
 	 * @param string $name
@@ -234,15 +213,11 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return [NULL, $name, NULL];
 	}
 
-
-
 	/** @deprecated */
 	public function add($listener)
 	{
 		return $this->append($listener);
 	}
-
-
 
 	/** @deprecated */
 	public function unshift($listener)
@@ -250,11 +225,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return $this->prepend($listener);
 	}
 
-
-
 	/********************* interface \Countable *********************/
-
-
 
 	/**
 	 * @return int
@@ -264,25 +235,17 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return count($this->listeners);
 	}
 
-
-
 	/********************* interface \IteratorAggregate *********************/
-
-
 
 	/**
 	 * @return \ArrayIterator|\Traversable
 	 */
 	public function getIterator()
 	{
-		return new \ArrayIterator($this->getListeners());
+		return new ArrayIterator($this->getListeners());
 	}
 
-
-
 	/********************* interface \ArrayAccess *********************/
-
-
 
 	/**
 	 * @param int|NULL $index
@@ -300,23 +263,19 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		}
 	}
 
-
-
 	/**
 	 * @param mixed $index
 	 * @return callable
-	 * @throws OutOfRangeException
+	 * @throws \Kdyby\Events\OutOfRangeException
 	 */
 	public function offsetGet($index)
 	{
 		if (!$this->offsetExists($index)) {
-			throw new OutOfRangeException;
+			throw new \Kdyby\Events\OutOfRangeException;
 		}
 
 		return $this->listeners[$index];
 	}
-
-
 
 	/**
 	 * @param int $index
@@ -328,42 +287,12 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return isset($this->listeners[$index]);
 	}
 
-
-
 	/**
 	 * @param int $index
 	 */
 	public function offsetUnset($index)
 	{
 		unset($this->listeners[$index]);
-	}
-
-
-
-	/********************* Simpler Nette\Object *********************/
-
-
-
-	/**
-	 * @param $name
-	 * @return mixed|void
-	 * @throws MemberAccessException
-	 */
-	public function &__get($name)
-	{
-		throw new MemberAccessException("There is no property $name in " . get_class($this));
-	}
-
-
-
-	/**
-	 * @param $name
-	 * @param $value
-	 * @throws MemberAccessException
-	 */
-	public function __set($name, $value)
-	{
-		throw new MemberAccessException("There is no property $name in " . get_class($this));
 	}
 
 }

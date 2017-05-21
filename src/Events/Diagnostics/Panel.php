@@ -10,32 +10,27 @@
 
 namespace Kdyby\Events\Diagnostics;
 
+use Closure;
 use Doctrine\Common\EventArgs;
-use Kdyby;
 use Kdyby\Events\Event;
 use Kdyby\Events\EventManager;
-use Nette;
-use Nette\Utils\Callback;
-use Tracy\Bar;
-use Tracy\Debugger;
+use Nette\DI\Container as DIContainer;
 use Nette\Utils\Arrays;
+use Nette\Utils\Callback;
+use ReflectionClass;
+use ReflectionFunctionAbstract;
+use ReflectionProperty;
+use Tracy\Debugger;
 use Tracy\Dumper;
-use Tracy;
+use Tracy\Helpers as TracyHelpers;
 
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class Panel extends Nette\Object implements Tracy\IBarPanel
+class Panel implements \Tracy\IBarPanel
 {
 
-	/**
-	 * @var EventManager
-	 */
-	private $evm;
+	use \Kdyby\StrictObjects\Scream;
 
 	/**
-	 * @var Nette\DI\Container
+	 * @var \Nette\DI\Container
 	 */
 	private $sl;
 
@@ -79,25 +74,18 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 	 */
 	public $renderPanel = TRUE;
 
-
-
-	public function __construct(Nette\DI\Container $sl)
+	public function __construct(DIContainer $sl)
 	{
 		$this->sl = $sl;
 	}
 
-
-
 	/**
-	 * @param EventManager $evm
+	 * @param \Kdyby\Events\EventManager $evm
 	 */
 	public function setEventManager(EventManager $evm)
 	{
-		$this->evm = $evm;
 		$evm->setPanel($this);
 	}
-
-
 
 	public function setServiceIds(array $listenerIds)
 	{
@@ -107,15 +95,11 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$this->listenerIds = $listenerIds;
 	}
 
-
-
 	public function registerEvent(Event $event)
 	{
 		$this->events[] = $event;
 		$event->setPanel($this);
 	}
-
-
 
 	public function eventDispatch($eventName, EventArgs $args = NULL)
 	{
@@ -128,18 +112,16 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		}
 
 		if (!is_array($this->renderPanel) || $this->renderPanel['dispatchTree']) {
-			// [parent-ref, name, args, children]
+			// meta is array of (parent-ref, name, args, children)
 			$meta = [&$this->dispatchTreePointer, $eventName, $args, []];
 			if ($this->dispatchTreePointer === NULL) {
-				$this->dispatchTree[] = & $meta;
+				$this->dispatchTree[] = &$meta;
 			} else {
-				$this->dispatchTreePointer[3][] = & $meta;
+				$this->dispatchTreePointer[3][] = &$meta;
 			}
-			$this->dispatchTreePointer = & $meta;
+			$this->dispatchTreePointer = &$meta;
 		}
 	}
-
-
 
 	public function eventDispatched($eventName, EventArgs $args = NULL)
 	{
@@ -149,8 +131,6 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$this->dispatchTreePointer = &$this->dispatchTreePointer[0];
 	}
 
-
-
 	public function inlineCallbacks($eventName, $inlineCallbacks)
 	{
 		if (!$this->renderPanel) {
@@ -158,8 +138,6 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		}
 		$this->inlineCallbacks[$eventName] = (array) $inlineCallbacks;
 	}
-
-
 
 	/**
 	 * Renders HTML code for custom tab.
@@ -173,12 +151,10 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		}
 
 		return '<span title="Kdyby/Events">'
-		. '<img width="16" height="16" src="data:image/png;base64,' . base64_encode(file_get_contents(__DIR__ . '/icon.png')) . '" />'
-		. '<span class="tracy-label">' . count(Arrays::flatten($this->dispatchLog)) .  ' calls</span>'
-		. '</span>';
+			. '<img width="16" height="16" src="data:image/png;base64,' . base64_encode(file_get_contents(__DIR__ . '/icon.png')) . '" />'
+			. '<span class="tracy-label">' . count(Arrays::flatten($this->dispatchLog)) . ' calls</span>'
+			. '</span>';
 	}
-
-
 
 	/**
 	 * Renders HTML code for custom panel.
@@ -213,12 +189,10 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$totalEvents = count($this->listenerIds);
 		$totalListeners = count(array_unique(Arrays::flatten($this->listenerIds)));
 
-		return '<style>' . $this->renderStyles() . '</style>'.
+		return '<style>' . $this->renderStyles() . '</style>' .
 			'<h1>' . $h($totalEvents) . ' registered events, ' . $h($totalListeners) . ' registered listeners</h1>' .
 			'<div class="nette-inner tracy-inner nette-KdybyEventsPanel"><table>' . $s . '</table></div>';
 	}
-
-
 
 	private function renderPanelDispatchLog(&$visited)
 	{
@@ -248,8 +222,6 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		return $s;
 	}
 
-
-
 	private function renderPanelEvents(&$visited)
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['events'])) {
@@ -259,7 +231,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$h = 'htmlspecialchars';
 		$s = '';
 		foreach ($this->events as $event) {
-			/** @var Event $event */
+			/** @var \Kdyby\Events\Event $event */
 			if (in_array($event->getName(), $visited, TRUE)) {
 				continue;
 			}
@@ -283,8 +255,6 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 		return $s;
 	}
-
-
 
 	private function renderPanelListeners(&$visited)
 	{
@@ -318,8 +288,6 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		return $s;
 	}
 
-
-
 	private function renderPanelDispatchTree()
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['dispatchTree'])) {
@@ -336,8 +304,6 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		return $s;
 	}
 
-
-
 	/**
 	 * Renders an item in call graph.
 	 *
@@ -350,7 +316,9 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 		$s = '<ul><li>';
 		$s .= '<a href="#' . $this->formatEventId($item[1]) . '">' . $h($item[1]) . '</a>';
-		if ($item[2]) $s .= ' (<a href="#' . $this->formatArgsId($item[2]) . '">' . get_class($item[2]) . '</a>)';
+		if ($item[2]) {
+			$s .= ' (<a href="#' . $this->formatArgsId($item[2]) . '">' . get_class($item[2]) . '</a>)';
+		}
 
 		if ($item[3]) {
 			foreach ($item[3] as $child) {
@@ -361,21 +329,15 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		return $s . '</li></ul>';
 	}
 
-
-
 	private function getEventCalls($eventName)
 	{
 		return !empty($this->dispatchLog[$eventName]) ? $this->dispatchLog[$eventName] : [];
 	}
 
-
-
 	private function getInlineCallbacks($eventName)
 	{
 		return !empty($this->inlineCallbacks[$eventName]) ? $this->inlineCallbacks[$eventName] : [];
 	}
-
-
 
 	private function renderListeners($ids)
 	{
@@ -388,10 +350,12 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 
 		$h = 'htmlspecialchars';
 
-		$shortFilename = function (\ReflectionFunctionAbstract $refl) {
+		$shortFilename = function (ReflectionFunctionAbstract $refl) {
 			$title = '.../' . basename($refl->getFileName()) . ':' . $refl->getStartLine();
 
-			if ($editor = Tracy\Helpers::editorUri($refl->getFileName(), $refl->getStartLine())) {
+			/** @var string|NULL $editor */
+			$editor = TracyHelpers::editorUri($refl->getFileName(), $refl->getStartLine());
+			if ($editor !== NULL) {
 				return sprintf(' defined at <a href="%s">%s</a>', htmlspecialchars($editor), $title);
 			}
 
@@ -402,15 +366,18 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		foreach ($ids as $id) {
 			if (is_callable($id)) {
 				$s .= '<tr><td width=18>' . $addIcon . '</td><td><pre class="nette-dump"><span class="nette-dump-object">' .
-					Callback::toString($id) . ($id instanceof \Closure ? $shortFilename(Callback::toReflection($id)) : '') .
+					Callback::toString($id) . ($id instanceof Closure ? $shortFilename(Callback::toReflection($id)) : '') .
 					'</span></span></th></tr>';
 
 				continue;
 			}
 
-			if (!$this->sl->isCreated($id) && ($class = array_search($id, $registeredClasses, TRUE))) {
+			$class = array_search($id, $registeredClasses, TRUE);
+			if (!$this->sl->isCreated($id) && $class !== FALSE) {
+				$classRefl = new ReflectionClass($class);
+
 				$s .= '<tr><td width=18>' . $addIcon . '</td><td><pre class="nette-dump"><span class="nette-dump-object">' .
-					$h(Nette\Reflection\ClassType::from($class)->getName()) .
+					$h($classRefl->getName()) .
 					'</span></span></th></tr>';
 
 			} else {
@@ -418,7 +385,7 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 					$s .= '<tr><td width=18>' . $addIcon . '</td><td>' . self::dumpToHtml($this->sl->getService($id)) . '</th></tr>';
 
 				} catch (\Exception $e) {
-					$s .= "<tr><td colspan=2>Service $id cannot be loaded because of exception<br><br>\n" . (string) $e . '</td></th>';
+					$s .= sprintf("<tr><td colspan=2>Service %s cannot be loaded because of exception<br><br>\n%s</td></th>", $id, (string) $e);
 				}
 			}
 		}
@@ -426,14 +393,10 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		return $s;
 	}
 
-
-
 	private static function dumpToHtml($structure)
 	{
 		return Dumper::toHtml($structure, [Dumper::COLLAPSE => TRUE, Dumper::DEPTH => 2]);
 	}
-
-
 
 	private function getClassMap()
 	{
@@ -441,12 +404,12 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 			return $this->registeredClasses;
 		}
 
-		$refl = new Nette\Reflection\Property(Nette\DI\Container::class, 'meta');
+		$refl = new ReflectionProperty(DIContainer::class, 'meta');
 		$refl->setAccessible(TRUE);
 		$meta = $refl->getValue($this->sl);
 
 		$this->registeredClasses = [];
-		foreach ($meta[Nette\DI\Container::TYPES] as $type => $serviceIds) {
+		foreach ($meta[DIContainer::TYPES] as $type => $serviceIds) {
 			if (isset($this->registeredClasses[$type])) {
 				$this->registeredClasses[$type] = FALSE;
 				continue;
@@ -458,8 +421,6 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		return $this->registeredClasses;
 	}
 
-
-
 	private function renderCalls(array $calls)
 	{
 		static $runIcon;
@@ -470,17 +431,15 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		$s = '';
 		foreach ($calls as $args) {
 			$s .= '<tr><td width=18>' . $runIcon . '</td>';
-			$s .='<td' . ($args ? ' id="' . $this->formatArgsId($args) . '">' . self::dumpToHtml($args) : '>dispatched without arguments');
+			$s .= '<td' . ($args ? ' id="' . $this->formatArgsId($args) . '">' . self::dumpToHtml($args) : '>dispatched without arguments');
 			$s .= '</td></tr>';
 		}
 
 		return $s;
 	}
 
-
-
 	/**
-	 * @param string
+	 * @param string $name
 	 * @return string
 	 */
 	private function formatEventId($name)
@@ -488,18 +447,14 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 		return 'kdyby-event-' . md5($name);
 	}
 
-
-
 	/**
-	 * @param object
+	 * @param object $args
 	 * @return string
 	 */
 	private function formatArgsId($args)
 	{
 		return 'kdyby-event-arg-' . md5(spl_object_hash($args));
 	}
-
-
 
 	/**
 	 * @return string
@@ -522,18 +477,15 @@ class Panel extends Nette\Object implements Tracy\IBarPanel
 CSS;
 	}
 
-
-
 	/**
-	 * @param EventManager $eventManager
+	 * @param \Kdyby\Events\EventManager $eventManager
 	 * @param \Nette\DI\Container $sl
-	 * @return Panel
+	 * @return \Kdyby\Events\Diagnostics\Panel
 	 */
-	public static function register(EventManager $eventManager, Nette\DI\Container $sl)
+	public static function register(EventManager $eventManager, DIContainer $sl)
 	{
+		/** @var \Kdyby\Events\Diagnostics\Panel $panel */
 		$panel = new static($sl);
-		/** @var Panel $panel */
-
 		$panel->setEventManager($eventManager);
 		Debugger::getBar()->addPanel($panel);
 

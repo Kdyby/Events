@@ -3,28 +3,23 @@
 /**
  * Test: Kdyby\Events\Event.
  *
- * @testCase Kdyby\Events\EventTest
- * @author Filip Procházka <filip@prochazka.su>
- * @package Kdyby\Events
+ * @testCase
  */
 
 namespace KdybyTests\Events;
 
-use Kdyby;
 use Kdyby\Events\Event;
-use Tester;
+use Kdyby\Events\EventManager;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class EventTest extends Tester\TestCase
+class EventTest extends \Tester\TestCase
 {
 
+	/**
+	 * @return array
+	 */
 	public function dataParseName()
 	{
 		return [
@@ -35,8 +30,6 @@ class EventTest extends Tester\TestCase
 		];
 	}
 
-
-
 	/**
 	 * @dataProvider dataParseName
 	 */
@@ -45,11 +38,9 @@ class EventTest extends Tester\TestCase
 		Assert::same($expected, Event::parseName($name));
 	}
 
-
-
 	/**
 	 * @param array $calls
-	 * @return FooMock
+	 * @return \KdybyTests\Events\FooMock
 	 */
 	public function dataDispatch(&$calls)
 	{
@@ -66,9 +57,7 @@ class EventTest extends Tester\TestCase
 		return $foo;
 	}
 
-
-
-	public function testDispatch_Method()
+	public function testDispatchMethod()
 	{
 		$foo = $this->dataDispatch($calls);
 		$foo->onBar->dispatch([10]);
@@ -80,9 +69,7 @@ class EventTest extends Tester\TestCase
 		Assert::same([10], $calls[1][1]);
 	}
 
-
-
-	public function testDispatch_Invoke()
+	public function testDispatchInvoke()
 	{
 		$foo = $this->dataDispatch($calls);
 		$foo->onBar(15);
@@ -94,18 +81,16 @@ class EventTest extends Tester\TestCase
 		Assert::same([15], $calls[1][1]);
 	}
 
-
-
 	/**
-	 * @param FooMock $foo
-	 * @param LoremListener $listener
+	 * @param \KdybyTests\Events\FooMock $foo
+	 * @param \KdybyTests\Events\LoremListener $listener
 	 * @param array $calls
 	 * @return \Kdyby\Events\EventManager
 	 */
 	public function dataToManagerDispatch(FooMock $foo, LoremListener $listener, &$calls)
 	{
 		// create
-		$evm = new Kdyby\Events\EventManager();
+		$evm = new EventManager();
 		$evm->addEventSubscriber($listener);
 
 		// event
@@ -129,11 +114,11 @@ class EventTest extends Tester\TestCase
 		return $evm;
 	}
 
-
-
-	public function testDispatch_toManager_invoke()
+	public function testDispatchToManagerInvoke()
 	{
-		$this->dataToManagerDispatch($foo = new FooMock, $listener = new LoremListener, $calls);
+		$foo = new FooMock;
+		$listener = new LoremListener;
+		$this->dataToManagerDispatch($foo, $listener, $calls);
 
 		$foo->onMagic($foo, 2);
 
@@ -146,11 +131,11 @@ class EventTest extends Tester\TestCase
 		Assert::same([$foo, 2], $listener->calls[0][1]);
 	}
 
-
-
-	public function testDispatch_toManager_dispatch()
+	public function testDispatchToManagerDispatch()
 	{
-		$this->dataToManagerDispatch($foo = new FooMock, $listener = new LoremListener, $calls);
+		$foo = new FooMock;
+		$listener = new LoremListener;
+		$this->dataToManagerDispatch($foo, $listener, $calls);
 
 		$foo->onMagic->dispatch([$foo, 3]);
 
@@ -163,11 +148,11 @@ class EventTest extends Tester\TestCase
 		Assert::same([$foo, 3], $listener->calls[0][1]);
 	}
 
-
-
-	public function testDispatch_toManager_secondInvoke()
+	public function testDispatchToManagerSecondInvoke()
 	{
-		$this->dataToManagerDispatch($foo = new FooMock, $listener = new LoremListener, $calls);
+		$foo = new FooMock;
+		$listener = new LoremListener;
+		$this->dataToManagerDispatch($foo, $listener, $calls);
 
 		$foo->onStartup($foo, 4);
 
@@ -184,12 +169,10 @@ class EventTest extends Tester\TestCase
 		Assert::same(4, $args->int);
 	}
 
-
-
 	public function testDispatchOrderGlobalFirst()
 	{
 		$listener = new EventListenerMock();
-		$evm = new Kdyby\Events\EventManager();
+		$evm = new EventManager();
 		$evm->addEventSubscriber($listener);
 
 		$event = new Event('onFoo');
@@ -209,12 +192,10 @@ class EventTest extends Tester\TestCase
 		Assert::match('KdybyTests\Events\%A?%{closure}', $listener->calls[1]);
 	}
 
-
-
 	public function testDispatchOrderGlobalLast()
 	{
 		$listener = new EventListenerMock();
-		$evm = new Kdyby\Events\EventManager();
+		$evm = new EventManager();
 		$evm->addEventSubscriber($listener);
 
 		$event = new Event('onFoo');

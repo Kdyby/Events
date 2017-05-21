@@ -11,20 +11,33 @@
 namespace Kdyby\Events\DI;
 
 use Doctrine\Common\EventSubscriber;
-use Kdyby;
 use Kdyby\Events\Diagnostics\Panel;
-use Nette;
-use Nette\PhpGenerator as Code;
-use Nette\Utils\AssertionException;
-use Symfony;
+use Kdyby\Events\Event;
+use Kdyby\Events\EventManager;
+use Kdyby\Events\LazyEventManager;
+use Kdyby\Events\Subscriber;
+use Kdyby\Events\SymfonyDispatcher;
+use Nette\Configurator;
+use Nette\DI\Compiler;
+use Nette\DI\Config\Helpers as DIConfigHelpers;
+use Nette\DI\Container as DIContainer;
+use Nette\DI\ContainerBuilder as DIContainerBuilder;
+use Nette\DI\ServiceDefinition;
+use Nette\DI\Statement;
+use Nette\PhpGenerator\ClassType as ClassTypeGenerator;
+use Nette\PhpGenerator\Helpers as GeneratorHelpers;
+use Nette\PhpGenerator\PhpLiteral;
+use Nette\Reflection\ClassType as ClassTypeReflection;
+use Nette\Utils\Validators;
+use ReflectionProperty;
+use Symfony\Component\EventDispatcher\Event as SymfonyEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class EventsExtension extends Nette\DI\CompilerExtension
+class EventsExtension extends \Nette\DI\CompilerExtension
 {
+
+	use \Kdyby\StrictObjects\Scream;
+
 	/** @deprecated */
 	const EVENT_TAG = self::TAG_EVENT;
 	/** @deprecated */
@@ -63,8 +76,6 @@ class EventsExtension extends Nette\DI\CompilerExtension
 	 */
 	private $allowedManagerSetup = [];
 
-
-
 	public function loadConfiguration()
 	{
 		$this->listeners = [];
@@ -84,28 +95,28 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 
 		$evm = $builder->addDefinition($this->prefix('manager'))
-			->setClass(Kdyby\Events\EventManager::class);
+			->setClass(EventManager::class);
 		if ($config['debugger']) {
 			$defaults = ['dispatchTree' => FALSE, 'dispatchLog' => TRUE, 'events' => TRUE, 'listeners' => FALSE];
 			if (is_array($config['debugger'])) {
-				$config['debugger'] = Nette\DI\Config\Helpers::merge($config['debugger'], $defaults);
+				$config['debugger'] = DIConfigHelpers::merge($config['debugger'], $defaults);
 			} else {
 				$config['debugger'] = $config['debugger'] !== self::PANEL_COUNT_MODE;
 			}
 
-			$evm->addSetup('?::register(?, ?)->renderPanel = ?', [new Code\PhpLiteral(Panel::class), '@self', '@container', $config['debugger']]);
+			$evm->addSetup('?::register(?, ?)->renderPanel = ?', [new PhpLiteral(Panel::class), '@self', '@container', $config['debugger']]);
 		}
 
 		if ($config['exceptionHandler'] !== NULL) {
 			$evm->addSetup('setExceptionHandler', $this->filterArgs($config['exceptionHandler']));
 		}
 
-		Nette\Utils\Validators::assertField($config, 'subscribers', 'array');
+		Validators::assertField($config, 'subscribers', 'array');
 		foreach ($config['subscribers'] as $i => $subscriber) {
 			$def = $builder->addDefinition($this->prefix('subscriber.' . $i));
 
-			$def->setFactory(Nette\DI\Compiler::filterArguments([
-				is_string($subscriber) ? new Nette\DI\Statement($subscriber) : $subscriber
+			$def->setFactory(Compiler::filterArguments([
+				is_string($subscriber) ? new Statement($subscriber) : $subscriber,
 			])[0]);
 
 			list($subscriberClass) = (array) $builder->normalizeEntity($def->getEntity());
@@ -117,16 +128,14 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			$def->addTag(self::SUBSCRIBER_TAG);
 		}
 
-		if (class_exists(Symfony\Component\EventDispatcher\Event::class)) {
+		if (class_exists(SymfonyEvent::class)) {
 			$builder->addDefinition($this->prefix('symfonyProxy'))
-				->setClass(Symfony\Component\EventDispatcher\EventDispatcherInterface::class)
-				->setFactory(Kdyby\Events\SymfonyDispatcher::class);
+				->setClass(EventDispatcherInterface::class)
+				->setFactory(SymfonyDispatcher::class);
 		}
 
 		$this->loadedConfig = $config;
 	}
-
-
 
 	public function beforeCompile()
 	{
@@ -138,30 +147,28 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			$manager->addSetup('addEventSubscriber', ['@' . $serviceName]);
 		}
 
-		Nette\Utils\Validators::assertField($config, 'validate', 'bool');
+		Validators::assertField($config, 'validate', 'bool');
 		if ($config['validate']) {
 			$this->validateSubscribers($builder, $manager);
 		}
 
-		Nette\Utils\Validators::assertField($config, 'autowire', 'bool');
+		Validators::assertField($config, 'autowire', 'bool');
 		if ($config['autowire']) {
-			Nette\Utils\Validators::assertField($config, 'globalDispatchFirst', 'bool');
+			Validators::assertField($config, 'globalDispatchFirst', 'bool');
 			$this->autowireEvents($builder);
 		}
 
-		Nette\Utils\Validators::assertField($config, 'optimize', 'bool');
+		Validators::assertField($config, 'optimize', 'bool');
 		if ($config['optimize']) {
 			if (!$config['validate']) {
-				throw new Kdyby\Events\InvalidStateException("Cannot optimize without validation.");
+				throw new \Kdyby\Events\InvalidStateException('Cannot optimize without validation.');
 			}
 
 			$this->optimizeListeners($builder);
 		}
 	}
 
-
-
-	public function afterCompile(Code\ClassType $class)
+	public function afterCompile(ClassTypeGenerator $class)
 	{
 		$init = $class->getMethod('initialize');
 
@@ -171,12 +178,12 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		$init->setBody(NULL);
 		while (($line = array_shift($lines)) || $lines) {
 			if ($foundNetteInitStart && !$foundNetteInitEnd &&
-					stripos($line, 'Nette\\') === FALSE && stripos($line, 'set_include_path') === FALSE && stripos($line, 'date_default_timezone_set') === FALSE
+				stripos($line, 'Nette\\') === FALSE && stripos($line, 'set_include_path') === FALSE && stripos($line, 'date_default_timezone_set') === FALSE
 			) {
-				$init->addBody(Code\Helpers::format(
+				$init->addBody(GeneratorHelpers::format(
 					'$this->getService(?)->createEvent(?)->dispatch($this);',
 					$this->prefix('manager'),
-					[Nette\DI\Container::class, 'onInitialize']
+					[DIContainer::class, 'onInitialize']
 				));
 
 				$foundNetteInitEnd = TRUE;
@@ -192,22 +199,20 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 
 		if (!$foundNetteInitEnd) {
-			$init->addBody(Code\Helpers::format(
+			$init->addBody(GeneratorHelpers::format(
 				'$this->getService(?)->createEvent(?)->dispatch($this);',
 				$this->prefix('manager'),
-				[Nette\DI\Container::class, 'onInitialize']
+				[DIContainer::class, 'onInitialize']
 			));
 		}
 	}
 
-
-
 	/**
 	 * @param \Nette\DI\ContainerBuilder $builder
 	 * @param \Nette\DI\ServiceDefinition $manager
-	 * @throws AssertionException
+	 * @throws \Nette\Utils\AssertionException
 	 */
-	private function validateSubscribers(Nette\DI\ContainerBuilder $builder, Nette\DI\ServiceDefinition $manager)
+	private function validateSubscribers(DIContainerBuilder $builder, ServiceDefinition $manager)
 	{
 		foreach ($manager->getSetup() as $stt) {
 			if ($stt->getEntity() !== 'addEventSubscriber') {
@@ -220,39 +225,51 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				$def = $builder->getDefinition($serviceName);
 
 			} catch (\Exception $e) {
-				throw new AssertionException(
-					"Please, do not register listeners directly to service '" . $this->prefix('manager') . "'. " .
-					"Use section '" . $this->name . ": subscribers: ', or tag the service as '" . self::SUBSCRIBER_TAG . "'.",
-					0, $e
+				throw new \Nette\Utils\AssertionException(
+					sprintf(
+						'Please, do not register listeners directly to service %s. Use section "%s: subscribers: ", or tag the service as "%s".',
+						$this->prefix('@manager'),
+						$this->name,
+						self::SUBSCRIBER_TAG
+					),
+					0,
+					$e
 				);
 			}
 
 			if (!$def->getClass()) {
-				throw new AssertionException(
-					"Please, specify existing class for " . (is_numeric($serviceName) ? 'anonymous ' : '') . "service '$serviceName' explicitly, " .
-					"and make sure, that the class exists and can be autoloaded."
+				throw new \Nette\Utils\AssertionException(
+					sprintf(
+						'Please, specify existing class for %sservice @%s explicitly, and make sure, that the class exists and can be autoloaded.',
+						is_numeric($serviceName) ? 'anonymous ' : '',
+						$serviceName
+					)
 				);
 
 			} elseif (!class_exists($def->getClass())) {
-				throw new AssertionException(
-					"Class '" . $def->getClass() . "' of " . (is_numeric($serviceName) ? 'anonymous ' : '') . "service '$serviceName' cannot be found. " .
-					"Please make sure, that the class exists and can be autoloaded."
+				throw new \Nette\Utils\AssertionException(
+					sprintf(
+						'Class %s of %sservice @%s cannot be found. Please make sure, that the class exists and can be autoloaded.',
+						$def->getClass(),
+						is_numeric($serviceName) ? 'anonymous ' : '',
+						$serviceName
+					)
 				);
 			}
 
-			if (!in_array(EventSubscriber::class , class_implements($def->getClass()))) {
+			if (!in_array(EventSubscriber::class, class_implements($def->getClass()))) {
 				// the minimum is Doctrine EventSubscriber, but recommend is Kdyby Subscriber
-				throw new AssertionException(sprintf("Subscriber '%s' doesn't implement %s.", $serviceName, Kdyby\Events\Subscriber::class));
+				throw new \Nette\Utils\AssertionException(sprintf('Subscriber @%s doesn\'t implement %s.', $serviceName, Subscriber::class));
 			}
 
 			$eventNames = [];
 			$listenerInst = self::createEventSubscriberInstanceWithoutConstructor($def->getClass());
 			foreach ($listenerInst->getSubscribedEvents() as $eventName => $params) {
 				if (is_numeric($eventName) && is_string($params)) { // [EventName, ...]
-					list(, $method) = Kdyby\Events\Event::parseName($params);
+					list(, $method) = Event::parseName($params);
 					$eventNames[] = ltrim($params, '\\');
 					if (!method_exists($listenerInst, $method)) {
-						throw new AssertionException('Event listener ' . $def->getClass() . "::{$method}() is not implemented.");
+						throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $method));
 					}
 
 				} elseif (is_string($eventName)) { // [EventName => ???, ...]
@@ -260,18 +277,18 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 					if (is_string($params)) { // [EventName => method, ...]
 						if (!method_exists($listenerInst, $params)) {
-							throw new AssertionException('Event listener ' . $def->getClass() . "::{$params}() is not implemented.");
+							throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $params));
 						}
 
 					} elseif (is_string($params[0])) { // [EventName => [method, priority], ...]
 						if (!method_exists($listenerInst, $params[0])) {
-							throw new AssertionException('Event listener ' . $def->getClass() . "::{$params[0]}() is not implemented.");
+							throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $params[0]));
 						}
 
 					} else {
 						foreach ($params as $listener) { // [EventName => [[method, priority], ...], ...]
 							if (!method_exists($listenerInst, $listener[0])) {
-								throw new AssertionException('Event listener ' . $def->getClass() . "::{$listener[0]}() is not implemented.");
+								throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $listener[0]));
 							}
 						}
 					}
@@ -282,34 +299,33 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 	}
 
-
-
-	private function isAlias(Nette\DI\ServiceDefinition $definition)
+	private function isAlias(ServiceDefinition $definition)
 	{
 		return $definition->getFactory() && (
-				$definition->getEntity() instanceof Nette\DI\ServiceDefinition
+				$definition->getEntity() instanceof ServiceDefinition
 				|| (is_string($definition->getEntity()) && substr($definition->getEntity(), 0, 1) === '@')
 			);
 	}
 
-
-
 	/**
 	 * @param \Nette\DI\ContainerBuilder $builder
 	 */
-	private function autowireEvents(Nette\DI\ContainerBuilder $builder)
+	private function autowireEvents(DIContainerBuilder $builder)
 	{
 		foreach ($builder->getDefinitions() as $def) {
-			/** @var Nette\DI\ServiceDefinition $def */
+			/** @var \Nette\DI\ServiceDefinition $def */
 			if ($this->isAlias($def)) {
 				continue; // alias
 			}
 
-			if (!class_exists($class = $builder->expand($def->getClass()))) {
+			$class = $builder->expand($def->getClass());
+			if (!class_exists($class)) {
 				if (!$def->getFactory()) {
 					continue;
+				}
 
-				} elseif (is_array($class = $builder->expand($def->getEntity()))) {
+				$class = $builder->expand($def->getEntity());
+				if (is_array($class)) {
 					continue;
 
 				} elseif (!class_exists($class)) {
@@ -320,16 +336,15 @@ class EventsExtension extends Nette\DI\CompilerExtension
 				continue;
 			}
 
-			$this->bindEventProperties($def, Nette\Reflection\ClassType::from($class));
+			$this->bindEventProperties($def, ClassTypeReflection::from($class));
 		}
 	}
 
-
-
-	protected function bindEventProperties(Nette\DI\ServiceDefinition $def, Nette\Reflection\ClassType $class)
+	protected function bindEventProperties(ServiceDefinition $def, ClassTypeReflection $class)
 	{
-		foreach ($class->getProperties(Nette\Reflection\Property::IS_PUBLIC) as $property) {
-			if (!preg_match('#^on[A-Z]#', $name = $property->getName())) {
+		foreach ($class->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
+			$name = $property->getName();
+			if (!preg_match('#^on[A-Z]#', $name)) {
 				continue;
 			}
 
@@ -338,29 +353,27 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			}
 
 			$def->addSetup('$' . $name, [
-				new Nette\DI\Statement($this->prefix('@manager') . '::createEvent', [
+				new Statement($this->prefix('@manager') . '::createEvent', [
 					[$class->getName(), $name],
-					new Code\PhpLiteral('$service->' . $name),
+					new PhpLiteral('$service->' . $name),
 					NULL,
 					$property->hasAnnotation('globalDispatchFirst')
 						? (bool) $property->getAnnotation('globalDispatchFirst')
 						: $this->loadedConfig['globalDispatchFirst'],
-				])
+				]),
 			]);
 		}
 	}
 
-
-
 	/**
 	 * @param \Nette\DI\ContainerBuilder $builder
 	 */
-	private function optimizeListeners(Nette\DI\ContainerBuilder $builder)
+	private function optimizeListeners(DIContainerBuilder $builder)
 	{
 		$listeners = [];
 		foreach ($this->listeners as $serviceName => $eventNames) {
 			foreach ($eventNames as $eventName) {
-				list($namespace, $event) = Kdyby\Events\Event::parseName($eventName);
+				list($namespace, $event) = Event::parseName($eventName);
 				$listeners[$eventName][] = $serviceName;
 
 				if (!$namespace || !class_exists($namespace)) {
@@ -369,12 +382,13 @@ class EventsExtension extends Nette\DI\CompilerExtension
 
 				// find all subclasses and register the listener to all the classes dispatching them
 				foreach ($builder->getDefinitions() as $def) {
-					if (!$class = $def->getClass()) {
+					$class = $def->getClass();
+					if (!empty($class)) {
 						continue; // ignore unresolved classes
 					}
 
 					if (is_subclass_of($class, $namespace)) {
-						$listeners["$class::$event"][] = $serviceName;
+						$listeners[sprintf('%s::%s', $class, $event)][] = $serviceName;
 					}
 				}
 			}
@@ -385,34 +399,28 @@ class EventsExtension extends Nette\DI\CompilerExtension
 		}
 
 		$builder->getDefinition($this->prefix('manager'))
-			->setClass(Kdyby\Events\LazyEventManager::class, [$listeners])
+			->setClass(LazyEventManager::class, [$listeners])
 			->setSetup($this->allowedManagerSetup);
 	}
 
-
-
 	/**
 	 * @param string|\stdClass $statement
-	 * @return Nette\DI\Statement[]
+	 * @return \Nette\DI\Statement[]
 	 */
 	private function filterArgs($statement)
 	{
-		return Nette\DI\Compiler::filterArguments([is_string($statement) ? new Nette\DI\Statement($statement) : $statement]);
+		return Compiler::filterArguments([is_string($statement) ? new Statement($statement) : $statement]);
 	}
-
-
 
 	/**
 	 * @param \Nette\Configurator $configurator
 	 */
-	public static function register(Nette\Configurator $configurator)
+	public static function register(Configurator $configurator)
 	{
-		$configurator->onCompile[] = function ($config, Nette\DI\Compiler $compiler) {
+		$configurator->onCompile[] = function ($config, Compiler $compiler) {
 			$compiler->addExtension('events', new EventsExtension());
 		};
 	}
-
-
 
 	/**
 	 * @param string|NULL $class
@@ -424,9 +432,9 @@ class EventsExtension extends Nette\DI\CompilerExtension
 			throw new \InvalidArgumentException('Given class cannot be NULL');
 		}
 
-		$instance = Nette\Reflection\ClassType::from($class)->newInstanceWithoutConstructor();
+		$instance = ClassTypeReflection::from($class)->newInstanceWithoutConstructor();
 		if (!$instance instanceof EventSubscriber) {
-			throw new Kdyby\Events\UnexpectedValueException(sprintf('The class %s does not implement %s', $class, EventSubscriber::class));
+			throw new \Kdyby\Events\UnexpectedValueException(sprintf('The class %s does not implement %s', $class, EventSubscriber::class));
 		}
 
 		return $instance;

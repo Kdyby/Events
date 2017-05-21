@@ -3,25 +3,17 @@
 /**
  * Test: Kdyby\Events\EventArgs.
  *
- * @testCase Kdyby\Events\EventArgsTest
- * @author Filip Procházka <filip@prochazka.su>
- * @package Kdyby\Events
+ * @testCase
  */
 
 namespace KdybyTests\Events;
 
 use Doctrine\Common\EventArgs;
-use Tester;
 use Tester\Assert;
 
 require_once __DIR__ . '/../bootstrap.php';
 
-
-
-/**
- * @author Filip Procházka <filip@prochazka.su>
- */
-class EventArgsTest extends Tester\TestCase
+class EventArgsTest extends \Tester\TestCase
 {
 
 	public function testImplementsDoctrineEventArgs()
