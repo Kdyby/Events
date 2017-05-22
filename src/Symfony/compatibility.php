@@ -8,6 +8,8 @@
  * For the full copyright and license information, please view the file license.txt that was distributed with this source code.
  */
 
-if (!class_exists(\Doctrine\Common\EventManager::class)) {
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+
+if (!interface_exists(EventDispatcherInterface::class)) {
 	require_once __DIR__ . '/aliases.php';
 }

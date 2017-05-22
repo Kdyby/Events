@@ -42,7 +42,8 @@
 			"src/Events/exceptions.php"
 		],
 		"files": [
-			"src/Doctrine/compatibility.php"
+			"src/Doctrine/compatibility.php",
+			"src/Symfony/compatibility.php"
 		]
 	},
 	"autoload-dev": {
