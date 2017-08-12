@@ -195,6 +195,11 @@ class EventManager extends \Doctrine\Common\EventManager
 
 		foreach ((array) $unsubscribe as $eventName) {
 			$eventName = ltrim($eventName, '\\');
+			
+			if (!isset($this->listeners[$eventName])) {
+				continue;
+			}
+			
 			foreach ($this->listeners[$eventName] as $priority => $listeners) {
 				$key = NULL;
 				foreach ($listeners as $k => $listener) {
