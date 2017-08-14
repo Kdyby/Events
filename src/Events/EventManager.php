@@ -195,31 +195,33 @@ class EventManager extends \Doctrine\Common\EventManager
 
 		foreach ((array) $unsubscribe as $eventName) {
 			$eventName = ltrim($eventName, '\\');
-			foreach ($this->listeners[$eventName] as $priority => $listeners) {
-				$key = NULL;
-				foreach ($listeners as $k => $listener) {
-					if (!($listener === $subscriber || (is_array($listener) && $listener[0] === $subscriber))) {
+			if (isset($this->listeners[$eventName])) {
+				foreach ($this->listeners[ $eventName ] as $priority => $listeners) {
+					$key = null;
+					foreach ($listeners as $k => $listener) {
+						if (!($listener === $subscriber || (is_array($listener) && $listener[ 0 ] === $subscriber))) {
+							continue;
+						}
+						$key = $k;
+						break;
+					}
+
+					if ($key === null) {
 						continue;
 					}
-					$key = $k;
-					break;
-				}
 
-				if ($key === NULL) {
-					continue;
-				}
-
-				unset($this->listeners[$eventName][$priority][$key]);
-				if (empty($this->listeners[$eventName][$priority])) {
-					unset($this->listeners[$eventName][$priority]);
-				}
-				if (empty($this->listeners[$eventName])) {
-					unset($this->listeners[$eventName]);
-					// there are no listeners for this specific event, so no reason to call sort on next dispatch
-					$this->sorted[$eventName] = [];
-				} else {
-					// otherwise it needs to be sorted again
-					unset($this->sorted[$eventName]);
+					unset($this->listeners[ $eventName ][ $priority ][ $key ]);
+					if (empty($this->listeners[ $eventName ][ $priority ])) {
+						unset($this->listeners[ $eventName ][ $priority ]);
+					}
+					if (empty($this->listeners[ $eventName ])) {
+						unset($this->listeners[ $eventName ]);
+						// there are no listeners for this specific event, so no reason to call sort on next dispatch
+						$this->sorted[ $eventName ] = [];
+					} else {
+						// otherwise it needs to be sorted again
+						unset($this->sorted[ $eventName ]);
+					}
 				}
 			}
 		}
