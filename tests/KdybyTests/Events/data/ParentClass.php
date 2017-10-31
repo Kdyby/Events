@@ -5,8 +5,10 @@ namespace KdybyTests\Events;
 /**
  * @method onCreate(string | NULL $arg)
  */
-class ParentClass extends \Nette\Object
+class ParentClass
 {
+
+	use \Nette\SmartObject;
 
 	/**
 	 * @var array|callable[]|\Kdyby\Events\Event
