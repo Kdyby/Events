@@ -2,8 +2,10 @@
 
 namespace KdybyTests\Events;
 
-class DispatchOrderMock extends \Nette\Object
+class DispatchOrderMock
 {
+
+	use \Nette\SmartObject;
 
 	/**
 	 * @globalDispatchFirst

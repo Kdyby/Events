@@ -7,8 +7,10 @@ namespace KdybyTests\Events;
  * @method onMagic(FooMock $foo, $int)
  * @method onStartup(FooMock $foo, $int)
  */
-class FooMock extends \Nette\Object
+class FooMock
 {
+
+	use \Nette\SmartObject;
 
 	/**
 	 * @var array|callable[]|\Kdyby\Events\Event
