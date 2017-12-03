@@ -33,7 +33,7 @@
 
 		"symfony/event-dispatcher": "^3.0 || ^4.0",
 
-		"nette/tester": "~1.7"
+		"nette/tester": "^2.0"
 	},
 	"minimum-stability": "dev",
 	"autoload": {
