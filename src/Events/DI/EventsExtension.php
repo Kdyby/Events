@@ -383,7 +383,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 				// find all subclasses and register the listener to all the classes dispatching them
 				foreach ($builder->getDefinitions() as $def) {
 					$class = $def->getClass();
-					if (!empty($class)) {
+					if (!$class) {
 						continue; // ignore unresolved classes
 					}
 
