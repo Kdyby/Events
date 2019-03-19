@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Test: Kdyby\Events\EventManager.
  *
@@ -19,12 +21,12 @@ class EventManagerTest extends \Tester\TestCase
 	/** @var \Kdyby\Events\EventManager */
 	private $manager;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		$this->manager = new EventManager();
 	}
 
-	public function testListenerHasRequiredMethod()
+	public function testListenerHasRequiredMethod(): void
 	{
 		$listener = new EventListenerMock();
 		$this->manager->addEventListener('onFoo', $listener);
@@ -32,14 +34,14 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same(['onFoo' => [$listener]], $this->manager->getListeners());
 	}
 
-	public function testListenerIsMissingMethod()
+	public function testListenerIsMissingMethod(): void
 	{
-		Assert::exception(function () {
+		Assert::exception(function (): void {
 			$this->manager->addEventListener('onStartup', new EventListenerMock());
 		}, \Kdyby\Events\InvalidListenerException::class, 'Event listener "KdybyTests\Events\EventListenerMock" has no method "onStartup"');
 	}
 
-	public function testListenerIsCallable()
+	public function testListenerIsCallable(): void
 	{
 		$listener = self::getEmptyClosure();
 		$this->manager->addEventListener('onFoo', $listener);
@@ -47,7 +49,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same(['onFoo' => [$listener]], $this->manager->getListeners());
 	}
 
-	public function testListenerMagic()
+	public function testListenerMagic(): void
 	{
 		$listener = new MagicEventListenerMock();
 		$this->manager->addEventListener('onBaz', $listener);
@@ -55,7 +57,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same(['onBaz' => [$listener]], $this->manager->getListeners());
 	}
 
-	public function testRemovingListenerFromSpecificEvent()
+	public function testRemovingListenerFromSpecificEvent(): void
 	{
 		$subscriber = new EventListenerMock();
 		$listenerCallback = self::getEmptyClosure();
@@ -85,7 +87,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::true($this->manager->hasListeners('onCorge'));
 	}
 
-	public function testRemovingListenerCompletely()
+	public function testRemovingListenerCompletely(): void
 	{
 		$subscriber = new EventListenerMock();
 		$listenerCallback = self::getEmptyClosure();
@@ -116,7 +118,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same([], $this->manager->getListeners());
 	}
 
-	public function testRemovingSomeListeners()
+	public function testRemovingSomeListeners(): void
 	{
 		$listener = new EventListenerMock();
 		$this->manager->addEventListener('onFoo', $listener);
@@ -134,7 +136,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same(['onBar' => [$listener2]], $this->manager->getListeners());
 	}
 
-	public function testRemovingListenersIssue90()
+	public function testRemovingListenersIssue90(): void
 	{
 		$listener1 = new EventListenerMock();
 		$listener2 = new EventListenerMock2();
@@ -147,17 +149,16 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same(['onFoo' => [$listener1]], $this->manager->getListeners());
 	}
 
-	public function testListenerDontHaveRequiredMethodException()
+	public function testListenerDontHaveRequiredMethodException(): void
 	{
-		$evm = $this->manager;
 		$listener = new EventListenerMock();
 
-		Assert::exception(static function () use ($evm, $listener) {
-			$evm->addEventListener('onNonexisting', $listener);
+		Assert::exception(function () use ($listener): void {
+			$this->manager->addEventListener('onNonexisting', $listener);
 		}, \Kdyby\Events\InvalidListenerException::class);
 	}
 
-	public function testListenerWithoutInterface()
+	public function testListenerWithoutInterface(): void
 	{
 		Assert::false($this->manager->hasListeners('onClear'));
 		$listener = new ListenerWithoutInterface();
@@ -175,7 +176,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $this->manager->getListeners());
 	}
 
-	public function testDispatching()
+	public function testDispatching(): void
 	{
 		$listener = new EventListenerMock();
 		$this->manager->addEventSubscriber($listener);
@@ -190,10 +191,10 @@ class EventManagerTest extends \Tester\TestCase
 		], $listener->calls);
 	}
 
-	public function testDispatchingCallable()
+	public function testDispatchingCallable(): void
 	{
 		$triggerCounter = 0;
-		$callback = static function () use (& $triggerCounter) {
+		$callback = static function () use (& $triggerCounter): void {
 			$triggerCounter++;
 		};
 
@@ -215,7 +216,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same(2, $triggerCounter);
 	}
 
-	public function testDispatchingMagic()
+	public function testDispatchingMagic(): void
 	{
 		$listener = new MagicEventListenerMock();
 		$this->manager->addEventSubscriber($listener);
@@ -230,10 +231,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $listener->calls);
 	}
 
-	/**
-	 * @return array
-	 */
-	public function dataEventsDispatchingNamespaces()
+	public function dataEventsDispatchingNamespaces(): array
 	{
 		return [
 			['App::onFoo', ['App::onFoo']],
@@ -244,10 +242,8 @@ class EventManagerTest extends \Tester\TestCase
 
 	/**
 	 * @dataProvider dataEventsDispatchingNamespaces
-	 * @param string $trigger
-	 * @param array $called
 	 */
-	public function testEventsDispatchingNamespaces($trigger, array $called)
+	public function testEventsDispatchingNamespaces(string $trigger, array $called): void
 	{
 		$plain = new EventListenerMock();
 		$this->manager->addEventListener('onFoo', $plain);
@@ -268,7 +264,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same($expected, array_merge($ns->calls, $plain->calls));
 	}
 
-	public function testEventsDispatchingCustomNamespaces()
+	public function testEventsDispatchingCustomNamespaces(): void
 	{
 		$listener = new CustomNamespacedEventListenerMock();
 		$this->manager->addEventSubscriber($listener);
@@ -283,7 +279,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $listener->calls);
 	}
 
-	public function testEventsDispatchingCustomMethodAlias()
+	public function testEventsDispatchingCustomMethodAlias(): void
 	{
 		$listener = new MethodAliasListenerMock();
 		$this->manager->addEventSubscriber($listener);
@@ -296,7 +292,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $listener->calls);
 	}
 
-	public function testEventsDispatchingPriority()
+	public function testEventsDispatchingPriority(): void
 	{
 		$lower = new PriorityMethodAliasListenerMock();
 		$this->manager->addEventSubscriber($lower);
@@ -312,7 +308,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $args->calls);
 	}
 
-	public function testEventsDispatchingMultipleEventMethods()
+	public function testEventsDispatchingMultipleEventMethods(): void
 	{
 		$listener = new MultipleEventMethodsListenerMock();
 		$this->manager->addEventSubscriber($listener);
@@ -326,7 +322,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $listener->calls);
 	}
 
-	public function testEventsDispatchingMultipleEventMethodsNamespaced()
+	public function testEventsDispatchingMultipleEventMethodsNamespaced(): void
 	{
 		$listener = new MultipleEventMethodsListenerMock();
 		$this->manager->addEventSubscriber($listener);
@@ -340,7 +336,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $listener->calls);
 	}
 
-	public function testEventsDispatchingListenerWithoutInterface()
+	public function testEventsDispatchingListenerWithoutInterface(): void
 	{
 		$listener = new ListenerWithoutInterface();
 		$this->manager->addEventListener(['onClear'], $listener);
@@ -353,7 +349,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $listener->calls);
 	}
 
-	public function testEventDispatchingInheritanceHasListeners()
+	public function testEventDispatchingInheritanceHasListeners(): void
 	{
 		$parentClassOnly = new ParentClassOnlyListener();
 		$this->manager->addEventSubscriber($parentClassOnly);
@@ -374,7 +370,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::true($this->manager->hasListeners(LeafClass::class . '::onCreate'));
 	}
 
-	public function testEventDispatchingInheritanceGetListeners()
+	public function testEventDispatchingInheritanceGetListeners(): void
 	{
 		$parentClassOnly = new ParentClassOnlyListener();
 		$this->manager->addEventSubscriber($parentClassOnly);
@@ -399,7 +395,7 @@ class EventManagerTest extends \Tester\TestCase
 		], $this->manager->getListeners(LeafClass::class . '::onCreate'));
 	}
 
-	public function testEventDispatchingInheritanceListeningOnParentClass()
+	public function testEventDispatchingInheritanceListeningOnParentClass(): void
 	{
 		$parentClassOnly = new ParentClassOnlyListener();
 		$this->manager->addEventSubscriber($parentClassOnly);
@@ -417,7 +413,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same([], $leafClassOnly->eventCalls);
 	}
 
-	public function testEventDispatchingInheritanceListeningOnInheritedClass()
+	public function testEventDispatchingInheritanceListeningOnInheritedClass(): void
 	{
 		$parentClassOnly = new ParentClassOnlyListener();
 		$this->manager->addEventSubscriber($parentClassOnly);
@@ -435,7 +431,7 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same([], $leafClassOnly->eventCalls);
 	}
 
-	public function testEventDispatchingInheritanceListeningOnLeafClass()
+	public function testEventDispatchingInheritanceListeningOnLeafClass(): void
 	{
 		$parentClassOnly = new ParentClassOnlyListener();
 		$this->manager->addEventSubscriber($parentClassOnly);
@@ -453,12 +449,9 @@ class EventManagerTest extends \Tester\TestCase
 		Assert::same([[1]], $leafClassOnly->eventCalls);
 	}
 
-	/**
-	 * @return \Closure
-	 */
-	private static function getEmptyClosure()
+	private static function getEmptyClosure(): callable
 	{
-		return static function () {
+		return static function (): void {
 		};
 	}
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class EventListenerMock implements \Kdyby\Events\Subscriber
@@ -12,10 +14,7 @@ class EventListenerMock implements \Kdyby\Events\Subscriber
 	 */
 	public $calls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			'onFoo',
@@ -23,13 +22,13 @@ class EventListenerMock implements \Kdyby\Events\Subscriber
 		];
 	}
 
-	public function onFoo(EventArgsMock $args)
+	public function onFoo(EventArgsMock $args): void
 	{
 		$args->calls[] = [__METHOD__, func_get_args()];
 		$this->calls[] = [__METHOD__, func_get_args()];
 	}
 
-	public function onBar(EventArgsMock $args)
+	public function onBar(EventArgsMock $args): void
 	{
 		$args->calls[] = [__METHOD__, func_get_args()];
 		$this->calls[] = [__METHOD__, func_get_args()];

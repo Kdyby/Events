@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -28,42 +30,62 @@ class SymfonyDispatcher implements \Symfony\Component\EventDispatcher\EventDispa
 		$this->evm = $eventManager;
 	}
 
-	public function dispatch($eventName, SymfonyEvent $event = NULL)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param string|null $eventName
+	 * @param \Symfony\Component\EventDispatcher\Event $event
+	 */
+	public function dispatch($eventName, SymfonyEvent $event = NULL): void
 	{
 		$this->evm->dispatchEvent($eventName, new EventArgsList([$event]));
 	}
 
-	public function addListener($eventName, $listener, $priority = 0)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 */
+	public function addListener($eventName, $listener, $priority = 0): void
 	{
 		throw new \Kdyby\Events\NotSupportedException();
 	}
 
-	public function addSubscriber(EventSubscriberInterface $subscriber)
+	public function addSubscriber(EventSubscriberInterface $subscriber): void
 	{
 		throw new \Kdyby\Events\NotSupportedException();
 	}
 
-	public function removeListener($eventName, $listener)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 */
+	public function removeListener($eventName, $listener): void
 	{
 		throw new \Kdyby\Events\NotSupportedException();
 	}
 
-	public function removeSubscriber(EventSubscriberInterface $subscriber)
+	public function removeSubscriber(EventSubscriberInterface $subscriber): void
 	{
 		throw new \Kdyby\Events\NotSupportedException();
 	}
 
-	public function getListenerPriority($eventName, $listener)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 */
+	public function getListenerPriority($eventName, $listener): void
 	{
 		throw new \Kdyby\Events\NotSupportedException();
 	}
 
-	public function getListeners($eventName = NULL)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 */
+	public function getListeners($eventName = NULL): array
 	{
 		return $this->evm->getListeners($eventName);
 	}
 
-	public function hasListeners($eventName = NULL)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 */
+	public function hasListeners($eventName = NULL): bool
 	{
 		return $this->evm->hasListeners($eventName);
 	}

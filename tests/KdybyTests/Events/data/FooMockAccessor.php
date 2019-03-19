@@ -1,13 +1,12 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 interface FooMockAccessor
 {
 
-	/**
-	 * @return \KdybyTests\Events\FooMock
-	 */
-	public function get();
+	public function get(): FooMock;
 
 }

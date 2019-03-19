@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -79,15 +81,12 @@ class Panel implements \Tracy\IBarPanel
 		$this->sl = $sl;
 	}
 
-	/**
-	 * @param \Kdyby\Events\EventManager $evm
-	 */
-	public function setEventManager(EventManager $evm)
+	public function setEventManager(EventManager $evm): void
 	{
 		$evm->setPanel($this);
 	}
 
-	public function setServiceIds(array $listenerIds)
+	public function setServiceIds(array $listenerIds): void
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['listeners'])) {
 			return;
@@ -95,13 +94,17 @@ class Panel implements \Tracy\IBarPanel
 		$this->listenerIds = $listenerIds;
 	}
 
-	public function registerEvent(Event $event)
+	public function registerEvent(Event $event): void
 	{
 		$this->events[] = $event;
 		$event->setPanel($this);
 	}
 
-	public function eventDispatch($eventName, EventArgs $args = NULL)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param string|null $eventName
+	 */
+	public function eventDispatch($eventName, EventArgs $args = NULL): void
 	{
 		if (!$this->renderPanel) {
 			return;
@@ -123,7 +126,11 @@ class Panel implements \Tracy\IBarPanel
 		}
 	}
 
-	public function eventDispatched($eventName, EventArgs $args = NULL)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param string|null $eventName
+	 */
+	public function eventDispatched($eventName, EventArgs $args = NULL): void
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['dispatchTree'])) {
 			return;
@@ -131,7 +138,12 @@ class Panel implements \Tracy\IBarPanel
 		$this->dispatchTreePointer = &$this->dispatchTreePointer[0];
 	}
 
-	public function inlineCallbacks($eventName, $inlineCallbacks)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param string|null $eventName
+	 * @param array $inlineCallbacks
+	 */
+	public function inlineCallbacks($eventName, $inlineCallbacks): void
 	{
 		if (!$this->renderPanel) {
 			return;
@@ -141,10 +153,8 @@ class Panel implements \Tracy\IBarPanel
 
 	/**
 	 * Renders HTML code for custom tab.
-	 *
-	 * @return string|NULL
 	 */
-	public function getTab()
+	public function getTab(): ?string
 	{
 		if (empty($this->events)) {
 			return NULL;
@@ -163,10 +173,8 @@ class Panel implements \Tracy\IBarPanel
 
 	/**
 	 * Renders HTML code for custom panel.
-	 *
-	 * @return string|NULL
 	 */
-	public function getPanel()
+	public function getPanel(): ?string
 	{
 		if (!$this->renderPanel) {
 			return '';
@@ -199,7 +207,11 @@ class Panel implements \Tracy\IBarPanel
 			'<div class="nette-inner tracy-inner nette-KdybyEventsPanel"><table>' . $s . '</table></div>';
 	}
 
-	private function renderPanelDispatchLog(&$visited)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param array $visited
+	 */
+	private function renderPanelDispatchLog(&$visited): string
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['dispatchLog'])) {
 			return '';
@@ -227,7 +239,11 @@ class Panel implements \Tracy\IBarPanel
 		return $s;
 	}
 
-	private function renderPanelEvents(&$visited)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param array $visited
+	 */
+	private function renderPanelEvents(&$visited): string
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['events'])) {
 			return '';
@@ -261,7 +277,11 @@ class Panel implements \Tracy\IBarPanel
 		return $s;
 	}
 
-	private function renderPanelListeners(&$visited)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param array $visited
+	 */
+	private function renderPanelListeners(&$visited): string
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['listeners'])) {
 			return '';
@@ -293,7 +313,7 @@ class Panel implements \Tracy\IBarPanel
 		return $s;
 	}
 
-	private function renderPanelDispatchTree()
+	private function renderPanelDispatchTree(): string
 	{
 		if (!$this->renderPanel || (is_array($this->renderPanel) && !$this->renderPanel['dispatchTree'])) {
 			return '';
@@ -311,11 +331,8 @@ class Panel implements \Tracy\IBarPanel
 
 	/**
 	 * Renders an item in call graph.
-	 *
-	 * @param array $item
-	 * @return string
 	 */
-	private function renderTreeItem(array $item)
+	private function renderTreeItem(array $item): string
 	{
 		$h = 'htmlspecialchars';
 
@@ -334,17 +351,17 @@ class Panel implements \Tracy\IBarPanel
 		return $s . '</li></ul>';
 	}
 
-	private function getEventCalls($eventName)
+	private function getEventCalls(string $eventName): array
 	{
 		return !empty($this->dispatchLog[$eventName]) ? $this->dispatchLog[$eventName] : [];
 	}
 
-	private function getInlineCallbacks($eventName)
+	private function getInlineCallbacks(string $eventName): array
 	{
 		return !empty($this->inlineCallbacks[$eventName]) ? $this->inlineCallbacks[$eventName] : [];
 	}
 
-	private function renderListeners($ids)
+	private function renderListeners(array $ids): string
 	{
 		static $addIcon;
 		if (empty($addIcon)) {
@@ -356,12 +373,12 @@ class Panel implements \Tracy\IBarPanel
 			$addIcon = '<img width="18" height="18" src="data:image/png;base64,' . base64_encode($icon) . '" title="Listener" />';
 		}
 
-		$registeredClasses = $this->getClassMap();
+		$registeredClasses = (array) $this->getClassMap();
 
 		$h = 'htmlspecialchars';
 
-		$shortFilename = static function (ReflectionFunctionAbstract $refl) {
-			$title = '.../' . basename($refl->getFileName() ?: 'unknown.php') . ':' . ((string) $refl->getStartLine());
+		$shortFilename = static function (ReflectionFunctionAbstract $refl): string {
+			$title = '.../' . basename($refl->getFileName() ?: 'unknown.php') . ':' . (string) $refl->getStartLine();
 
 			/** @var string|NULL $editor */
 			$editor = TracyHelpers::editorUri($refl->getFileName() ?: 'unknown.php', $refl->getStartLine() ?: 0);
@@ -403,12 +420,15 @@ class Panel implements \Tracy\IBarPanel
 		return $s;
 	}
 
-	private static function dumpToHtml($structure)
+	/**
+	 * @param string|object|array $structure
+	 */
+	private static function dumpToHtml($structure): string
 	{
 		return Dumper::toHtml($structure, [Dumper::COLLAPSE => TRUE, Dumper::DEPTH => 2]);
 	}
 
-	private function getClassMap()
+	private function getClassMap(): ?array
 	{
 		if ($this->registeredClasses !== NULL) {
 			return $this->registeredClasses;
@@ -431,7 +451,7 @@ class Panel implements \Tracy\IBarPanel
 		return $this->registeredClasses;
 	}
 
-	private function renderCalls(array $calls)
+	private function renderCalls(array $calls): string
 	{
 		static $runIcon;
 		if (empty($runIcon)) {
@@ -453,28 +473,21 @@ class Panel implements \Tracy\IBarPanel
 		return $s;
 	}
 
-	/**
-	 * @param string $name
-	 * @return string
-	 */
-	private function formatEventId($name)
+	private function formatEventId(string $name): string
 	{
 		return 'kdyby-event-' . md5($name);
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param object $args
-	 * @return string
 	 */
-	private function formatArgsId($args)
+	private function formatArgsId($args): string
 	{
 		return 'kdyby-event-arg-' . md5(spl_object_hash($args));
 	}
 
-	/**
-	 * @return string
-	 */
-	protected function renderStyles()
+	protected function renderStyles(): string
 	{
 		return <<<CSS
 			#nette-debug .nette-panel .nette-KdybyEventsPanel,
@@ -492,14 +505,8 @@ class Panel implements \Tracy\IBarPanel
 CSS;
 	}
 
-	/**
-	 * @param \Kdyby\Events\EventManager $eventManager
-	 * @param \Nette\DI\Container $sl
-	 * @return \Kdyby\Events\Diagnostics\Panel
-	 */
-	public static function register(EventManager $eventManager, DIContainer $sl)
+	public static function register(EventManager $eventManager, DIContainer $sl): Panel
 	{
-		/** @var \Kdyby\Events\Diagnostics\Panel $panel */
 		$panel = new static($sl);
 		$panel->setEventManager($eventManager);
 		Debugger::getBar()->addPanel($panel);

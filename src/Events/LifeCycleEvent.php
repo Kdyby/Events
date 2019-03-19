@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -20,31 +22,31 @@ final class LifeCycleEvent
 	/**
 	 * Occurs before the application loads presenter
 	 */
-	const onStartup = Application::class . '::onStartup';
+	public const onStartup = Application::class . '::onStartup';
 
 	/**
 	 * Occurs before the application shuts down
 	 */
-	const onShutdown = Application::class . '::onShutdown';
+	public const onShutdown = Application::class . '::onShutdown';
 
 	/**
 	 * Occurs when a new request is ready for dispatch;
 	 */
-	const onRequest = Application::class . '::onRequest';
+	public const onRequest = Application::class . '::onRequest';
 
 	/**
 	 * Occurs when a presenter is created
 	 */
-	const onPresenter = Application::class . '::onPresenter';
+	public const onPresenter = Application::class . '::onPresenter';
 
 	/**
 	 * Occurs when a new response is received
 	 */
-	const onResponse = Application::class . '::onResponse';
+	public const onResponse = Application::class . '::onResponse';
 
 	/**
 	 * Occurs when an unhandled exception occurs in the application
 	 */
-	const onError = Application::class . '::onError';
+	public const onError = Application::class . '::onError';
 
 }

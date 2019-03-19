@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class InheritSubscriber implements \Kdyby\Events\Subscriber
@@ -12,10 +14,7 @@ class InheritSubscriber implements \Kdyby\Events\Subscriber
 	 */
 	public $eventCalls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			LeafClass::class . '::onCreate',
@@ -23,7 +22,7 @@ class InheritSubscriber implements \Kdyby\Events\Subscriber
 		];
 	}
 
-	public function onCreate()
+	public function onCreate(): void
 	{
 		$backtrace = debug_backtrace();
 		$event = $backtrace[2]['args'][0];

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -39,14 +41,14 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 	use \Kdyby\StrictObjects\Scream;
 
 	/** @deprecated */
-	const EVENT_TAG = self::TAG_EVENT;
+	public const EVENT_TAG = self::TAG_EVENT;
 	/** @deprecated */
-	const SUBSCRIBER_TAG = self::TAG_SUBSCRIBER;
+	public const SUBSCRIBER_TAG = self::TAG_SUBSCRIBER;
 
-	const TAG_EVENT = 'kdyby.event';
-	const TAG_SUBSCRIBER = 'kdyby.subscriber';
+	public const TAG_EVENT = 'kdyby.event';
+	public const TAG_SUBSCRIBER = 'kdyby.subscriber';
 
-	const PANEL_COUNT_MODE = 'count';
+	public const PANEL_COUNT_MODE = 'count';
 
 	/**
 	 * @var array
@@ -76,7 +78,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 	 */
 	private $allowedManagerSetup = [];
 
-	public function loadConfiguration()
+	public function loadConfiguration(): void
 	{
 		$this->listeners = [];
 		$this->allowedManagerSetup = [];
@@ -137,7 +139,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		$this->loadedConfig = $config;
 	}
 
-	public function beforeCompile()
+	public function beforeCompile(): void
 	{
 		$builder = $this->getContainerBuilder();
 		$config = $this->loadedConfig;
@@ -168,7 +170,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 	}
 
-	public function afterCompile(ClassTypeGenerator $class)
+	public function afterCompile(ClassTypeGenerator $class): void
 	{
 		$init = $class->getMethod('initialize');
 
@@ -208,11 +210,9 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 	}
 
 	/**
-	 * @param \Nette\DI\ContainerBuilder $builder
-	 * @param \Nette\DI\ServiceDefinition $manager
 	 * @throws \Nette\Utils\AssertionException
 	 */
-	private function validateSubscribers(DIContainerBuilder $builder, ServiceDefinition $manager)
+	private function validateSubscribers(DIContainerBuilder $builder, ServiceDefinition $manager): void
 	{
 		foreach ($manager->getSetup() as $stt) {
 			if ($stt->getEntity() !== 'addEventSubscriber') {
@@ -303,7 +303,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 	}
 
-	private function isAlias(ServiceDefinition $definition)
+	private function isAlias(ServiceDefinition $definition): bool
 	{
 		return $definition->getFactory() && (
 				$definition->getEntity() instanceof ServiceDefinition
@@ -311,10 +311,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 			);
 	}
 
-	/**
-	 * @param \Nette\DI\ContainerBuilder $builder
-	 */
-	private function autowireEvents(DIContainerBuilder $builder)
+	private function autowireEvents(DIContainerBuilder $builder): void
 	{
 		foreach ($builder->getDefinitions() as $def) {
 			/** @var \Nette\DI\ServiceDefinition $def */
@@ -345,7 +342,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 	}
 
-	protected function bindEventProperties(ServiceDefinition $def, ClassTypeReflection $class)
+	protected function bindEventProperties(ServiceDefinition $def, ClassTypeReflection $class): void
 	{
 		foreach ($class->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
 			$name = $property->getName();
@@ -370,10 +367,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 	}
 
-	/**
-	 * @param \Nette\DI\ContainerBuilder $builder
-	 */
-	private function optimizeListeners(DIContainerBuilder $builder)
+	private function optimizeListeners(DIContainerBuilder $builder): void
 	{
 		$listeners = [];
 		foreach ($this->listeners as $serviceName => $eventNames) {
@@ -412,26 +406,23 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 	 * @param string|\stdClass $statement
 	 * @return \Nette\DI\Statement[]
 	 */
-	private function filterArgs($statement)
+	private function filterArgs($statement): array
 	{
 		return Compiler::filterArguments([is_string($statement) ? new Statement($statement) : $statement]);
 	}
 
-	/**
-	 * @param \Nette\Configurator $configurator
-	 */
-	public static function register(Configurator $configurator)
+	public static function register(Configurator $configurator): void
 	{
-		$configurator->onCompile[] = static function ($config, Compiler $compiler) {
+		$configurator->onCompile[] = static function ($config, Compiler $compiler): void {
 			$compiler->addExtension('events', new EventsExtension());
 		};
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param string|NULL $class
-	 * @return \Doctrine\Common\EventSubscriber
 	 */
-	private static function createEventSubscriberInstanceWithoutConstructor($class)
+	private static function createEventSubscriberInstanceWithoutConstructor($class): EventSubscriber
 	{
 		if ($class === NULL) {
 			throw new \InvalidArgumentException('Given class cannot be NULL');

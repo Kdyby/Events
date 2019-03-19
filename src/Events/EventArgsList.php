@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -26,10 +28,7 @@ class EventArgsList extends \Kdyby\Events\EventArgs
 		$this->args = $args;
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getArgs()
+	public function getArgs(): array
 	{
 		return $this->args;
 	}

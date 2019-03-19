@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class NamespacedEventListenerMock implements \Kdyby\Events\Subscriber
@@ -12,17 +14,14 @@ class NamespacedEventListenerMock implements \Kdyby\Events\Subscriber
 	 */
 	public $calls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			'\App::onFoo',
 		];
 	}
 
-	public function onFoo(EventArgsMock $args)
+	public function onFoo(EventArgsMock $args): void
 	{
 		$args->calls[] = [__METHOD__, func_get_args()];
 		$this->calls[] = [__METHOD__, func_get_args()];

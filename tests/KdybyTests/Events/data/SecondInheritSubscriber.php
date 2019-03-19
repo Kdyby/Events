@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 use Kdyby\Events\EventManager;
@@ -15,17 +17,14 @@ class SecondInheritSubscriber implements \Kdyby\Events\Subscriber
 	 */
 	public $eventCalls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			ParentClass::class . '::onCreate',
 		];
 	}
 
-	public function onCreate()
+	public function onCreate(): void
 	{
 		$event = TracyHelpers::findTrace(debug_backtrace(), EventManager::class . '::dispatchEvent');
 		if ($event === NULL) {

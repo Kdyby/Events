@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -56,17 +58,13 @@ class EventManager extends \Doctrine\Common\EventManager
 
 	/**
 	 * @internal
-	 * @param \Kdyby\Events\Diagnostics\Panel $panel
 	 */
-	public function setPanel(Panel $panel)
+	public function setPanel(Panel $panel): void
 	{
 		$this->panel = $panel;
 	}
 
-	/**
-	 * @param \Kdyby\Events\IExceptionHandler $exceptionHandler
-	 */
-	public function setExceptionHandler(IExceptionHandler $exceptionHandler)
+	public function setExceptionHandler(IExceptionHandler $exceptionHandler): void
 	{
 		$this->exceptionHandler = $exceptionHandler;
 	}
@@ -74,10 +72,11 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * Dispatches an event to all registered listeners.
 	 *
-	 * @param string $eventName The name of the event to dispatch. The name of the event is the name of the method that is invoked on listeners.
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param string|null $eventName The name of the event to dispatch. The name of the event is the name of the method that is invoked on listeners.
 	 * @param \Doctrine\Common\EventArgs $eventArgs The event arguments to pass to the event handlers/listeners. If not supplied, the single empty EventArgs instance is used
 	 */
-	public function dispatchEvent($eventName, DoctrineEventArgs $eventArgs = NULL)
+	public function dispatchEvent($eventName, DoctrineEventArgs $eventArgs = NULL): void
 	{
 		if ($this->panel) {
 			$this->panel->eventDispatch($eventName, $eventArgs);
@@ -117,10 +116,11 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * Gets the listeners of a specific event or all listeners.
 	 *
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param string|null $eventName
 	 * @return \Doctrine\Common\EventSubscriber[]|callable[]|\Doctrine\Common\EventSubscriber[][]|callable[][]
 	 */
-	public function getListeners($eventName = NULL)
+	public function getListeners($eventName = NULL): array
 	{
 		if ($eventName !== NULL) {
 			if (!isset($this->sorted[$eventName])) {
@@ -142,10 +142,11 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * Checks whether an event has any registered listeners.
 	 *
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param string|null $eventName
 	 * @return bool TRUE if the specified event has any listeners, FALSE otherwise.
 	 */
-	public function hasListeners($eventName)
+	public function hasListeners($eventName): bool
 	{
 		return (bool) count($this->getListeners($eventName));
 	}
@@ -153,6 +154,7 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * Adds an event listener that listens on the specified events.
 	 *
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param string|array $events The event(s) to listen on.
 	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $subscriber The listener object.
 	 * @param int $priority
@@ -183,6 +185,7 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * Removes an event listener from the specified events.
 	 *
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param \Doctrine\Common\EventSubscriber|\Closure|array|string $unsubscribe
 	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $subscriber
 	 */
@@ -226,11 +229,7 @@ class EventManager extends \Doctrine\Common\EventManager
 		}
 	}
 
-	/**
-	 * @param \Doctrine\Common\EventSubscriber $subscriber
-	 * @return array
-	 */
-	protected function extractSubscriber(EventSubscriber $subscriber)
+	protected function extractSubscriber(EventSubscriber $subscriber): array
 	{
 		$unsubscribe = [];
 
@@ -250,11 +249,7 @@ class EventManager extends \Doctrine\Common\EventManager
 		return [$unsubscribe, $subscriber];
 	}
 
-	/**
-	 * @param callable $subscriber
-	 * @return array
-	 */
-	protected function extractCallable(callable $subscriber)
+	protected function extractCallable(callable $subscriber): array
 	{
 		$unsubscribe = [];
 
@@ -311,6 +306,7 @@ class EventManager extends \Doctrine\Common\EventManager
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param string $name
 	 * @param array|\Traversable|null $defaults
 	 * @param string $argsClass
@@ -330,6 +326,10 @@ class EventManager extends \Doctrine\Common\EventManager
 		return $event;
 	}
 
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param string|null $eventName
+	 */
 	private function sortListeners($eventName)
 	{
 		$this->sorted[$eventName] = [];

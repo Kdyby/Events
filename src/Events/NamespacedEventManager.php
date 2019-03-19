@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -31,7 +33,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 	 */
 	private $namespace;
 
-	public function __construct($namespace, EventManager $eventManager)
+	public function __construct(string $namespace, EventManager $eventManager)
 	{
 		$this->namespace = $namespace;
 		$this->evm = $eventManager;
@@ -40,7 +42,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 	/**
 	 * {@inheritDoc}
 	 */
-	public function dispatchEvent($eventName, DoctrineEventArgs $eventArgs = NULL)
+	public function dispatchEvent($eventName, DoctrineEventArgs $eventArgs = NULL): void
 	{
 		[$ns, $event] = Event::parseName($eventName);
 
@@ -54,7 +56,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getListeners($eventName = NULL)
+	public function getListeners($eventName = NULL): array
 	{
 		if ($eventName === NULL) {
 			$listeners = [];
@@ -83,7 +85,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 	/**
 	 * {@inheritDoc}
 	 */
-	public function hasListeners($eventName)
+	public function hasListeners($eventName): bool
 	{
 		[$ns, $event] = Event::parseName($eventName);
 
@@ -134,10 +136,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 		$this->evm->removeEventListener($unsubscribe, $subscriber);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public function setExceptionHandler(IExceptionHandler $exceptionHandler)
+	public function setExceptionHandler(IExceptionHandler $exceptionHandler): void
 	{
 		throw new \Kdyby\Events\NotSupportedException();
 	}

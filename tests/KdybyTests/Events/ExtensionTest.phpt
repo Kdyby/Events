@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Test: Kdyby\Events\Extension.
  *
@@ -14,6 +16,7 @@ use Kdyby\Events\EventManager;
 use Kdyby\Events\IExceptionHandler;
 use Nette\Application\Application;
 use Nette\Configurator;
+use Nette\DI\Container;
 use Nette\Security\User;
 use ReflectionProperty;
 use Tester\Assert;
@@ -23,11 +26,7 @@ require_once __DIR__ . '/../bootstrap.php';
 class ExtensionTest extends \Tester\TestCase
 {
 
-	/**
-	 * @param string $configFile
-	 * @return \Nette\DI\Container
-	 */
-	public function createContainer($configFile)
+	public function createContainer(string $configFile): Container
 	{
 		$config = new Configurator();
 		$config->setTempDirectory(TEMP_DIR);
@@ -38,7 +37,7 @@ class ExtensionTest extends \Tester\TestCase
 		return $config->createContainer();
 	}
 
-	public function testRegisterListeners()
+	public function testRegisterListeners(): void
 	{
 		$container = $this->createContainer('subscribers');
 		$manager = $container->getService('events.manager');
@@ -47,7 +46,7 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::equal(2, count($manager->getListeners()));
 	}
 
-	public function testRegisterListenersWithSameArguments()
+	public function testRegisterListenersWithSameArguments(): void
 	{
 		$container = $this->createContainer('subscribersWithSameArgument');
 		$manager = $container->getService('events.manager');
@@ -58,14 +57,14 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::count(2, $manager->getListeners('onFoo'));
 	}
 
-	public function testValidateDirect()
+	public function testValidateDirect(): void
 	{
-		Assert::exception(function () {
+		Assert::exception(function (): void {
 			$this->createContainer('validate.direct');
 		}, \Nette\Utils\AssertionException::class, 'Please, do not register listeners directly to service @events.manager. %a%');
 	}
 
-	public function testValidateMissing()
+	public function testValidateMissing(): void
 	{
 		try {
 			$this->createContainer('validate.missing');
@@ -80,33 +79,33 @@ class ExtensionTest extends \Tester\TestCase
 		} catch (\Nette\DI\ServiceCreationException $e) {
 			Assert::match("Class NonExistingClass_%a% used in service 'events.subscriber.%a%' not found%a?%.", $e->getMessage());
 
-		} catch (\Exception $e) {
+		} catch (\Throwable $e) {
 			Assert::fail($e->getMessage());
 		}
 	}
 
-	public function testValidateFake()
+	public function testValidateFake(): void
 	{
-		Assert::exception(function () {
+		Assert::exception(function (): void {
 			$this->createContainer('validate.fake');
 		}, \Nette\Utils\AssertionException::class, 'Subscriber @events.subscriber.%a% doesn\'t implement Kdyby\Events\Subscriber.');
 	}
 
-	public function testValidateInvalid()
+	public function testValidateInvalid(): void
 	{
-		Assert::exception(function () {
+		Assert::exception(function (): void {
 			$this->createContainer('validate.invalid');
 		}, \Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\FirstInvalidListenerMock::onFoo() is not implemented.');
 	}
 
-	public function testValidateInvalid2()
+	public function testValidateInvalid2(): void
 	{
-		Assert::exception(function () {
+		Assert::exception(function (): void {
 			$this->createContainer('validate.invalid2');
 		}, \Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\SecondInvalidListenerMock::onBar() is not implemented.');
 	}
 
-	public function testAutowire()
+	public function testAutowire(): void
 	{
 		$container = $this->createContainer('autowire');
 
@@ -140,7 +139,7 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::same(User::class . '::onLoggedOut', $user->onLoggedOut->getName());
 	}
 
-	public function testInherited()
+	public function testInherited(): void
 	{
 		$container = $this->createContainer('inherited');
 
@@ -169,7 +168,7 @@ class ExtensionTest extends \Tester\TestCase
 		], $subscriber2->eventCalls);
 	}
 
-	public function testOptimize()
+	public function testOptimize(): void
 	{
 		$container = $this->createContainer('optimize');
 		$manager = $container->getService('events.manager');
@@ -204,7 +203,7 @@ class ExtensionTest extends \Tester\TestCase
 		], $baz->calls);
 	}
 
-	public function testOptimizeDispatchNamespaceFirst()
+	public function testOptimizeDispatchNamespaceFirst(): void
 	{
 		$container = $this->createContainer('optimize');
 		$manager = $container->getService('events.manager');
@@ -229,7 +228,7 @@ class ExtensionTest extends \Tester\TestCase
 		], $baz->calls);
 	}
 
-	public function testOptimizeStandalone()
+	public function testOptimizeStandalone(): void
 	{
 		$container = $this->createContainer('optimize');
 		$manager = $container->getService('events.manager');
@@ -255,7 +254,7 @@ class ExtensionTest extends \Tester\TestCase
 		], $baz->calls);
 	}
 
-	public function testExceptionHandler()
+	public function testExceptionHandler(): void
 	{
 		$container = $this->createContainer('exceptionHandler');
 		$manager = $container->getService('events.manager');
@@ -268,13 +267,13 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::true($handler instanceof IExceptionHandler);
 	}
 
-	public function testAutowireAlias()
+	public function testAutowireAlias(): void
 	{
 		$container = $this->createContainer('alias');
 		Assert::same($container->getService('alias'), $container->getService('application'));
 	}
 
-	public function testFactoryAndAccessor()
+	public function testFactoryAndAccessor(): void
 	{
 		$container = $this->createContainer('factory.accessor');
 
@@ -291,7 +290,7 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::notSame($foo, $foo3);
 	}
 
-	public function testGlobalDispatchFirst()
+	public function testGlobalDispatchFirst(): void
 	{
 		$container = $this->createContainer('globalDispatchFirst');
 		$container->getService('events.manager');
@@ -302,7 +301,7 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::true($mock->onGlobalDispatchDefault->globalDispatchFirst);
 	}
 
-	public function testGlobalDispatchLast()
+	public function testGlobalDispatchLast(): void
 	{
 		$container = $this->createContainer('globalDispatchLast');
 		$container->getService('events.manager');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Test: Kdyby\Events\EventArgs.
  *
@@ -16,7 +18,7 @@ require_once __DIR__ . '/../bootstrap.php';
 class EventArgsTest extends \Tester\TestCase
 {
 
-	public function testImplementsDoctrineEventArgs()
+	public function testImplementsDoctrineEventArgs(): void
 	{
 		$args = new EventArgsMock();
 		Assert::true($args instanceof EventArgs);

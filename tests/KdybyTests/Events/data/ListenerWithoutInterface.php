@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class ListenerWithoutInterface
@@ -12,7 +14,7 @@ class ListenerWithoutInterface
 	 */
 	public $calls = [];
 
-	public function onClear()
+	public function onClear(): void
 	{
 		$this->calls[] = [__METHOD__, func_get_args()];
 	}

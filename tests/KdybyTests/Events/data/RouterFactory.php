@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class RouterFactory
@@ -7,10 +9,7 @@ class RouterFactory
 
 	use \Kdyby\StrictObjects\Scream;
 
-	/**
-	 * @return \KdybyTests\Events\SampleRouter
-	 */
-	public function createRouter()
+	public function createRouter(): SampleRouter
 	{
 		return new SampleRouter('nemam');
 	}

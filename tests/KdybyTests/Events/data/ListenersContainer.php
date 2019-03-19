@@ -1,32 +1,34 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class ListenersContainer extends \Nette\DI\Container
 {
 
-	protected function createServiceFirst()
+	protected function createServiceFirst(): NamespacedEventListenerMock
 	{
 		return new NamespacedEventListenerMock();
 	}
 
-	protected function createServiceSecond()
+	protected function createServiceSecond(): EventListenerMock
 	{
 		return new EventListenerMock();
 	}
 
-	protected function createServiceThird()
+	protected function createServiceThird(): MethodAliasListenerMock
 	{
 		return new MethodAliasListenerMock();
 	}
 
-	protected function createServiceFourth()
+	protected function createServiceFourth(): callable
 	{
-		return static function () {
+		return static function (): void {
 		};
 	}
 
-	protected function createServiceFifth()
+	protected function createServiceFifth(): MagicEventListenerMock
 	{
 		return new MagicEventListenerMock();
 	}

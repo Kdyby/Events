@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class LeafClassOnlyListener implements \Kdyby\Events\Subscriber
@@ -12,15 +14,12 @@ class LeafClassOnlyListener implements \Kdyby\Events\Subscriber
 	 */
 	public $eventCalls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [LeafClass::class . '::onCreate'];
 	}
 
-	public function onCreate()
+	public function onCreate(): void
 	{
 		$this->eventCalls[] = func_get_args();
 	}

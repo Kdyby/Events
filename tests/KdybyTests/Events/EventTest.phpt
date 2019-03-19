@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Test: Kdyby\Events\Event.
  *
@@ -17,10 +19,7 @@ require_once __DIR__ . '/../bootstrap.php';
 class EventTest extends \Tester\TestCase
 {
 
-	/**
-	 * @return array
-	 */
-	public function dataParseName()
+	public function dataParseName(): array
 	{
 		return [
 			[[NULL, 'onFoo', NULL], 'onFoo'],
@@ -33,31 +32,31 @@ class EventTest extends \Tester\TestCase
 	/**
 	 * @dataProvider dataParseName
 	 */
-	public function testParseName($expected, $name)
+	public function testParseName(array $expected, string $name): void
 	{
 		Assert::same($expected, Event::parseName($name));
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param array $calls
-	 * @return \KdybyTests\Events\FooMock
 	 */
-	public function dataDispatch(&$calls)
+	public function dataDispatch(&$calls): FooMock
 	{
 		$foo = new FooMock();
 		$foo->onBar = new Event('bar');
 
-		$foo->onBar[] = static function ($lorem) use (&$calls) {
+		$foo->onBar[] = static function ($lorem) use (&$calls): void {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
-		$foo->onBar[] = static function ($lorem) use (&$calls) {
+		$foo->onBar[] = static function ($lorem) use (&$calls): void {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
 
 		return $foo;
 	}
 
-	public function testDispatchMethod()
+	public function testDispatchMethod(): void
 	{
 		$foo = $this->dataDispatch($calls);
 		$foo->onBar->dispatch([10]);
@@ -69,7 +68,7 @@ class EventTest extends \Tester\TestCase
 		Assert::same([10], $calls[1][1]);
 	}
 
-	public function testDispatchInvoke()
+	public function testDispatchInvoke(): void
 	{
 		$foo = $this->dataDispatch($calls);
 		$foo->onBar(15);
@@ -82,12 +81,12 @@ class EventTest extends \Tester\TestCase
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param \KdybyTests\Events\FooMock $foo
 	 * @param \KdybyTests\Events\LoremListener $listener
 	 * @param array $calls
-	 * @return \Kdyby\Events\EventManager
 	 */
-	public function dataToManagerDispatch(FooMock $foo, LoremListener $listener, &$calls)
+	public function dataToManagerDispatch(FooMock $foo, LoremListener $listener, &$calls): EventManager
 	{
 		// create
 		$evm = new EventManager();
@@ -98,7 +97,7 @@ class EventTest extends \Tester\TestCase
 		$foo->onMagic->injectEventManager($evm);
 
 		// listener
-		$foo->onMagic[] = static function (FooMock $foo, $int) use (&$calls) {
+		$foo->onMagic[] = static function (FooMock $foo, $int) use (&$calls): void {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
 
@@ -107,14 +106,14 @@ class EventTest extends \Tester\TestCase
 		$foo->onStartup->injectEventManager($evm);
 
 		// listener
-		$foo->onStartup[] = static function (FooMock $foo, $int) use (&$calls) {
+		$foo->onStartup[] = static function (FooMock $foo, $int) use (&$calls): void {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
 
 		return $evm;
 	}
 
-	public function testDispatchToManagerInvoke()
+	public function testDispatchToManagerInvoke(): void
 	{
 		$foo = new FooMock();
 		$listener = new LoremListener();
@@ -131,7 +130,7 @@ class EventTest extends \Tester\TestCase
 		Assert::same([$foo, 2], $listener->calls[0][1]);
 	}
 
-	public function testDispatchToManagerDispatch()
+	public function testDispatchToManagerDispatch(): void
 	{
 		$foo = new FooMock();
 		$listener = new LoremListener();
@@ -148,7 +147,7 @@ class EventTest extends \Tester\TestCase
 		Assert::same([$foo, 3], $listener->calls[0][1]);
 	}
 
-	public function testDispatchToManagerSecondInvoke()
+	public function testDispatchToManagerSecondInvoke(): void
 	{
 		$foo = new FooMock();
 		$listener = new LoremListener();
@@ -169,7 +168,7 @@ class EventTest extends \Tester\TestCase
 		Assert::same(4, $args->int);
 	}
 
-	public function testDispatchOrderGlobalFirst()
+	public function testDispatchOrderGlobalFirst(): void
 	{
 		$listener = new EventListenerMock();
 		$evm = new EventManager();
@@ -179,7 +178,7 @@ class EventTest extends \Tester\TestCase
 		$event->injectEventManager($evm);
 		$event->globalDispatchFirst = TRUE;
 
-		$event[] = static function () use ($listener) {
+		$event[] = static function () use ($listener): void {
 			$listener->calls[] = __METHOD__;
 		};
 
@@ -192,7 +191,7 @@ class EventTest extends \Tester\TestCase
 		Assert::match('KdybyTests\Events\%A?%{closure}', $listener->calls[1]);
 	}
 
-	public function testDispatchOrderGlobalLast()
+	public function testDispatchOrderGlobalLast(): void
 	{
 		$listener = new EventListenerMock();
 		$evm = new EventManager();
@@ -202,7 +201,7 @@ class EventTest extends \Tester\TestCase
 		$event->injectEventManager($evm);
 		$event->globalDispatchFirst = FALSE;
 
-		$event[] = static function () use ($listener) {
+		$event[] = static function () use ($listener): void {
 			$listener->calls[] = __METHOD__;
 		};
 

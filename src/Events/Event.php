@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -62,6 +64,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	private $panel;
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param string|array $name
 	 * @param array|\Traversable|null $defaults
 	 * @param string $argsClass
@@ -80,26 +83,21 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 	/**
 	 * @internal
-	 * @param \Kdyby\Events\Diagnostics\Panel $panel
 	 */
-	public function setPanel(Panel $panel)
+	public function setPanel(Panel $panel): void
 	{
 		$this->panel = $panel;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getName()
+	public function getName(): string
 	{
 		return ($this->namespace ? $this->namespace . '::' : '') . $this->name;
 	}
 
 	/**
-	 * @param \Kdyby\Events\EventManager $eventManager
 	 * @return static
 	 */
-	public function injectEventManager(EventManager $eventManager)
+	public function injectEventManager(EventManager $eventManager): self
 	{
 		$this->eventManager = $eventManager;
 		return $this;
@@ -108,7 +106,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Invokes the event.
 	 *
-	 * @param array $args
+	 * @param array|mixed $args
 	 */
 	public function dispatch($args = [])
 	{
@@ -126,10 +124,9 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
-	 * @param callable $listener
 	 * @return static
 	 */
-	public function append($listener)
+	public function append(callable $listener): self
 	{
 		Callback::check($listener, TRUE);
 		$this->listeners[] = $listener;
@@ -137,10 +134,9 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
-	 * @param callable $listener
 	 * @return static
 	 */
-	public function prepend($listener)
+	public function prepend(callable $listener): self
 	{
 		Callback::check($listener, TRUE);
 		array_unshift($this->listeners, $listener);
@@ -148,9 +144,9 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
-	 * @return array|callable[]
+	 * @return callable[]
 	 */
-	public function getListeners()
+	public function getListeners(): array
 	{
 		$listeners = $this->listeners;
 
@@ -191,16 +187,15 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * Invokes the event.
 	 */
-	public function __invoke()
+	public function __invoke(): void
 	{
 		$this->dispatch(func_get_args());
 	}
 
 	/**
 	 * @param string|array $name
-	 * @return array
 	 */
-	public static function parseName(&$name)
+	public static function parseName(&$name): array
 	{
 		if (is_array($name)) {
 			return $name;
@@ -217,45 +212,40 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 		return [NULL, $name, NULL];
 	}
 
-	/** @deprecated */
-	public function add($listener)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @deprecated
+	 */
+	public function add($listener): self
 	{
 		return $this->append($listener);
 	}
 
-	/** @deprecated */
-	public function unshift($listener)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @deprecated
+	 */
+	public function unshift($listener): self
 	{
 		return $this->prepend($listener);
 	}
 
-	/********************* interface \Countable *********************/
-
-	/**
-	 * @return int
-	 */
-	public function count()
+	public function count(): int
 	{
 		return count($this->listeners);
 	}
 
-	/********************* interface \IteratorAggregate *********************/
-
-	/**
-	 * @return \ArrayIterator|\Traversable
-	 */
-	public function getIterator()
+	public function getIterator(): Traversable
 	{
 		return new ArrayIterator($this->getListeners());
 	}
 
-	/********************* interface \ArrayAccess *********************/
-
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param int|NULL $index
 	 * @param callable $item
 	 */
-	public function offsetSet($index, $item)
+	public function offsetSet($index, $item): void
 	{
 		Callback::check($item, TRUE);
 
@@ -268,11 +258,11 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param mixed $index
-	 * @return callable
 	 * @throws \Kdyby\Events\OutOfRangeException
 	 */
-	public function offsetGet($index)
+	public function offsetGet($index): callable
 	{
 		if (!$this->offsetExists($index)) {
 			throw new \Kdyby\Events\OutOfRangeException();
@@ -282,18 +272,19 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param int $index
-	 * @return bool
 	 */
-	public function offsetExists($index)
+	public function offsetExists($index): bool
 	{
 		return isset($this->listeners[$index]);
 	}
 
 	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
 	 * @param int $index
 	 */
-	public function offsetUnset($index)
+	public function offsetUnset($index): void
 	{
 		unset($this->listeners[$index]);
 	}

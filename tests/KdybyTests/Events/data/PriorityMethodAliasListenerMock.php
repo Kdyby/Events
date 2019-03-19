@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class PriorityMethodAliasListenerMock implements \Kdyby\Events\Subscriber
@@ -12,17 +14,14 @@ class PriorityMethodAliasListenerMock implements \Kdyby\Events\Subscriber
 	 */
 	public $calls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			'Article::onDiscard' => ['customMethod', 10],
 		];
 	}
 
-	public function customMethod(EventArgsMock $args)
+	public function customMethod(EventArgsMock $args): void
 	{
 		$args->calls[] = [__METHOD__, func_get_args()];
 		$this->calls[] = [__METHOD__, func_get_args()];

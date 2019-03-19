@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 /**
@@ -15,7 +17,10 @@ class ParentClass
 	 */
 	public $onCreate = [];
 
-	public function create($arg = NULL)
+	/**
+	 * @param mixed $arg
+	 */
+	public function create($arg = NULL): void
 	{
 		$this->onCreate($arg);
 	}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Test: Kdyby\Events\NamespacedEventManager.
  *
@@ -18,7 +20,7 @@ require_once __DIR__ . '/../bootstrap.php';
 class NamespacedEventManagerTest extends \Tester\TestCase
 {
 
-	public function testHasListeners()
+	public function testHasListeners(): void
 	{
 		$evm = new EventManager();
 		$first = new EventListenerMock();
@@ -33,7 +35,7 @@ class NamespacedEventManagerTest extends \Tester\TestCase
 		Assert::true($ns->hasListeners('App::onFoo'));
 	}
 
-	public function testHasListenersWithNamespace()
+	public function testHasListenersWithNamespace(): void
 	{
 		$evm = new EventManager();
 		$second = new NamespacedEventListenerMock();
@@ -48,7 +50,7 @@ class NamespacedEventManagerTest extends \Tester\TestCase
 		Assert::true($ns->hasListeners('App::onFoo'));
 	}
 
-	public function testDispatch()
+	public function testDispatch(): void
 	{
 		$evm = new EventManager();
 		$first = new EventListenerMock();
@@ -72,7 +74,7 @@ class NamespacedEventManagerTest extends \Tester\TestCase
 		], $args->calls);
 	}
 
-	public function testDispatchGlobal()
+	public function testDispatchGlobal(): void
 	{
 		$evm = new EventManager();
 		$first = new EventListenerMock();

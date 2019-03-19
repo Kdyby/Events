@@ -3,3 +3,10 @@ parameters:
 	paths:
 		- src
 		- tests/KdybyTests
+	ignoreErrors:
+		-
+			message: '~^Return type \(void\) of method Kdyby\\Events\\SymfonyDispatcher::dispatch\(\) should be compatible with return type \(Symfony\\Component\\EventDispatcher\\Event\) of method Symfony\\Component\\EventDispatcher\\EventDispatcherInterface::dispatch\(\)$~'
+			path: '*/src/Events/SymfonyDispatcher.php'
+		-
+			message: '~^Return type \(void\) of method Kdyby\\Events\\SymfonyDispatcher::getListenerPriority\(\) should be compatible with return type \(int\|null\) of method Symfony\\Component\\EventDispatcher\\EventDispatcherInterface::getListenerPriority\(\)$~'
+			path: '*/src/Events/SymfonyDispatcher.php'

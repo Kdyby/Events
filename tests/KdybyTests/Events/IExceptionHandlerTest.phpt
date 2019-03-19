@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Test: Kdyby\Events\IExceptionHandler.
  *
@@ -19,20 +21,20 @@ class IExceptionHandlerTest extends \Tester\TestCase
 	/** @var \Kdyby\Events\EventManager */
 	private $evm;
 
-	protected function setUp()
+	protected function setUp(): void
 	{
 		$this->evm = new EventManager();
 		$this->evm->addEventListener('testEvent', [$this, 'eventHandler']);
 	}
 
-	public function testNotCaught()
+	public function testNotCaught(): void
 	{
-		Assert::exception(function () {
+		Assert::exception(function (): void {
 			$this->evm->dispatchEvent('testEvent');
-		}, \Exception::class);
+		}, \Throwable::class);
 	}
 
-	public function testCaught()
+	public function testCaught(): void
 	{
 		$this->evm->setExceptionHandler($handler = new SampleExceptionHandler());
 		$this->evm->dispatchEvent('testEvent');
@@ -41,7 +43,7 @@ class IExceptionHandlerTest extends \Tester\TestCase
 		Assert::true($handler->exceptions[0] instanceof \Exception);
 	}
 
-	public function eventHandler()
+	public function eventHandler(): void
 	{
 		throw new \Exception('dummy');
 	}

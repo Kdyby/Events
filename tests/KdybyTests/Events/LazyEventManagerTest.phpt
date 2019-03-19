@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * Test: Kdyby\Events\LazyEventManager.
  *
@@ -17,7 +19,7 @@ require_once __DIR__ . '/../bootstrap.php';
 class LazyEventManagerTest extends \Tester\TestCase
 {
 
-	public function dateGetListeners()
+	public function dateGetListeners(): array
 	{
 		$sl = new ListenersContainer();
 
@@ -48,7 +50,7 @@ class LazyEventManagerTest extends \Tester\TestCase
 	/**
 	 * @dataProvider dateGetListeners
 	 */
-	public function testGetListenersSingle(Container $sl, LazyEventManager $lazy)
+	public function testGetListenersSingle(Container $sl, LazyEventManager $lazy): void
 	{
 		Assert::false($sl->isCreated('first'));
 		Assert::false($sl->isCreated('second'));
@@ -72,7 +74,7 @@ class LazyEventManagerTest extends \Tester\TestCase
 	/**
 	 * @dataProvider dateGetListeners
 	 */
-	public function testGetListenersAll(Container $sl, LazyEventManager $lazy)
+	public function testGetListenersAll(Container $sl, LazyEventManager $lazy): void
 	{
 		Assert::false($sl->isCreated('first'));
 		Assert::false($sl->isCreated('second'));
@@ -119,7 +121,7 @@ class LazyEventManagerTest extends \Tester\TestCase
 	/**
 	 * @dataProvider dateGetListeners
 	 */
-	public function testRemoveSubscriber(Container $sl, LazyEventManager $lazy)
+	public function testRemoveSubscriber(Container $sl, LazyEventManager $lazy): void
 	{
 		$first = $sl->getService('first');
 		$second = $sl->getService('second');

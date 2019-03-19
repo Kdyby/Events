@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class EventListenerConstructorMock implements \Kdyby\Events\Subscriber
@@ -17,17 +19,14 @@ class EventListenerConstructorMock implements \Kdyby\Events\Subscriber
 		$this->routerFactory = $routerFactory;
 	}
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			'onFoo',
 		];
 	}
 
-	public function onFoo(EventArgsMock $args)
+	public function onFoo(EventArgsMock $args): void
 	{
 		$this->routerFactory->createRouter(); // pass
 	}

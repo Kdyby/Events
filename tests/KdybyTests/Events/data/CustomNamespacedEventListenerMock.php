@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class CustomNamespacedEventListenerMock implements \Kdyby\Events\Subscriber
@@ -12,17 +14,14 @@ class CustomNamespacedEventListenerMock implements \Kdyby\Events\Subscriber
 	 */
 	public $calls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			'domain.users.updated',
 		];
 	}
 
-	public function updated(EventArgsMock $args)
+	public function updated(EventArgsMock $args): void
 	{
 		$args->calls[] = [__METHOD__, func_get_args()];
 		$this->calls[] = [__METHOD__, func_get_args()];

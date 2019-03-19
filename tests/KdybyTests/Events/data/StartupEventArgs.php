@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class StartupEventArgs extends \Kdyby\Events\EventArgs
@@ -17,11 +19,7 @@ class StartupEventArgs extends \Kdyby\Events\EventArgs
 	 */
 	public $int;
 
-	/**
-	 * @param \KdybyTests\Events\FooMock $foo
-	 * @param int $int
-	 */
-	public function __construct(FooMock $foo, $int)
+	public function __construct(FooMock $foo, int $int)
 	{
 		$this->foo = $foo;
 		$this->int = $int;

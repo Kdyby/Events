@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class EventListenerMock2 implements \Kdyby\Events\Subscriber
@@ -7,10 +9,7 @@ class EventListenerMock2 implements \Kdyby\Events\Subscriber
 
 	use \Kdyby\StrictObjects\Scream;
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			'onFoo',
@@ -18,11 +17,11 @@ class EventListenerMock2 implements \Kdyby\Events\Subscriber
 		];
 	}
 
-	public function onFoo()
+	public function onFoo(): void
 	{
 	}
 
-	public function onBar()
+	public function onBar(): void
 	{
 	}
 

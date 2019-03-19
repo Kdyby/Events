@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 namespace KdybyTests\Events;
 
 class MagicEventListenerMock implements \Kdyby\Events\CallableSubscriber
@@ -12,10 +14,7 @@ class MagicEventListenerMock implements \Kdyby\Events\CallableSubscriber
 	 */
 	public $calls = [];
 
-	/**
-	 * @return array
-	 */
-	public function getSubscribedEvents()
+	public function getSubscribedEvents(): array
 	{
 		return [
 			'onQuux',
@@ -23,7 +22,12 @@ class MagicEventListenerMock implements \Kdyby\Events\CallableSubscriber
 		];
 	}
 
-	public function __call($name, $arguments)
+	/**
+	 * @phpcsSuppress SlevomatCodingStandard.TypeHints.TypeHintDeclaration.MissingParameterTypeHint
+	 * @param string $name
+	 * @param array $arguments
+	 */
+	public function __call($name, $arguments): void
 	{
 		$args = $arguments[0];
 		$args->calls[] = [self::class . '::' . $name, $arguments];

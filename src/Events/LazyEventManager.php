@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1);
+
 /**
  * This file is part of the Kdyby (http://www.kdyby.org)
  *
@@ -41,7 +43,7 @@ class LazyEventManager extends \Kdyby\Events\EventManager
 		$this->container = $container;
 	}
 
-	public function setPanel(Panel $panel)
+	public function setPanel(Panel $panel): void
 	{
 		parent::setPanel($panel);
 		$panel->setServiceIds($this->listenerIds);
@@ -50,7 +52,7 @@ class LazyEventManager extends \Kdyby\Events\EventManager
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getListeners($eventName = NULL)
+	public function getListeners($eventName = NULL): array
 	{
 		if ($eventName === NULL) {
 			while (($type = key($this->listenerIds)) !== NULL) {
@@ -67,7 +69,7 @@ class LazyEventManager extends \Kdyby\Events\EventManager
 	/**
 	 * {@inheritdoc}
 	 */
-	public function removeEventListener($unsubscribe, $subscriber = NULL)
+	public function removeEventListener($unsubscribe, $subscriber = NULL): void
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
 			[$unsubscribe, $subscriber] = $this->extractSubscriber($unsubscribe);
@@ -84,15 +86,12 @@ class LazyEventManager extends \Kdyby\Events\EventManager
 		parent::removeEventListener($unsubscribe, $subscriber);
 	}
 
-	/**
-	 * @param string $eventName
-	 */
-	private function initializeListener($eventName)
+	private function initializeListener(?string $eventName): void
 	{
 		foreach ($this->listenerIds[$eventName] as $serviceName) {
 			$listener = $this->container->getService($serviceName);
 			if ($listener instanceof Closure) {
-				$this->addEventListener($eventName, $listener);
+				$this->addEventListener((string) $eventName, $listener);
 			} elseif ($listener instanceof EventSubscriber) {
 				$this->addEventSubscriber($listener);
 			}
