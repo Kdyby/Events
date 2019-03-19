@@ -11,6 +11,7 @@
 namespace Kdyby\Events;
 
 use ArrayIterator;
+use Doctrine\Common\EventArgs;
 use Kdyby\Events\Diagnostics\Panel;
 use Nette\Reflection\ClassType as ClassTypeReflection;
 use Nette\Utils\Callback;
@@ -46,7 +47,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	private $namespace;
 
 	/**
-	 * @var \Kdyby\Events\EventManager
+	 * @var \Kdyby\Events\EventManager|null
 	 */
 	private $eventManager;
 
@@ -56,18 +57,18 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	private $argsClass;
 
 	/**
-	 * @var \Kdyby\Events\Diagnostics\Panel
+	 * @var \Kdyby\Events\Diagnostics\Panel|null
 	 */
 	private $panel;
 
 	/**
 	 * @param string|array $name
-	 * @param array $defaults
+	 * @param array|\Traversable|null $defaults
 	 * @param string $argsClass
 	 */
 	public function __construct($name, $defaults = [], $argsClass = NULL)
 	{
-		list($this->namespace, $this->name) = self::parseName($name);
+		[$this->namespace, $this->name] = self::parseName($name);
 		$this->argsClass = $argsClass;
 
 		if (is_array($defaults) || $defaults instanceof Traversable) {
@@ -162,14 +163,17 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 		$name = $this->getName();
 		$evm = $this->eventManager;
+		assert($evm !== NULL);
 		$argsClass = $this->argsClass;
-		$globalDispatch = function () use ($name, $evm, $argsClass) {
+		$globalDispatch = static function () use ($name, $evm, $argsClass) {
 			if ($argsClass === NULL) {
 				$args = new EventArgsList(func_get_args());
 
 			} else {
 				$args = ClassTypeReflection::from($argsClass)->newInstanceArgs(func_get_args());
 			}
+
+			assert($args instanceof EventArgs);
 
 			$evm->dispatchEvent($name, $args);
 		};
@@ -193,7 +197,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	}
 
 	/**
-	 * @param string $name
+	 * @param string|array $name
 	 * @return array
 	 */
 	public static function parseName(&$name)
@@ -271,7 +275,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	public function offsetGet($index)
 	{
 		if (!$this->offsetExists($index)) {
-			throw new \Kdyby\Events\OutOfRangeException;
+			throw new \Kdyby\Events\OutOfRangeException();
 		}
 
 		return $this->listeners[$index];
@@ -279,7 +283,6 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 
 	/**
 	 * @param int $index
-	 *
 	 * @return bool
 	 */
 	public function offsetExists($index)

@@ -26,8 +26,8 @@ class MagicEventListenerMock implements \Kdyby\Events\CallableSubscriber
 	public function __call($name, $arguments)
 	{
 		$args = $arguments[0];
-		$args->calls[] = [__CLASS__ . '::' . $name, $arguments];
-		$this->calls[] = [__CLASS__ . '::' . $name, $arguments];
+		$args->calls[] = [self::class . '::' . $name, $arguments];
+		$this->calls[] = [self::class . '::' . $name, $arguments];
 	}
 
 }

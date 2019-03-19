@@ -119,7 +119,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 				is_string($subscriber) ? new Statement($subscriber) : $subscriber,
 			])[0]);
 
-			list($subscriberClass) = (array) $builder->normalizeEntity($def->getEntity());
+			[$subscriberClass] = (array) $builder->normalizeEntity($def->getEntity());
 			if (class_exists($subscriberClass)) {
 				$def->setClass($subscriberClass);
 			}
@@ -176,7 +176,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		$foundNetteInitStart = $foundNetteInitEnd = FALSE;
 		$lines = explode(";\n", trim($init->getBody()));
 		$init->setBody(NULL);
-		while (($line = array_shift($lines)) || $lines) {
+		while (($line = array_shift($lines)) !== NULL) {
 			if ($foundNetteInitStart && !$foundNetteInitEnd &&
 				stripos($line, 'Nette\\') === FALSE && stripos($line, 'set_include_path') === FALSE && stripos($line, 'date_default_timezone_set') === FALSE
 			) {
@@ -237,7 +237,9 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 				);
 			}
 
-			if (!$def->getClass()) {
+			$defClass = $def->getClass();
+
+			if (!$defClass) {
 				throw new \Nette\Utils\AssertionException(
 					sprintf(
 						'Please, specify existing class for %sservice @%s explicitly, and make sure, that the class exists and can be autoloaded.',
@@ -246,30 +248,32 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 					)
 				);
 
-			} elseif (!class_exists($def->getClass())) {
+			}
+
+			if (!class_exists($defClass)) {
 				throw new \Nette\Utils\AssertionException(
 					sprintf(
 						'Class %s of %sservice @%s cannot be found. Please make sure, that the class exists and can be autoloaded.',
-						$def->getClass(),
+						$defClass,
 						is_numeric($serviceName) ? 'anonymous ' : '',
 						$serviceName
 					)
 				);
 			}
 
-			if (!in_array(EventSubscriber::class, class_implements($def->getClass()))) {
+			if (!in_array(EventSubscriber::class, class_implements($defClass), TRUE)) {
 				// the minimum is Doctrine EventSubscriber, but recommend is Kdyby Subscriber
 				throw new \Nette\Utils\AssertionException(sprintf('Subscriber @%s doesn\'t implement %s.', $serviceName, Subscriber::class));
 			}
 
 			$eventNames = [];
-			$listenerInst = self::createEventSubscriberInstanceWithoutConstructor($def->getClass());
+			$listenerInst = self::createEventSubscriberInstanceWithoutConstructor($defClass);
 			foreach ($listenerInst->getSubscribedEvents() as $eventName => $params) {
 				if (is_numeric($eventName) && is_string($params)) { // [EventName, ...]
-					list(, $method) = Event::parseName($params);
+					[, $method] = Event::parseName($params);
 					$eventNames[] = ltrim($params, '\\');
 					if (!method_exists($listenerInst, $method)) {
-						throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $method));
+						throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $defClass, $method));
 					}
 
 				} elseif (is_string($eventName)) { // [EventName => ???, ...]
@@ -277,18 +281,18 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 
 					if (is_string($params)) { // [EventName => method, ...]
 						if (!method_exists($listenerInst, $params)) {
-							throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $params));
+							throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $defClass, $params));
 						}
 
 					} elseif (is_string($params[0])) { // [EventName => [method, priority], ...]
 						if (!method_exists($listenerInst, $params[0])) {
-							throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $params[0]));
+							throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $defClass, $params[0]));
 						}
 
 					} else {
 						foreach ($params as $listener) { // [EventName => [[method, priority], ...], ...]
 							if (!method_exists($listenerInst, $listener[0])) {
-								throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $def->getClass(), $listener[0]));
+								throw new \Nette\Utils\AssertionException(sprintf('Event listener %s::%s() is not implemented.', $defClass, $listener[0]));
 							}
 						}
 					}
@@ -327,8 +331,9 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 				$class = $builder->expand($def->getEntity());
 				if (is_array($class)) {
 					continue;
+				}
 
-				} elseif (!class_exists($class)) {
+				if (!class_exists($class)) {
 					continue;
 				}
 			}
@@ -373,7 +378,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		$listeners = [];
 		foreach ($this->listeners as $serviceName => $eventNames) {
 			foreach ($eventNames as $eventName) {
-				list($namespace, $event) = Event::parseName($eventName);
+				[$namespace, $event] = Event::parseName($eventName);
 				$listeners[$eventName][] = $serviceName;
 
 				if (!$namespace || !class_exists($namespace)) {
@@ -417,7 +422,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 	 */
 	public static function register(Configurator $configurator)
 	{
-		$configurator->onCompile[] = function ($config, Compiler $compiler) {
+		$configurator->onCompile[] = static function ($config, Compiler $compiler) {
 			$compiler->addExtension('events', new EventsExtension());
 		};
 	}

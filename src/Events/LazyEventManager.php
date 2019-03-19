@@ -22,7 +22,7 @@ class LazyEventManager extends \Kdyby\Events\EventManager
 {
 
 	/**
-	 * @var array
+	 * @var array<string, string[]>
 	 */
 	private $listenerIds;
 
@@ -32,7 +32,7 @@ class LazyEventManager extends \Kdyby\Events\EventManager
 	private $container;
 
 	/**
-	 * @param array $listenerIds
+	 * @param array<string, string[]> $listenerIds
 	 * @param \Nette\DI\Container $container
 	 */
 	public function __construct(array $listenerIds, DIContainer $container)
@@ -70,9 +70,9 @@ class LazyEventManager extends \Kdyby\Events\EventManager
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
-			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
+			[$unsubscribe, $subscriber] = $this->extractSubscriber($unsubscribe);
 		} elseif ($unsubscribe instanceof Closure) {
-			list($unsubscribe, $subscriber) = $this->extractCallable($unsubscribe);
+			[$unsubscribe, $subscriber] = $this->extractCallable($unsubscribe);
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {

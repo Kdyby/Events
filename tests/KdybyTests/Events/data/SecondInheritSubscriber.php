@@ -32,7 +32,7 @@ class SecondInheritSubscriber implements \Kdyby\Events\Subscriber
 			$this->eventCalls['unknown'] += 1;
 		} else {
 			$eventName = $event['args'][0];
-			$this->eventCalls[$eventName] = 1 + (isset($this->eventCalls[$eventName]) ? $this->eventCalls[$eventName] : 0);
+			$this->eventCalls[$eventName] = 1 + ($this->eventCalls[$eventName] ?? 0);
 		}
 	}
 
