@@ -27,9 +27,8 @@ class IExceptionHandlerTest extends \Tester\TestCase
 
 	public function testNotCaught()
 	{
-		$evm = $this->evm;
-		Assert::exception(function () use ($evm) {
-			$evm->dispatchEvent('testEvent');
+		Assert::exception(function () {
+			$this->evm->dispatchEvent('testEvent');
 		}, \Exception::class);
 	}
 

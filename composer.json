@@ -12,18 +12,25 @@
 			"email": "filip@prochazka.su"
 		}
 	],
+	"repositories": [
+		{
+			"type": "git",
+			"url": "https://github.com/CZechBoY/Kdyby-CodingStandard.git"
+		}
+	],
 	"support": {
 		"email": "filip@prochazka.su",
 		"issues": "https://github.com/kdyby/events/issues"
 	},
 	"require": {
-		"php": "^5.6 || ^7.0",
+		"php": "^7.1",
 		"nette/di": "^2.4.8@dev",
 		"nette/utils": "^2.4.5@dev",
 		"nette/reflection": "^2.4@dev",
 		"kdyby/strict-objects": "^1.0"
 	},
 	"require-dev": {
+		"kdyby/coding-standard": "^1.0@dev",
 		"nette/application": "^2.4@dev",
 		"nette/bootstrap": "^2.4@dev",
 		"nette/caching": "^2.5@dev",
@@ -33,7 +40,8 @@
 
 		"symfony/event-dispatcher": "^3.0 || ^4.0",
 
-		"nette/tester": "^2.0"
+		"nette/tester": "^2.0",
+		"phpstan/phpstan-shim": "^0.11"
 	},
 	"minimum-stability": "dev",
 	"autoload": {

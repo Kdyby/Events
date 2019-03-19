@@ -36,4 +36,7 @@ $_SERVER = array_intersect_key($_SERVER, array_flip([
 	'argv',
 ]));
 $_SERVER['REQUEST_TIME'] = 1234567890;
+
+// phpcs:disable SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable
 $_ENV = $_GET = $_POST = [];
+// phpcs:enable SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable

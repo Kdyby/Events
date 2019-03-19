@@ -60,19 +60,15 @@ class ExtensionTest extends \Tester\TestCase
 
 	public function testValidateDirect()
 	{
-		$me = $this;
-
-		Assert::exception(function () use ($me) {
-			$me->createContainer('validate.direct');
+		Assert::exception(function () {
+			$this->createContainer('validate.direct');
 		}, \Nette\Utils\AssertionException::class, 'Please, do not register listeners directly to service @events.manager. %a%');
 	}
 
 	public function testValidateMissing()
 	{
-		$me = $this;
-
 		try {
-			$me->createContainer('validate.missing');
+			$this->createContainer('validate.missing');
 			Assert::fail('Expected exception');
 
 		} catch (\Nette\Utils\AssertionException $e) {
@@ -91,28 +87,22 @@ class ExtensionTest extends \Tester\TestCase
 
 	public function testValidateFake()
 	{
-		$me = $this;
-
-		Assert::exception(function () use ($me) {
-			$me->createContainer('validate.fake');
+		Assert::exception(function () {
+			$this->createContainer('validate.fake');
 		}, \Nette\Utils\AssertionException::class, 'Subscriber @events.subscriber.%a% doesn\'t implement Kdyby\Events\Subscriber.');
 	}
 
 	public function testValidateInvalid()
 	{
-		$me = $this;
-
-		Assert::exception(function () use ($me) {
-			$me->createContainer('validate.invalid');
+		Assert::exception(function () {
+			$this->createContainer('validate.invalid');
 		}, \Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\FirstInvalidListenerMock::onFoo() is not implemented.');
 	}
 
 	public function testValidateInvalid2()
 	{
-		$me = $this;
-
-		Assert::exception(function () use ($me) {
-			$me->createContainer('validate.invalid2');
+		Assert::exception(function () {
+			$this->createContainer('validate.invalid2');
 		}, \Nette\Utils\AssertionException::class, 'Event listener KdybyTests\Events\SecondInvalidListenerMock::onBar() is not implemented.');
 	}
 
@@ -257,8 +247,8 @@ class ExtensionTest extends \Tester\TestCase
 		Assert::false($container->isCreated('baz'));
 		Assert::same(1, count($manager->getListeners('onStartup')));
 
-		$baz = $container->getService('foo');
 		/** @var \KdybyTests\Events\NamespacedEventListenerMock $baz */
+		$baz = $container->getService('foo');
 
 		Assert::same([
 			[LoremListener::class . '::onStartup', [$bazArgs]],
@@ -304,8 +294,7 @@ class ExtensionTest extends \Tester\TestCase
 	public function testGlobalDispatchFirst()
 	{
 		$container = $this->createContainer('globalDispatchFirst');
-		$manager = $container->getService('events.manager');
-		/** @var \Kdyby\Events\EventManager $manager */
+		$container->getService('events.manager');
 
 		$mock = $container->getService('dispatchOrderMock');
 		Assert::true($mock->onGlobalDispatchFirst->globalDispatchFirst);
@@ -316,8 +305,7 @@ class ExtensionTest extends \Tester\TestCase
 	public function testGlobalDispatchLast()
 	{
 		$container = $this->createContainer('globalDispatchLast');
-		$manager = $container->getService('events.manager');
-		/** @var \Kdyby\Events\EventManager $manager */
+		$container->getService('events.manager');
 
 		$mock = $container->getService('dispatchOrderMock');
 		Assert::true($mock->onGlobalDispatchFirst->globalDispatchFirst);

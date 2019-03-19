@@ -70,7 +70,7 @@ class Panel implements \Tracy\IBarPanel
 	private $registeredClasses;
 
 	/**
-	 * @var bool
+	 * @var bool|array<string, mixed>
 	 */
 	public $renderPanel = TRUE;
 
@@ -350,7 +350,7 @@ class Panel implements \Tracy\IBarPanel
 
 		$h = 'htmlspecialchars';
 
-		$shortFilename = function (ReflectionFunctionAbstract $refl) {
+		$shortFilename = static function (ReflectionFunctionAbstract $refl) {
 			$title = '.../' . basename($refl->getFileName()) . ':' . $refl->getStartLine();
 
 			/** @var string|NULL $editor */

@@ -22,7 +22,7 @@ class ListenersContainer extends \Nette\DI\Container
 
 	protected function createServiceFourth()
 	{
-		return function () {
+		return static function () {
 		};
 	}
 
