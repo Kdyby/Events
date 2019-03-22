@@ -35,6 +35,7 @@
 		"nette/bootstrap": "^2.4@dev",
 		"nette/caching": "^2.5@dev",
 		"nette/security": "^2.4@dev",
+		"nette/http": "^2.4.7@dev",
 		"tracy/tracy": "^2.4@dev",
 
 		"symfony/event-dispatcher": "^3.0 || ^4.0",
