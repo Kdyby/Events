@@ -25,7 +25,7 @@
 	"require": {
 		"php": "^7.1",
 		"nette/di": "^2.4.8@dev",
-		"nette/utils": "2.5.*",
+		"nette/utils": "^2.4.5@dev",
 		"nette/reflection": "^2.4@dev",
 		"kdyby/strict-objects": "^1.0"
 	},
