@@ -60,7 +60,7 @@ class SymfonyDispatcher implements \Symfony\Component\EventDispatcher\EventDispa
 
 	public function getListeners($eventName = NULL)
 	{
-		return $this->getListeners($eventName);
+		return $this->evm->getListeners($eventName);
 	}
 
 	public function hasListeners($eventName = NULL)
