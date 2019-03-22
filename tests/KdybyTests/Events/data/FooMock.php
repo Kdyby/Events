@@ -4,8 +4,8 @@ namespace KdybyTests\Events;
 
 /**
  * @method onBar($lorem)
- * @method onMagic(FooMock $foo, $int)
- * @method onStartup(FooMock $foo, $int)
+ * @method onMagic(\KdybyTests\Events\FooMock $foo, $int)
+ * @method onStartup(\KdybyTests\Events\FooMock $foo, $int)
  */
 class FooMock
 {

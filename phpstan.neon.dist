@@ -1,0 +1,8 @@
+parameters:
+	level: 7
+	paths:
+		- src
+		- tests/KdybyTests
+	ignoreErrors:
+		- '#Parameter \#1 $eventName \(string|null\) of method Kdyby\\Events\\SymfonyDispatcher::dispatch\(\) should be compatible .*?#'
+		- '#Parameter \#1 $eventName of method Kdyby\\Events\\EventManager::dispatchEvent\(\) expects string, string|null given.#'

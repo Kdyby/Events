@@ -12,6 +12,12 @@
 		<exclude-pattern>src/Events/EventManager.php</exclude-pattern>
 	</rule>
 
+	<rule ref="SlevomatCodingStandard.Namespaces.FullyQualifiedClassNameInAnnotation.NonFullyQualifiedClassName">
+		<exclude-pattern>src/Events/EventManager.php</exclude-pattern>
+		<exclude-pattern>src/Events/Diagnostics/Panel.php</exclude-pattern>
+		<exclude-pattern>src/Events/LazyEventManager.php</exclude-pattern>
+	</rule>
+
 	<!-- compatibility classes, they're a mess, just ignore them -->
 	<exclude-pattern>src/Doctrine/*</exclude-pattern>
 	<exclude-pattern>src/Symfony/*</exclude-pattern>

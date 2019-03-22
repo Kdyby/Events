@@ -47,10 +47,10 @@ class EventTest extends \Tester\TestCase
 		$foo = new FooMock();
 		$foo->onBar = new Event('bar');
 
-		$foo->onBar[] = function ($lorem) use (&$calls) {
+		$foo->onBar[] = static function ($lorem) use (&$calls) {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
-		$foo->onBar[] = function ($lorem) use (&$calls) {
+		$foo->onBar[] = static function ($lorem) use (&$calls) {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
 
@@ -98,7 +98,7 @@ class EventTest extends \Tester\TestCase
 		$foo->onMagic->injectEventManager($evm);
 
 		// listener
-		$foo->onMagic[] = function (FooMock $foo, $int) use (&$calls) {
+		$foo->onMagic[] = static function (FooMock $foo, $int) use (&$calls) {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
 
@@ -107,7 +107,7 @@ class EventTest extends \Tester\TestCase
 		$foo->onStartup->injectEventManager($evm);
 
 		// listener
-		$foo->onStartup[] = function (FooMock $foo, $int) use (&$calls) {
+		$foo->onStartup[] = static function (FooMock $foo, $int) use (&$calls) {
 			$calls[] = [__METHOD__, func_get_args()];
 		};
 
@@ -116,8 +116,8 @@ class EventTest extends \Tester\TestCase
 
 	public function testDispatchToManagerInvoke()
 	{
-		$foo = new FooMock;
-		$listener = new LoremListener;
+		$foo = new FooMock();
+		$listener = new LoremListener();
 		$this->dataToManagerDispatch($foo, $listener, $calls);
 
 		$foo->onMagic($foo, 2);
@@ -133,8 +133,8 @@ class EventTest extends \Tester\TestCase
 
 	public function testDispatchToManagerDispatch()
 	{
-		$foo = new FooMock;
-		$listener = new LoremListener;
+		$foo = new FooMock();
+		$listener = new LoremListener();
 		$this->dataToManagerDispatch($foo, $listener, $calls);
 
 		$foo->onMagic->dispatch([$foo, 3]);
@@ -150,8 +150,8 @@ class EventTest extends \Tester\TestCase
 
 	public function testDispatchToManagerSecondInvoke()
 	{
-		$foo = new FooMock;
-		$listener = new LoremListener;
+		$foo = new FooMock();
+		$listener = new LoremListener();
 		$this->dataToManagerDispatch($foo, $listener, $calls);
 
 		$foo->onStartup($foo, 4);
@@ -161,9 +161,9 @@ class EventTest extends \Tester\TestCase
 		Assert::same([$foo, 4], $calls[0][1]);
 		Assert::same(1, count($listener->calls));
 
-		list($call) = $listener->calls;
+		[$call] = $listener->calls;
 		Assert::same(LoremListener::class . '::onStartup', $call[0]);
-		list($args) = $call[1];
+		[$args] = $call[1];
 		Assert::true($args instanceof StartupEventArgs);
 		Assert::same($foo, $args->foo);
 		Assert::same(4, $args->int);
@@ -179,7 +179,7 @@ class EventTest extends \Tester\TestCase
 		$event->injectEventManager($evm);
 		$event->globalDispatchFirst = TRUE;
 
-		$event[] = function () use ($listener) {
+		$event[] = static function () use ($listener) {
 			$listener->calls[] = __METHOD__;
 		};
 
@@ -202,7 +202,7 @@ class EventTest extends \Tester\TestCase
 		$event->injectEventManager($evm);
 		$event->globalDispatchFirst = FALSE;
 
-		$event[] = function () use ($listener) {
+		$event[] = static function () use ($listener) {
 			$listener->calls[] = __METHOD__;
 		};
 

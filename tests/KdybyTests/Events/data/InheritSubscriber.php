@@ -27,7 +27,7 @@ class InheritSubscriber implements \Kdyby\Events\Subscriber
 	{
 		$backtrace = debug_backtrace();
 		$event = $backtrace[2]['args'][0];
-		$this->eventCalls[$event] = 1 + (isset($this->eventCalls[$event]) ? $this->eventCalls[$event] : 0);
+		$this->eventCalls[$event] = 1 + ($this->eventCalls[$event] ?? 0);
 	}
 
 }

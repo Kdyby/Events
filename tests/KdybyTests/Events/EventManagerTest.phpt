@@ -152,7 +152,7 @@ class EventManagerTest extends \Tester\TestCase
 		$evm = $this->manager;
 		$listener = new EventListenerMock();
 
-		Assert::exception(function () use ($evm, $listener) {
+		Assert::exception(static function () use ($evm, $listener) {
 			$evm->addEventListener('onNonexisting', $listener);
 		}, \Kdyby\Events\InvalidListenerException::class);
 	}
@@ -193,7 +193,7 @@ class EventManagerTest extends \Tester\TestCase
 	public function testDispatchingCallable()
 	{
 		$triggerCounter = 0;
-		$callback = function () use (& $triggerCounter) {
+		$callback = static function () use (& $triggerCounter) {
 			$triggerCounter++;
 		};
 
@@ -244,7 +244,6 @@ class EventManagerTest extends \Tester\TestCase
 
 	/**
 	 * @dataProvider dataEventsDispatchingNamespaces
-	 *
 	 * @param string $trigger
 	 * @param array $called
 	 */
@@ -459,7 +458,7 @@ class EventManagerTest extends \Tester\TestCase
 	 */
 	private static function getEmptyClosure()
 	{
-		return function () {
+		return static function () {
 		};
 	}
 

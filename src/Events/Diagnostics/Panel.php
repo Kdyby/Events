@@ -70,7 +70,7 @@ class Panel implements \Tracy\IBarPanel
 	private $registeredClasses;
 
 	/**
-	 * @var bool
+	 * @var bool|array<string, mixed>
 	 */
 	public $renderPanel = TRUE;
 
@@ -150,8 +150,13 @@ class Panel implements \Tracy\IBarPanel
 			return NULL;
 		}
 
+		$iconFile = file_get_contents(__DIR__ . '/icon.png');
+		if ($iconFile === FALSE) {
+			throw new \RuntimeException('File icon.png not found');
+		}
+
 		return '<span title="Kdyby/Events">'
-			. '<img width="16" height="16" src="data:image/png;base64,' . base64_encode(file_get_contents(__DIR__ . '/icon.png')) . '" />'
+			. '<img width="16" height="16" src="data:image/png;base64,' . base64_encode($iconFile) . '" />'
 			. '<span class="tracy-label">' . count(Arrays::flatten($this->dispatchLog)) . ' calls</span>'
 			. '</span>';
 	}
@@ -186,8 +191,8 @@ class Panel implements \Tracy\IBarPanel
 
 		$s .= $this->renderPanelDispatchTree();
 
-		$totalEvents = count($this->listenerIds);
-		$totalListeners = count(array_unique(Arrays::flatten($this->listenerIds)));
+		$totalEvents = (string) count($this->listenerIds);
+		$totalListeners = (string) count(array_unique(Arrays::flatten($this->listenerIds)));
 
 		return '<style>' . $this->renderStyles() . '</style>' .
 			'<h1>' . $h($totalEvents) . ' registered events, ' . $h($totalListeners) . ' registered listeners</h1>' .
@@ -343,18 +348,23 @@ class Panel implements \Tracy\IBarPanel
 	{
 		static $addIcon;
 		if (empty($addIcon)) {
-			$addIcon = '<img width="18" height="18" src="data:image/png;base64,' . base64_encode(file_get_contents(__DIR__ . '/add.png')) . '" title="Listener" />';
+			$icon = file_get_contents(__DIR__ . '/add.png');
+			if ($icon === FALSE) {
+				throw new \RuntimeException('Missing file add.png');
+			}
+
+			$addIcon = '<img width="18" height="18" src="data:image/png;base64,' . base64_encode($icon) . '" title="Listener" />';
 		}
 
 		$registeredClasses = $this->getClassMap();
 
 		$h = 'htmlspecialchars';
 
-		$shortFilename = function (ReflectionFunctionAbstract $refl) {
-			$title = '.../' . basename($refl->getFileName()) . ':' . $refl->getStartLine();
+		$shortFilename = static function (ReflectionFunctionAbstract $refl) {
+			$title = '.../' . basename($refl->getFileName() ?: 'unknown.php') . ':' . ((string) $refl->getStartLine());
 
 			/** @var string|NULL $editor */
-			$editor = TracyHelpers::editorUri($refl->getFileName(), $refl->getStartLine());
+			$editor = TracyHelpers::editorUri($refl->getFileName() ?: 'unknown.php', $refl->getStartLine() ?: 0);
 			if ($editor !== NULL) {
 				return sprintf(' defined at <a href="%s">%s</a>', htmlspecialchars($editor), $title);
 			}
@@ -425,7 +435,12 @@ class Panel implements \Tracy\IBarPanel
 	{
 		static $runIcon;
 		if (empty($runIcon)) {
-			$runIcon = '<img width="18" height="18" src="data:image/png;base64,' . base64_encode(file_get_contents(__DIR__ . '/run.png')) . '" title="Event dispatch" />';
+			$runIconFile = file_get_contents(__DIR__ . '/run.png');
+			if ($runIconFile === FALSE) {
+				throw new \RuntimeException('File run.png not found');
+			}
+
+			$runIcon = '<img width="18" height="18" src="data:image/png;base64,' . base64_encode($runIconFile) . '" title="Event dispatch" />';
 		}
 
 		$s = '';

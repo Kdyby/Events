@@ -26,31 +26,31 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * [Event => [Priority => [[Listener, method], Subscriber, Subscriber, ...]]]
 	 *
-	 * @var array[]
+	 * @var array<string, array<int, callable[]>>
 	 */
 	private $listeners = [];
 
 	/**
 	 * [Event => Subscriber|callable]
 	 *
-	 * @var \Doctrine\Common\EventSubscriber[][]|callable[][]
+	 * @var array<\Doctrine\Common\EventSubscriber[]|callable[]>
 	 */
 	private $sorted = [];
 
 	/**
 	 * [SubscriberHash => Subscriber]
 	 *
-	 * @var \Doctrine\Common\EventSubscriber[]
+	 * @var array<string, \Doctrine\Common\EventSubscriber>
 	 */
 	private $subscribers = [];
 
 	/**
-	 * @var \Kdyby\Events\Diagnostics\Panel
+	 * @var \Kdyby\Events\Diagnostics\Panel|null
 	 */
 	private $panel;
 
 	/**
-	 * @var \Kdyby\Events\IExceptionHandler
+	 * @var \Kdyby\Events\IExceptionHandler|null
 	 */
 	private $exceptionHandler;
 
@@ -83,12 +83,14 @@ class EventManager extends \Doctrine\Common\EventManager
 			$this->panel->eventDispatch($eventName, $eventArgs);
 		}
 
-		list($namespace, $event) = Event::parseName($eventName);
+		[, $event] = Event::parseName($eventName);
 		foreach ($this->getListeners($eventName) as $listener) {
 			try {
 				if ($listener instanceof EventSubscriber) {
 					$listener = [$listener, $event];
 				}
+
+				assert(is_callable($listener));
 
 				if ($eventArgs instanceof EventArgsList) {
 					/** @var \Kdyby\Events\EventArgsList $eventArgs */
@@ -115,7 +117,7 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * Gets the listeners of a specific event or all listeners.
 	 *
-	 * @param string $eventName
+	 * @param string|null $eventName
 	 * @return \Doctrine\Common\EventSubscriber[]|callable[]|\Doctrine\Common\EventSubscriber[][]|callable[][]
 	 */
 	public function getListeners($eventName = NULL)
@@ -128,7 +130,7 @@ class EventManager extends \Doctrine\Common\EventManager
 			return $this->sorted[$eventName];
 		}
 
-		foreach ($this->listeners as $event => $prioritized) {
+		foreach (array_keys($this->listeners) as $event) {
 			if (!isset($this->sorted[$event])) {
 				$this->sortListeners($event);
 			}
@@ -140,7 +142,7 @@ class EventManager extends \Doctrine\Common\EventManager
 	/**
 	 * Checks whether an event has any registered listeners.
 	 *
-	 * @param string $eventName
+	 * @param string|null $eventName
 	 * @return bool TRUE if the specified event has any listeners, FALSE otherwise.
 	 */
 	public function hasListeners($eventName)
@@ -154,19 +156,18 @@ class EventManager extends \Doctrine\Common\EventManager
 	 * @param string|array $events The event(s) to listen on.
 	 * @param \Doctrine\Common\EventSubscriber|\Closure|array $subscriber The listener object.
 	 * @param int $priority
-	 *
 	 * @throws \Kdyby\Events\InvalidListenerException
 	 */
 	public function addEventListener($events, $subscriber, $priority = 0)
 	{
 		foreach ((array) $events as $eventName) {
-			list($namespace, $event) = Event::parseName($eventName);
+			[, $event] = Event::parseName($eventName);
 
 			if (!$subscriber instanceof Closure) {
 				$callback = !is_array($subscriber) ? [$subscriber, $event] : $subscriber;
 				if ($callback[0] instanceof CallableSubscriber) {
 					if (!is_callable($callback)) {
-						throw new \Kdyby\Events\InvalidListenerException(sprintf('Event listener "%s" is not callable.', $callback[0]));
+						throw new \Kdyby\Events\InvalidListenerException(sprintf('Event listener "%s" is not callable.', get_class($callback[0])));
 					}
 
 				} elseif (!method_exists($callback[0], $callback[1])) {
@@ -188,9 +189,9 @@ class EventManager extends \Doctrine\Common\EventManager
 	public function removeEventListener($unsubscribe, $subscriber = NULL)
 	{
 		if ($unsubscribe instanceof EventSubscriber) {
-			list($unsubscribe, $subscriber) = $this->extractSubscriber($unsubscribe);
+			[$unsubscribe, $subscriber] = $this->extractSubscriber($unsubscribe);
 		} elseif ($unsubscribe instanceof Closure) {
-			list($unsubscribe, $subscriber) = $this->extractCallable($unsubscribe);
+			[$unsubscribe, $subscriber] = $this->extractCallable($unsubscribe);
 		}
 
 		foreach ((array) $unsubscribe as $eventName) {
@@ -290,11 +291,11 @@ class EventManager extends \Doctrine\Common\EventManager
 					$this->addEventListener($eventName, [$subscriber, $params]);
 
 				} elseif (is_string($params[0])) { // [EventName => [method, priority], ...]
-					$this->addEventListener($eventName, [$subscriber, $params[0]], isset($params[1]) ? $params[1] : 0);
+					$this->addEventListener($eventName, [$subscriber, $params[0]], $params[1] ?? 0);
 
 				} else {
 					foreach ($params as $listener) { // [EventName => [[method, priority], ...], ...]
-						$this->addEventListener($eventName, [$subscriber, $listener[0]], isset($listener[1]) ? $listener[1] : 0);
+						$this->addEventListener($eventName, [$subscriber, $listener[0]], $listener[1] ?? 0);
 					}
 				}
 			}
@@ -310,8 +311,8 @@ class EventManager extends \Doctrine\Common\EventManager
 	}
 
 	/**
-	 * @param string|array $name
-	 * @param array $defaults
+	 * @param string $name
+	 * @param array|\Traversable|null $defaults
 	 * @param string $argsClass
 	 * @param bool $globalDispatchFirst
 	 * @return \Kdyby\Events\Event
@@ -334,7 +335,7 @@ class EventManager extends \Doctrine\Common\EventManager
 		$this->sorted[$eventName] = [];
 
 		$available = [];
-		list($namespace, $event, $separator) = Event::parseName($eventName);
+		[$namespace, $event, $separator] = Event::parseName($eventName);
 		$className = $namespace;
 		do {
 			$key = ($className ? $className . $separator : '') . $event;
@@ -342,7 +343,7 @@ class EventManager extends \Doctrine\Common\EventManager
 				continue;
 			}
 
-			$available = $available + array_fill_keys(array_keys($this->listeners[$key]), []);
+			$available += array_fill_keys(array_keys($this->listeners[$key]), []);
 			foreach ($this->listeners[$key] as $priority => $listeners) {
 				foreach ($listeners as $listener) {
 					if ($className === $namespace && in_array($listener, $available[$priority], TRUE)) {
@@ -360,9 +361,9 @@ class EventManager extends \Doctrine\Common\EventManager
 		}
 
 		krsort($available); // [priority => [[listener, ...], ...]
-		$sorted = call_user_func_array('array_merge', $available);
+		$sorted = array_merge(...$available);
 
-		$this->sorted[$eventName] = array_map(function ($callable) use ($event) {
+		$this->sorted[$eventName] = array_map(static function ($callable) use ($event) {
 			if ($callable instanceof EventSubscriber) {
 				return $callable;
 			}

@@ -42,7 +42,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 	 */
 	public function dispatchEvent($eventName, DoctrineEventArgs $eventArgs = NULL)
 	{
-		list($ns, $event) = Event::parseName($eventName);
+		[$ns, $event] = Event::parseName($eventName);
 
 		$this->evm->dispatchEvent($ns !== NULL ? $eventName : $this->namespace . $eventName, $eventArgs);
 
@@ -59,7 +59,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 		if ($eventName === NULL) {
 			$listeners = [];
 			foreach ($this->evm->getListeners(NULL) as $subscriberEventName => $subscribers) {
-				list($ns, $event) = Event::parseName($subscriberEventName);
+				[$ns, $event] = Event::parseName($subscriberEventName);
 				if ($ns === NULL || stripos($this->namespace, $ns) !== FALSE) {
 					$listeners[$subscriberEventName] = $subscribers;
 				}
@@ -68,7 +68,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 			return $listeners;
 		}
 
-		list($ns, $event) = Event::parseName($eventName);
+		[$ns, $event] = Event::parseName($eventName);
 
 		if ($ns !== NULL) {
 			throw new \Kdyby\Events\InvalidArgumentException('Unexpected event with namespace.');
@@ -85,7 +85,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 	 */
 	public function hasListeners($eventName)
 	{
-		list($ns, $event) = Event::parseName($eventName);
+		[$ns, $event] = Event::parseName($eventName);
 
 		if ($ns) {
 			return $this->evm->hasListeners($eventName) || $this->evm->hasListeners($event);
@@ -100,7 +100,7 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 	public function addEventListener($events, $subscriber, $priority = 0)
 	{
 		foreach ((array) $events as $eventName) {
-			list($ns, $event) = Event::parseName($eventName);
+			[$ns, $event] = Event::parseName($eventName);
 			$this->evm->addEventListener([$ns === NULL ? $this->namespace . $event : $eventName], $subscriber);
 		}
 	}
@@ -126,10 +126,9 @@ class NamespacedEventManager extends \Kdyby\Events\EventManager
 			}
 		}
 
-		$namespace = $this->namespace;
-		$unsubscribe = array_map(function ($eventName) use ($namespace) {
-			list($ns, $event) = Event::parseName($eventName);
-			return $ns === NULL ? $namespace . $event : $eventName;
+		$unsubscribe = array_map(function ($eventName) {
+			[$ns, $event] = Event::parseName($eventName);
+			return $ns === NULL ? $this->namespace . $event : $eventName;
 		}, (array) $unsubscribe);
 
 		$this->evm->removeEventListener($unsubscribe, $subscriber);
