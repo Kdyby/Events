@@ -228,10 +228,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 			}
 
 			try {
-//				$serviceName = $builder->getServiceName(reset($stt->arguments));
-//				$def = $builder->getDefinition($serviceName);
 				$argument = reset($stt->arguments);
-				dump(is_object($argument) ? get_class($argument) : null);
 				if ($argument instanceof Reference) {
 					$serviceName = $argument->getValue();
 					$def = $builder->getDefinition($serviceName);
@@ -242,10 +239,6 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 					$serviceName = ltrim($argument, '@');
 					$def = $builder->getDefinition($serviceName);
 				}
-
-//				$serviceName = $argument instanceof Reference ? $argument->getName() : ltrim($argument, '@');
-//				$def = $argument instanceof Reference ? $argument : $builder->getDefinition();
-//				$def = $builder->getDefinition($serviceName);
 
 			} catch (\Exception $e) {
 				throw new \Nette\Utils\AssertionException(
@@ -347,7 +340,6 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 			if ($def instanceof ImportedDefinition) {
 				continue;
 			}
-			dump($def);
 			
 			/** @var \Nette\DI\Definitions\ServiceDefinition $def */
 			if ($this->isAlias($def)) {
