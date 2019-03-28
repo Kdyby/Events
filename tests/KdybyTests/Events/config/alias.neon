@@ -5,6 +5,5 @@ events:
 
 services:
 	application:
-		class: NULL
 		factory: Nette\Application\Application
 	alias: @application

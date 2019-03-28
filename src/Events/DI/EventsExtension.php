@@ -20,10 +20,18 @@ use Kdyby\Events\SymfonyDispatcher;
 use Nette\Configurator;
 use Nette\DI\Compiler;
 use Nette\DI\Config\Helpers as DIConfigHelpers;
+use Nette\DI\Config\Helpers;
+use Nette\DI\Config\Processor;
 use Nette\DI\Container as DIContainer;
 use Nette\DI\ContainerBuilder as DIContainerBuilder;
-use Nette\DI\ServiceDefinition;
-use Nette\DI\Statement;
+use Nette\DI\Definitions\AccessorDefinition;
+use Nette\DI\Definitions\Definition;
+use Nette\DI\Definitions\FactoryDefinition;
+use Nette\DI\Definitions\ImportedDefinition;
+use Nette\DI\Definitions\Reference;
+use Nette\DI\Definitions\ServiceDefinition;
+use Nette\DI\Definitions\Statement;
+use Nette\DI\Resolver;
 use Nette\PhpGenerator\ClassType as ClassTypeGenerator;
 use Nette\PhpGenerator\Helpers as GeneratorHelpers;
 use Nette\PhpGenerator\PhpLiteral;
@@ -80,7 +88,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		$this->allowedManagerSetup = [];
 
 		$builder = $this->getContainerBuilder();
-		$config = $this->getConfig($this->defaults);
+		$config = Helpers::merge($this->getConfig(), $this->defaults);
 
 		$userConfig = $this->getConfig();
 		if (!array_key_exists('debugger', $userConfig)) {
@@ -113,11 +121,12 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		foreach ($config['subscribers'] as $i => $subscriber) {
 			$def = $builder->addDefinition($this->prefix('subscriber.' . $i));
 
-			$def->setFactory(Compiler::filterArguments([
+			$def->setFactory(Processor::processArguments([
 				is_string($subscriber) ? new Statement($subscriber) : $subscriber,
 			])[0]);
 
-			[$subscriberClass] = (array) $builder->normalizeEntity($def->getEntity());
+//			[$subscriberClass] = (array) $builder->normalizeEntity($def->getEntity());
+			$subscriberClass = $def->getEntity();
 			if (class_exists($subscriberClass)) {
 				$def->setClass($subscriberClass);
 			}
@@ -219,8 +228,24 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 			}
 
 			try {
-				$serviceName = $builder->getServiceName(reset($stt->arguments));
-				$def = $builder->getDefinition($serviceName);
+//				$serviceName = $builder->getServiceName(reset($stt->arguments));
+//				$def = $builder->getDefinition($serviceName);
+				$argument = reset($stt->arguments);
+				dump(is_object($argument) ? get_class($argument) : null);
+				if ($argument instanceof Reference) {
+					$serviceName = $argument->getValue();
+					$def = $builder->getDefinition($serviceName);
+				} elseif ($argument instanceof Statement) {
+					$serviceName = (string) $argument->getEntity();
+					$def = $builder->getDefinition($serviceName);
+				} else {
+					$serviceName = ltrim($argument, '@');
+					$def = $builder->getDefinition($serviceName);
+				}
+
+//				$serviceName = $argument instanceof Reference ? $argument->getName() : ltrim($argument, '@');
+//				$def = $argument instanceof Reference ? $argument : $builder->getDefinition();
+//				$def = $builder->getDefinition($serviceName);
 
 			} catch (\Exception $e) {
 				throw new \Nette\Utils\AssertionException(
@@ -228,14 +253,14 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 						'Please, do not register listeners directly to service %s. Use section "%s: subscribers: ", or tag the service as "%s".',
 						$this->prefix('@manager'),
 						$this->name,
-						self::SUBSCRIBER_TAG
+						self::TAG_SUBSCRIBER
 					),
 					0,
 					$e
 				);
 			}
 
-			$defClass = $def->getClass();
+			$defClass = $def->getType();
 
 			if (!$defClass) {
 				throw new \Nette\Utils\AssertionException(
@@ -301,12 +326,16 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 	}
 
-	private function isAlias(ServiceDefinition $definition)
+	private function isAlias(Definition $definition)
 	{
-		return $definition->getFactory() && (
-				$definition->getEntity() instanceof ServiceDefinition
-				|| (is_string($definition->getEntity()) && substr($definition->getEntity(), 0, 1) === '@')
-			);
+		if ($definition instanceof ServiceDefinition) {
+			return $definition->getFactory() && (
+					$definition->getEntity() instanceof Reference
+					|| (is_string($definition->getEntity()) && substr($definition->getEntity(), 0, 1) === '@')
+				);
+		}
+
+		return $definition instanceof Reference;
 	}
 
 	/**
@@ -315,18 +344,32 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 	private function autowireEvents(DIContainerBuilder $builder)
 	{
 		foreach ($builder->getDefinitions() as $def) {
-			/** @var \Nette\DI\ServiceDefinition $def */
+			if ($def instanceof ImportedDefinition) {
+				continue;
+			}
+			dump($def);
+			
+			/** @var \Nette\DI\Definitions\ServiceDefinition $def */
 			if ($this->isAlias($def)) {
 				continue; // alias
 			}
 
-			$class = $builder->expand($def->getClass());
+			$class = $def->getType();
 			if (!class_exists($class)) {
-				if (!$def->getFactory()) {
+				if ($def instanceof AccessorDefinition) {
 					continue;
 				}
 
-				$class = $builder->expand($def->getEntity());
+				if ($def instanceof FactoryDefinition && !$def->getResultDefinition()->getFactory()) {
+					continue;
+				}
+
+				if ($def instanceof FactoryDefinition) {
+					$class = $def->getResultDefinition()->getEntity();
+				} else {
+					$class = $def->getEntity();
+				}
+
 				if (is_array($class)) {
 					continue;
 				}
@@ -335,7 +378,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 					continue;
 				}
 			}
-			if ($def->getImplementMode() === $def::IMPLEMENT_MODE_GET) {
+			if ($def instanceof AccessorDefinition || $def instanceof ImportedDefinition) {
 				continue;
 			}
 
@@ -343,8 +386,10 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 	}
 
-	protected function bindEventProperties(ServiceDefinition $def, ClassTypeReflection $class)
+	protected function bindEventProperties(Definition $def, ClassTypeReflection $class)
 	{
+		$def = $def instanceof FactoryDefinition ? $def->getResultDefinition() : $def;
+
 		foreach ($class->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
 			$name = $property->getName();
 			if (!preg_match('#^on[A-Z]#', $name)) {
@@ -402,7 +447,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 
 		$builder->getDefinition($this->prefix('manager'))
-			->setClass(LazyEventManager::class, [$listeners])
+			->setFactory(LazyEventManager::class, [$listeners])
 			->setSetup($this->allowedManagerSetup);
 	}
 
@@ -412,7 +457,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 	 */
 	private function filterArgs($statement)
 	{
-		return Compiler::filterArguments([is_string($statement) ? new Statement($statement) : $statement]);
+		return Processor::processArguments([is_string($statement) ? new Statement($statement) : $statement]);
 	}
 
 	/**
