@@ -27,8 +27,6 @@ use Tracy\Helpers as TracyHelpers;
 class Panel implements \Tracy\IBarPanel
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var \Nette\DI\Container
 	 */

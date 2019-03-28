@@ -24,27 +24,23 @@
 	},
 	"require": {
 		"php": "^7.1",
-		"nette/di": "^2.4.8@dev",
-		"nette/utils": "^2.4.5@dev",
-		"nette/reflection": "^2.4@dev",
-		"kdyby/strict-objects": "^1.0"
+		"nette/di": "^3.0-RC",
+		"nette/utils": "^3.0",
+		"nette/reflection": "^2.4"
 	},
 	"require-dev": {
 		"kdyby/coding-standard": "^1.0@dev",
-		"nette/application": "^2.4@dev",
-		"nette/bootstrap": "^2.4@dev",
-		"nette/caching": "^2.5@dev",
-		"nette/security": "^2.4@dev",
-		"nette/http": "^2.4.7@dev",
-		"tracy/tracy": "^2.4@dev",
-
+		"nette/application": "^3.0-RC3",
+		"nette/bootstrap": "^3.0",
+		"nette/caching": "^3.0",
+		"nette/security": "^3.0",
+		"nette/http": "^3.0-RC",
+		"tracy/tracy": "^2.5",
 		"symfony/event-dispatcher": "^3.0 || ^4.0",
-
-		"nette/tester": "2.2.*",
+		"nette/tester": "^2.2",
 		"phpstan/phpstan-shim": "^0.11",
 		"jakub-onderka/php-parallel-lint": "^1.0"
 	},
-	"minimum-stability": "dev",
 	"autoload": {
 		"psr-4": {
 			"Kdyby\\Events\\": "src/Events"

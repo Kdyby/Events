@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class ListenerWithoutInterface
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var array
 	 */

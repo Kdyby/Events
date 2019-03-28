@@ -36,8 +36,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 class EventsExtension extends \Nette\DI\CompilerExtension
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/** @deprecated */
 	const EVENT_TAG = self::TAG_EVENT;
 	/** @deprecated */

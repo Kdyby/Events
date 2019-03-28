@@ -15,8 +15,6 @@ use Nette\Application\Application;
 final class LifeCycleEvent
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * Occurs before the application loads presenter
 	 */
