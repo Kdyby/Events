@@ -24,17 +24,17 @@
 	},
 	"require": {
 		"php": "^7.1",
-		"nette/di": "^3.0-RC",
+		"nette/di": "^3.0",
 		"nette/utils": "^3.0",
 		"nette/reflection": "^2.4"
 	},
 	"require-dev": {
 		"kdyby/coding-standard": "^1.0@dev",
-		"nette/application": "^3.0-RC3",
+		"nette/application": "^3.0",
 		"nette/bootstrap": "^3.0",
 		"nette/caching": "^3.0",
 		"nette/security": "^3.0",
-		"nette/http": "^3.0-RC",
+		"nette/http": "^3.0",
 		"tracy/tracy": "^2.5",
 		"symfony/event-dispatcher": "^3.0 || ^4.0",
 		"nette/tester": "^2.2",
