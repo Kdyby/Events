@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class MagicEventListenerMock implements \Kdyby\Events\CallableSubscriber
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var array
 	 */

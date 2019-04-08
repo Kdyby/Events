@@ -5,7 +5,7 @@ events:
 
 services:
 	application:
-		class: NULL
+		class: Nette\Application\Application
 		factory: Nette\Application\Application
 
 	routerFactory: KdybyTests\Events\RouterFactory

@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class EventListenerMock2 implements \Kdyby\Events\Subscriber
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @return array
 	 */

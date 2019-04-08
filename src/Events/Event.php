@@ -20,8 +20,6 @@ use Traversable;
 class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * Changes the order of listeners being invoked,
 	 * The default is that the closures and listeners registered directly are first,

@@ -27,8 +27,6 @@ use Tracy\Helpers as TracyHelpers;
 class Panel implements \Tracy\IBarPanel
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var \Nette\DI\Container
 	 */
@@ -414,12 +412,12 @@ class Panel implements \Tracy\IBarPanel
 			return $this->registeredClasses;
 		}
 
-		$refl = new ReflectionProperty(DIContainer::class, 'meta');
+		$refl = new ReflectionProperty(DIContainer::class, 'types');
 		$refl->setAccessible(TRUE);
-		$meta = $refl->getValue($this->sl);
+		$types = $refl->getValue($this->sl);
 
 		$this->registeredClasses = [];
-		foreach ($meta[DIContainer::TYPES] as $type => $serviceIds) {
+		foreach ($types as $type => $serviceIds) {
 			if (isset($this->registeredClasses[$type])) {
 				$this->registeredClasses[$type] = FALSE;
 				continue;

@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class EventListenerConstructorMock implements \Kdyby\Events\Subscriber
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var \KdybyTests\Events\RouterFactory
 	 */

@@ -16,8 +16,6 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class SymfonyDispatcher implements \Symfony\Component\EventDispatcher\EventDispatcherInterface
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var \Kdyby\Events\EventManager
 	 */

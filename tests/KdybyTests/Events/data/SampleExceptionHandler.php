@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class SampleExceptionHandler implements \Kdyby\Events\IExceptionHandler
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var \Exception[]
 	 */

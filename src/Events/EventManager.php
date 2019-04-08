@@ -21,8 +21,6 @@ use Kdyby\Events\Diagnostics\Panel;
 class EventManager extends \Doctrine\Common\EventManager
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * [Event => [Priority => [[Listener, method], Subscriber, Subscriber, ...]]]
 	 *

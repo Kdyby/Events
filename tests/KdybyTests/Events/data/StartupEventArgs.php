@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class StartupEventArgs extends \Kdyby\Events\EventArgs
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var \KdybyTests\Events\FooMock
 	 */

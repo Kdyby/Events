@@ -8,8 +8,6 @@ use Tracy\Helpers as TracyHelpers;
 class SecondInheritSubscriber implements \Kdyby\Events\Subscriber
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var array
 	 */

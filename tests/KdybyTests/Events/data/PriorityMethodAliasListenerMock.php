@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class PriorityMethodAliasListenerMock implements \Kdyby\Events\Subscriber
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var array
 	 */

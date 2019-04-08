@@ -5,8 +5,6 @@ namespace KdybyTests\Events;
 class LeafClassOnlyListener implements \Kdyby\Events\Subscriber
 {
 
-	use \Kdyby\StrictObjects\Scream;
-
 	/**
 	 * @var array
 	 */
