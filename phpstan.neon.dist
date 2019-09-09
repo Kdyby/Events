@@ -8,3 +8,6 @@ parameters:
 		-
 			message: '~Parameter \#1 \$eventName \(string\) of method Kdyby\\Events\\SymfonyDispatcher::dispatch\(\) should be compatible with parameter \$event \(object\) of method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface::dispatch\(\)~'
 			path: src/Events/SymfonyDispatcher.php
+		-
+			message: '~Parameter \#1 \$classname of function class_exists expects string, Nette\\DI\\Definitions\\Reference\|string given.~'
+			path: src/Events/DI/EventsExtension.php
