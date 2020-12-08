@@ -23,7 +23,7 @@
 		"issues": "https://github.com/kdyby/events/issues"
 	},
 	"require": {
-		"php": "^7.1",
+		"php": ">=7.1",
 		"nette/di": "^3.0",
 		"nette/utils": "^3.0",
 		"nette/reflection": "^2.4"
