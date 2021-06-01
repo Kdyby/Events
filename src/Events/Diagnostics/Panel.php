@@ -498,7 +498,7 @@ CSS;
 	public static function register(EventManager $eventManager, DIContainer $sl)
 	{
 		/** @var \Kdyby\Events\Diagnostics\Panel $panel */
-		$panel = new static($sl);
+		$panel = new Panel($sl);
 		$panel->setEventManager($eventManager);
 		Debugger::getBar()->addPanel($panel);
 
