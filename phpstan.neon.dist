@@ -1,5 +1,10 @@
 parameters:
-	level: 7
+	level: 5
 	paths:
 		- src
 		- tests/KdybyTests
+
+	ignoreErrors:
+		-
+			message: '~Method Kdyby\\Events\\SymfonyDispatcher::dispatch\(\) should return object but return statement is missing\.~'
+			path: src/Events/SymfonyDispatcher.php

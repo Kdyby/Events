@@ -12,24 +12,16 @@
 			"email": "filip@prochazka.su"
 		}
 	],
-	"repositories": [
-		{
-			"type": "git",
-			"url": "https://github.com/CZechBoY/Kdyby-CodingStandard.git"
-		}
-	],
 	"support": {
 		"email": "filip@prochazka.su",
 		"issues": "https://github.com/kdyby/events/issues"
 	},
 	"require": {
-		"php": "^7.1",
+		"php": "^7.4 | ^8.0",
 		"nette/di": "^3.0",
-		"nette/utils": "^3.0",
-		"nette/reflection": "^2.4"
+		"nette/utils": "^3.0"
 	},
 	"require-dev": {
-		"kdyby/coding-standard": "^1.0@dev",
 		"nette/application": "^3.0",
 		"nette/bootstrap": "^3.0",
 		"nette/caching": "^3.0",
@@ -37,8 +29,8 @@
 		"nette/http": "^3.0",
 		"tracy/tracy": "^2.5",
 		"symfony/event-dispatcher": "^3.0 || ^4.0",
-		"nette/tester": "^2.2",
-		"phpstan/phpstan-shim": "^0.11",
+		"nette/tester": "^2.4",
+		"phpstan/phpstan": "^0.12.88",
 		"jakub-onderka/php-parallel-lint": "^1.0"
 	},
 	"autoload": {

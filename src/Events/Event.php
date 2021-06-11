@@ -13,7 +13,6 @@ namespace Kdyby\Events;
 use ArrayIterator;
 use Doctrine\Common\EventArgs;
 use Kdyby\Events\Diagnostics\Panel;
-use Nette\Reflection\ClassType as ClassTypeReflection;
 use Nette\Utils\Callback;
 use Traversable;
 
@@ -168,7 +167,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 				$args = new EventArgsList(func_get_args());
 
 			} else {
-				$args = ClassTypeReflection::from($argsClass)->newInstanceArgs(func_get_args());
+				$args = (new \ReflectionClass($argsClass))->newInstanceArgs(func_get_args());
 			}
 
 			assert($args instanceof EventArgs);

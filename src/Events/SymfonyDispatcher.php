@@ -10,7 +10,7 @@
 
 namespace Kdyby\Events;
 
-use Symfony\Component\EventDispatcher\Event as SymfonyEvent;
+use Symfony\Contracts\EventDispatcher\Event as SymfonyEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class SymfonyDispatcher implements \Symfony\Component\EventDispatcher\EventDispatcherInterface
@@ -26,6 +26,9 @@ class SymfonyDispatcher implements \Symfony\Component\EventDispatcher\EventDispa
 		$this->evm = $eventManager;
 	}
 
+	/**
+	 * @param string|object $eventName
+	 */
 	public function dispatch($eventName, SymfonyEvent $event = NULL)
 	{
 		$this->evm->dispatchEvent($eventName, new EventArgsList([$event]));

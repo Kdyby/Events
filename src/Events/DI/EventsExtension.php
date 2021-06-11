@@ -33,7 +33,6 @@ use Nette\DI\Helpers as DIHelpers;
 use Nette\PhpGenerator\ClassType as ClassTypeGenerator;
 use Nette\PhpGenerator\Helpers as GeneratorHelpers;
 use Nette\PhpGenerator\PhpLiteral;
-use Nette\Reflection\ClassType as ClassTypeReflection;
 use Nette\Utils\Validators;
 use ReflectionProperty;
 use Symfony\Component\EventDispatcher\Event as SymfonyEvent;
@@ -352,7 +351,6 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 				continue;
 			}
 
-			/** @var \Nette\DI\Definitions\ServiceDefinition $def */
 			if ($this->isAlias($def)) {
 				continue; // alias
 			}
@@ -389,11 +387,11 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 				continue;
 			}
 
-			$this->bindEventProperties($def, ClassTypeReflection::from($class));
+			$this->bindEventProperties($def, new \ReflectionClass($class));
 		}
 	}
 
-	protected function bindEventProperties(Definition $def, ClassTypeReflection $class)
+	protected function bindEventProperties(Definition $def, \ReflectionClass $class)
 	{
 		/** @var \Nette\DI\Definitions\ServiceDefinition $def */
 		$def = $def instanceof FactoryDefinition ? $def->getResultDefinition() : $def;
@@ -404,18 +402,17 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 				continue;
 			}
 
-			if ($property->hasAnnotation('persistent') || $property->hasAnnotation('inject')) { // definitely not an event
+			if (self::propertyHasAnnotation($property, 'persistent') || self::propertyHasAnnotation($property, 'inject')) { // definitely not an event
 				continue;
 			}
 
+			$dispatchAnnotation = self::propertyHasAnnotation($property, 'globalDispatchFirst');
 			$def->addSetup('$' . $name, [
 				new Statement($this->prefix('@manager') . '::createEvent', [
 					[$class->getName(), $name],
 					new PhpLiteral('$service->' . $name),
 					NULL,
-					$property->hasAnnotation('globalDispatchFirst')
-						? (bool) $property->getAnnotation('globalDispatchFirst')
-						: $this->loadedConfig['globalDispatchFirst'],
+					$dispatchAnnotation ?? $this->loadedConfig['globalDispatchFirst'],
 				]),
 			]);
 		}
@@ -489,7 +486,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 			throw new \InvalidArgumentException('Given class cannot be NULL');
 		}
 
-		$instance = ClassTypeReflection::from($class)->newInstanceWithoutConstructor();
+		$instance = (new \ReflectionClass($class))->newInstanceWithoutConstructor();
 		if (!$instance instanceof EventSubscriber) {
 			throw new \Kdyby\Events\UnexpectedValueException(sprintf('The class %s does not implement %s', $class, EventSubscriber::class));
 		}
@@ -497,4 +494,12 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		return $instance;
 	}
 
+	private static function propertyHasAnnotation(ReflectionProperty $property, string $annotation): ?bool
+	{
+		$comment = $property->getDocComment();
+
+		$exists = \strpos($comment, "@$annotation") !== FALSE;
+
+		return $exists ? !\stripos($comment, "@$annotation false") : NULL;
+	}
 }
