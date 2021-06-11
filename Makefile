@@ -9,5 +9,5 @@ cs:
 phpstan:
 	vendor/bin/phpstan analyse src tests/KdybyTests
 
-tester:
+run-tests:
 	vendor/bin/tester -s -c ./tests/php.ini-unix ./tests/KdybyTests/

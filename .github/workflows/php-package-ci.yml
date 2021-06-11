@@ -20,4 +20,4 @@ jobs:
 
       - run: make phpstan
 
-      - run: make tester
+      - run: make run-tests
