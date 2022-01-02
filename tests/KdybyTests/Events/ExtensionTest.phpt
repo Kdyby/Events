@@ -78,7 +78,7 @@ class ExtensionTest extends \Tester\TestCase
 			);
 
 		} catch (\Nette\DI\ServiceCreationException $e) {
-			Assert::match("Service 'events.subscriber.0': Class NonExistingClass_%a% not found%a?%.", $e->getMessage());
+			Assert::match("Service 'events.subscriber.0': Class 'NonExistingClass_%a%' not found%a?%.", $e->getMessage());
 
 		} catch (\Exception $e) {
 			Assert::fail($e->getMessage());
