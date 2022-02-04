@@ -231,7 +231,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * @return int
 	 */
-	public function count()
+	public function count(): int
 	{
 		return count($this->listeners);
 	}
@@ -241,7 +241,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * @return \ArrayIterator|\Traversable
 	 */
-	public function getIterator()
+	public function getIterator(): \Traversable
 	{
 		return new ArrayIterator($this->getListeners());
 	}
@@ -252,7 +252,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param int|NULL $index
 	 * @param callable $item
 	 */
-	public function offsetSet($index, $item)
+	public function offsetSet($index, $item): void
 	{
 		Callback::check($item, TRUE);
 
@@ -269,7 +269,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @return callable
 	 * @throws \Kdyby\Events\OutOfRangeException
 	 */
-	public function offsetGet($index)
+	public function offsetGet($index): mixed
 	{
 		if (!$this->offsetExists($index)) {
 			throw new \Kdyby\Events\OutOfRangeException();
@@ -282,7 +282,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	 * @param int $index
 	 * @return bool
 	 */
-	public function offsetExists($index)
+	public function offsetExists($index): bool
 	{
 		return isset($this->listeners[$index]);
 	}
@@ -290,7 +290,7 @@ class Event implements \ArrayAccess, \IteratorAggregate, \Countable
 	/**
 	 * @param int $index
 	 */
-	public function offsetUnset($index)
+	public function offsetUnset($index): void
 	{
 		unset($this->listeners[$index]);
 	}
