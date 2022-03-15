@@ -187,7 +187,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 			if ($foundNetteInitStart && !$foundNetteInitEnd &&
 				stripos($line, 'Nette\\') === FALSE && stripos($line, 'set_include_path') === FALSE && stripos($line, 'date_default_timezone_set') === FALSE
 			) {
-				$init->addBody(GeneratorHelpers::format(
+				$init->addBody( (new \Nette\PhpGenerator\Dumper)->format(
 					'$this->getService(?)->createEvent(?)->dispatch($this);',
 					$this->prefix('manager'),
 					[DIContainer::class, 'onInitialize']
@@ -206,7 +206,7 @@ class EventsExtension extends \Nette\DI\CompilerExtension
 		}
 
 		if (!$foundNetteInitEnd) {
-			$init->addBody(GeneratorHelpers::format(
+			$init->addBody( (new \Nette\PhpGenerator\Dumper)->format(
 				'$this->getService(?)->createEvent(?)->dispatch($this);',
 				$this->prefix('manager'),
 				[DIContainer::class, 'onInitialize']
